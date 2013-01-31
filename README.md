@@ -141,9 +141,60 @@ lists all configured clients
 
 starts client 
 
+`--start-client-headless CLIENT_NAME`
+
+Start client called CLIENT_NAME as headless (no screen)
+
 `  --stop-clients client`
 
 stops client
+
+
+`--list-running-clients`
+
+Lists all clients currently running
+
+`--check-client-ssh`
+
+Checks if ssh is up on client
+
+`--check-client-status`
+
+Checks if clients is up and running
+
+`--client-exec CLIENT cmd`
+
+Execeute cmd on client
+
+`--client-exec-as-root`
+
+Execeute cmd on client as root
+
+`--client-x11 CLIENT`
+
+Checks if X11 is up and running on CLIENT
+
+`--client-screenshot CLIENT`
+
+Take a screenshot on CLIENT (not 100% ready)
+
+`--print-client CLIENT`
+
+Print the configuration for CLIENT
+
+`--wait-for-ssh CLIENT`
+
+Wait until ssh is up and running on CLIENT
+
+`--open-ssh CLIENT`
+
+Open an interactive shell (using ssh) on CLIENT
+
+`--check-client-online CLIENT`
+
+Check if CLIENT can ping the outside world
+
+
 
 ## Machine management
 
@@ -155,10 +206,29 @@ lists all machines known to VVM
 
 starts machine 
 
+
+` --start-machine-headless VM_NAME`
+
+Start machine called VM_NAME as headless (no screen)
+
 `  --stop-machine client` 
 
 stops machine
 
+`--check-machine`
+
+
+
+
+
+` --stop-client CLIENT_NAME`
+
+Stop client called CLIENT_NAME
+
+
+` --stop-machine VM_NAME`
+
+Stop machine called VM_NAME
 
 
 
