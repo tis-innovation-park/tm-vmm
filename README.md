@@ -132,102 +132,56 @@ First of all you need to decide what machine you want to use with your client. I
 
 *Command line options*:
 
-`  --list-clients`
+`  --list-clients` - lists all configured clients
 
-lists all configured clients
+`  --start-clients client` - starts client 
 
-`  --start-clients client`
+`  --start-client-headless CLIENT_NAME` - Start client called CLIENT_NAME as headless (no screen)
 
-starts client 
+`  --stop-clients client` - stops client
 
-`--start-client-headless CLIENT_NAME`
+`--list-running-clients` - Lists all clients currently running
 
-Start client called CLIENT_NAME as headless (no screen)
+`--check-client-ssh` - Checks if ssh is up on client
 
-`  --stop-clients client`
+`--check-client-status` - Checks if clients is up and running
 
-stops client
+`--client-exec CLIENT cmd` - Execeute cmd on client
 
+`--client-exec-as-root` - Execeute cmd on client as root
 
-`--list-running-clients`
+`--client-x11 CLIENT` - Checks if X11 is up and running on CLIENT
 
-Lists all clients currently running
+`--client-screenshot CLIENT` - Take a screenshot on CLIENT (not 100% ready)
 
-`--check-client-ssh`
+`--print-client CLIENT` - Print the configuration for CLIENT
 
-Checks if ssh is up on client
+`--wait-for-ssh CLIENT` - Wait until ssh is up and running on CLIENT
 
-`--check-client-status`
+`--open-ssh CLIENT` - Open an interactive shell (using ssh) on CLIENT
 
-Checks if clients is up and running
-
-`--client-exec CLIENT cmd`
-
-Execeute cmd on client
-
-`--client-exec-as-root`
-
-Execeute cmd on client as root
-
-`--client-x11 CLIENT`
-
-Checks if X11 is up and running on CLIENT
-
-`--client-screenshot CLIENT`
-
-Take a screenshot on CLIENT (not 100% ready)
-
-`--print-client CLIENT`
-
-Print the configuration for CLIENT
-
-`--wait-for-ssh CLIENT`
-
-Wait until ssh is up and running on CLIENT
-
-`--open-ssh CLIENT`
-
-Open an interactive shell (using ssh) on CLIENT
-
-`--check-client-online CLIENT`
-
-Check if CLIENT can ping the outside world
+`--check-client-online CLIENT` - Check if CLIENT can ping the outside world
 
 
 
 ## Machine management
 
-`  --list-machines`
+`  --list-machines` - lists all machines known to VVM
 
-lists all machines known to VVM
-
-`  --start-machine client`
-
-starts machine 
+`  --start-machine client` - starts machine 
 
 
-` --start-machine-headless VM_NAME`
+` --start-machine-headless VM_NAME` - Start machine called VM_NAME as headless (no screen)
 
-Start machine called VM_NAME as headless (no screen)
-
-`  --stop-machine client` 
-
-stops machine
+`  --stop-machine client`  - stops machine
 
 `--check-machine`
 
 
+` --stop-client CLIENT_NAME` - Stop client called CLIENT_NAME
 
 
-
-` --stop-client CLIENT_NAME`
-
-Stop client called CLIENT_NAME
-
-
-` --stop-machine VM_NAME`
-
-Stop machine called VM_NAME
+` --stop-machine VM_NAME` - Stop machine called VM_NAME
 
 
 
