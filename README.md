@@ -197,7 +197,7 @@ Check if CLIENT can ping the outside world
 
 ## Machine management
 
-`  --list-machine client`
+`  --list-machines`
 
 lists all machines known to VVM
 
