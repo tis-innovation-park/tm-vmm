@@ -1,0 +1,148 @@
+CONF_READ=false
+DEFAULT_LOG_DEBUG_DIR=/tmp/ats/
+DEFAULT_LOG_FORMAT=txt
+INIT_DONE=0
+
+DEBUG=true
+
+
+#DEBUG=true
+
+ERROR_STRINGS[0]="Success"
+ERROR_STRINGS[1]="could not find configuration file"
+ERROR_STRINGS[2]="could not find configuration file for client"
+ERROR_STRINGS[3]="could not start client"
+ERROR_STRINGS[4]="could not stop client"
+ERROR_STRINGS[5]="error when executing a command"
+ERROR_STRINGS[6]="could not find functions file"
+ERROR_STRINGS[7]="could not find atsvm-functions file"
+LAST_ERROR=6
+
+DATE=$(date +%Y-%m-%d)
+
+read_functions()
+{
+    FUNC_FILE=$SCRIPT_DIR/$1
+
+    if [ ! -f  $FUNC_FILE ]
+    then
+	echo "$PROGRAM_NAME: Could not find functions file ($FUNC_FILE)"
+    # exit 7 - means we couldn't find the functions file
+	exit 7
+    fi
+    . $FUNC_FILE
+}
+
+find_read_conf()
+{
+    # don't call init_ats
+
+    ATS_CONF=$1
+
+    if [ -f $ATS_CONF ]
+    then
+	. $ATS_CONF
+	CONF_READ=true
+    fi
+}
+
+
+
+
+init_ats()
+{
+    if [ $INIT_DONE -ne 0 ]
+    then
+	return
+    fi
+
+    if [ "$ETC_DIRS" = "" ]
+    then
+	ETC_DIRS="/etc/ats $ATS_DIR/etc/ ${HOME}/.ats/"
+    fi
+ 
+    for d in $ETC_DIRS
+    do
+	find_read_conf $d/ats.conf
+    done
+
+    read_functions ats-client-functions
+
+    if [ "$LOG_FORMAT" = "" ]
+    then
+	LOG_FORMAT="$DEFAULT_LOG_FORMAT"
+    fi
+
+    if [ "$LOG_DEBUG_DIR" = "" ]
+    then
+	LOG_DEBUG_DIR=$DEFAULT_LOG_DEBUG_DIR
+    fi
+    if [ ! -d $LOG_DEBUG_DIR ]
+    then
+	mkdir -p $LOG_DEBUG_DIR
+    fi
+
+    if [ -f $SCRIPT_DIR/loggers/$LOG_FORMAT-logger ]
+    then
+	. $SCRIPT_DIR/loggers/$LOG_FORMAT-logger
+	logger_init
+    else
+	echo "LOG FORMAT \"$LOG_FORMAT\" not supported"
+	echo "* defaulting to stderr"
+    fi
+
+    if [ -f $SCRIPT_DIR/loggers/debug-logger ]
+    then
+	. $SCRIPT_DIR/loggers/debug-logger
+	init_debug_file
+    else
+	echo "Could not find file: $SCRIPT_DIR/loggers/debug-logger"
+    fi
+
+
+
+    INIT_DONE=1
+}
+
+
+exit_with_msg()
+{
+    echo "Error:   $1"
+    echo "Message: " ${ERROR_STRINGS[$1]}
+    exit $1
+}
+
+
+exit_on_error()
+{
+    if [ "$1" != "0" ]
+	then
+	echo "ERROR"
+	log "ERROR"
+	if [ "$2" != "" ]
+	then
+	    echo "  Message: $2"
+	    log  "  Message: $2"
+	fi
+	exit 1
+    fi
+}
+
+
+countdowner()
+{
+    TMP=$1
+    printf "sleeping for: %2s seconds" $TMP
+    while [ $TMP -gt 0 ]
+    do
+	printf "\b\b\b\b\b\b\b\b\b\b%2s seconds" $TMP
+	TMP=$(( $TMP - 1 ))
+	sleep 1
+    done
+    printf "          \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
+    printf "          "
+    printf "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\r"
+}
+
+
+init_ats

@@ -1,0 +1,1262 @@
+declare -a SCRIPTS_TO_EXECUTE
+export SCRIPTS_TO_EXECUTE
+
+list_vbox_machines()
+{
+    debug "Listing vbox machines"
+    VB_NAMES=$(vboxmanage list vms | awk ' { printf "%s\n", $1}' | sed 's,\",,g')
+    for VB_NAME in $VB_NAMES
+    do
+	FOUND=false
+	if [ "$VB_NAME" != "" ]
+	then
+	    echo  "  |--$VB_NAME  which is used in client(s):"
+	    for vb in $(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+	    do
+#		echo " ---- $VB_NAME"
+		VB_SHORT_NAME=$(basename $vb)
+		echo "     |--$VB_SHORT_NAME"  
+		FOUND=true
+	    done
+#	    if [ "$FOUND" = "false" ]
+#	    then
+#		echo "      not in use"
+#	    fi
+	else
+	    echo "   no virtualbox machines currently running"
+	fi
+    done
+}
+
+list_machines()
+{
+    debug "Listing available machines:"
+    echo "Available machines:"
+    echo "  VirtualBox"
+    list_vbox_machines
+}
+
+list_clients()
+{
+    debug_enter "Listing available clients"
+
+    echo "Available clients:"
+    for d in $ETC_DIRS
+    do
+	debug_enter " entering dir $d"
+	debug "  in dir $d"
+	for i in $(find $d/clients -name "*.conf" 2>/dev/null)
+	do
+	    debug_enter " using file $i"
+	    debug "    file: $i"
+	    echo -n "   " 
+	    printf "%s " $(basename $i | sed 's,\.conf,,g' )
+	    printf "  ($i)\n"
+	    debug_leave " "
+	done
+	debug_leave " "
+    done
+
+    debug_leave "list_clients"
+}
+
+list_running_vbox()
+{
+    echo "  VirtualBox"
+    VB_NAME=$(vboxmanage list runningvms | awk ' { printf "%s", $1}' | sed 's,\",,g')
+    if [ "$VB_NAME" != "" ]
+    then
+	echo "  |--$VB_NAME  which is used in"
+	for vb in $(find $ETC_DIRS -name clients/*.conf | xargs grep -l $VB_NAME )
+	do
+	    VB_SHORT_NAME=$(basename $vb)
+	    echo "    |--$VB_SHORT_NAME"  
+	done
+    else
+	echo "   no virtualbox machines currently running"
+    fi
+}
+
+list_running_clients()
+{
+    echo "Running clients:"
+    list_running_vbox 
+}
+
+
+start_vbox_headless()
+{
+    if [ $(vboxmanage list vms | grep "$VM_NAME" | wc -l) -eq 0 ]
+	then
+	debug "Could not find vbox image: $VM_NAME"
+	return 1
+    fi
+    debug "start_vbox_headless()"
+    debug "start_vbox_headless: vboxheadless -s  \"$VM_NAME\""
+    vboxheadless -s  "$VM_NAME" 2>/dev/null >/dev/null &
+    return 0
+}
+
+set_qemu_program()
+{
+    WANTED_CPU=$1
+    export QEMU_BINARY
+    case $WANTED_CPU in
+	"arm")
+	    QEMU_BINARY=qemu-system-arm
+	    ;;
+	*)
+	    echo "Unsupported cmou $WANTED_CPU"
+	    ;;
+    esac
+    
+
+}
+
+start_qemu()
+{
+    VM_NAME="$1"
+
+    set_qemu_program $QEMU_CPU
+
+    debug "Starting qemu $1"
+    debug "  $VM_START_ARGS"
+    MONITOR_ARGS="-monitor unix:/tmp/qemu-$VM_NAME.sock,server,nowait "
+    REDIR_ARGS="-redir tcp:$SSH_PORT::22 "
+    EXTRA_ARGS="-no-reboot   -nographic -display none "
+    
+    START_VM="$QEMU_BINARY  -M versatilepb -m 256"
+    START_VM="$START_VM  -kernel $QEMU_KERNEL  -hda $QEMU_HDA"
+    START_VM="$START_VM  -append \"root=/dev/sda1\" "
+    START_VM="$START_VM -initrd $QEMU_INITRD"
+    START_VM="$START_VM  $MONITOR_ARGS $REDIR_ARGS $EXTRA_ARGS"
+
+    if [ ! -f $QEMU_KERNEL ] || [ ! -f $QEMU_INITRD ] || [ ! -f $QEMU_HDA ] 
+	then
+	debug "Can't find either of:"
+	debug "  kernel: $QEMU_KERNEL"
+        debug "  initrd: $QEMU_INITRD"
+	debug "  hda:    $QEMU_HDA"
+	return 1
+    fi
+
+
+    if [ "$VNC_PORT" != "" ]
+    then
+	START_VM="$START_VM  -vnc :$VNC_PORT"
+    fi
+    debug "  $START_VM"	     
+    echo "$START_VM" | bash & 
+    
+    return 0
+# /dev/null
+}
+
+maximise_vbox()
+{
+    VN_NAME=$1
+
+    debug "Will try to maximise VirtualBox window"
+    CTR=0
+    WIN_ID=""
+    while [ "$WIN_ID" = "" ]
+    do
+	debug "Waiting for VirtualBox window to appear"
+	countdowner 5
+	WIN_ID=$(wmctrl -l | grep VirtualBox | grep -v Manager | grep $VM_NAME | awk ' { print $1}')
+	CTR=$(( $CTR + 1))
+	debug "     current id:$WIN_ID"
+	if [ $CTR -gt 10 ]
+	then
+	    debug "    We've been waiting long enough"
+	    break
+	fi
+    done
+    
+    if [ "$WIN_ID" != "" ]
+    then
+	debug "Maximising window: $WIN_ID"
+	sleep 2
+	wmctrl -i -r $WIN_ID -b add,maximized_vert,maximized_horz
+    fi
+    
+}
+
+start_vbox()
+{
+    export PROC_EXPR=$1
+    debug "Start vbox: $VM_NAME"
+
+    if [ $(vboxmanage list vms | grep -c "$PROC_EXPR" | wc -l) -eq 0 ]
+	then
+	debug "Could not find vbox image: $PROC_EXPR"
+	return 1
+    fi
+    VBoxManage startvm "$VM_NAME"   2>/dev/null >/dev/null &
+
+
+    sleep 2
+    maximise_vbox "$VM_NAME"
+}
+
+kill_vb_proc()
+{
+    VB_NAME="$1"
+    KILL_ARG=$2
+
+    debug "Kill vb proc $1 ($KILL_ARG)"
+
+    sleep 5
+    VBID=$(ps auxww | grep -i virtualbox | grep -v grep | grep $VB_NAME | awk ' { print $2 }')
+    if [ "$VBID" != "" ]
+	then
+	debug "Still a vbox id to slay.. kill $KILL_ARG $VBID"
+	kill $VBID 2>/dev/null
+    fi
+}
+
+kill_vbox()
+{
+    
+
+    VB_NAME=$1
+    VB_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
+    if [ "$VB_NAME" != "" ]
+    then
+	kill_vb_proc "$VB_NAME"
+	kill_vb_proc "$VB_NAME" "-9"
+    fi
+}
+
+stop_vbox()
+{
+    VB_NAME=$1
+    debug "Stopping vbox $VM_NAME"
+
+
+    if [ "$VB_NAME" != "" ]
+    then
+
+
+                #
+                #  Press ACPI powerbutton off
+                #
+	is_client_up $VM_NAME
+	RET=$?
+	if [ "$RET" = "0" ]
+	then
+	    return
+	fi
+
+	debug "  sending  acpipowerbutton off to $VB_NAME"
+	VBoxManage controlvm $VB_NAME acpipowerbutton off 2>/dev/null
+	wait_until_down $VB_NAME
+	
+	
+                #
+                #  Do a "hard" poweroff
+                #
+	is_client_up $VM_NAME
+	RET=$?
+	if [ "$RET" = "0" ]
+	then
+	    return
+	fi
+
+	debug "  sending  poweroff to $VB_NAME"
+	VBoxManage controlvm $VB_NAME poweroff 2>/dev/null
+	wait_until_down $VB_NAME
+    fi
+}
+
+
+stop_qemu()
+{
+    VB_NAME=$1
+    debug "Stopping vbox $VM_NAME"
+
+    if [ "$VB_NAME" != "" ]
+    then
+	debug "Send to QEMU $VB_NAME: ctrl-alt-delete"
+	send_to_qemu $VB_NAME "sendkey ctrl-alt-delete"
+	wait_for_state down 20 $VB_NAME
+
+	is_qemu_up $VB_NAME 
+	RET=$?
+	if [ "$RET" != "0" ]
+	then
+	    debug "    client is up, returning"
+	    return
+	fi
+
+	debug "Send to QEMU $VB_NAME: system_powerdown"
+	send_to_qemu $VB_NAME "system_powerdown"
+	wait_for_state down 20  $VB_NAME
+
+	is_qemu_up $VB_NAME 
+	RET=$?
+	if [ "$RET" != "0" ]
+	then
+	    debug "    client is up, returning"
+	    return
+	fi
+
+	debug "Send to QEMU $VB_NAME: quit"
+	send_to_qemu $VB_NAME "quit"
+	wait_for_state down 20 $VB_NAME
+
+	break
+    fi	
+}
+
+
+check_qemu_proc()
+{
+    PROC_EXPR=$1
+    RET=$(ps auxww | grep qemu | grep -c $PROC_EXPR )
+
+    debug "Number of qemu processes: $RET"
+    
+    return $RET
+}
+
+check_vbox_proc()
+{
+    PROC_EXPR=$1
+    RET=$(ps auxww | grep -i virtualbox | grep -c $PROC_EXPR )
+
+    debug "Number of vbox processes: $RET"
+    
+    return $RET
+}
+
+stop_helper()
+{
+    WANTED_VM=$1
+    VM_TYPE=$2
+    CLI_CONF=$3
+
+
+    debug "stop_helper: $VM_NAME"
+    debug "Reading client conf $CLI_CONF"
+    .  $CLI_CONF
+
+    is_client_ssh_up
+    RET=$?
+    if [ "$RET" != "0" ]
+    then
+	debug "Host $1 ssh seems down, no use stopping it via ssh. Continuing with closing the vm"
+    fi
+
+    if [ "$VM_SUPERUSER" != "" ] && [ "$SSH_SHUTDOWN_COMMAND" != "" ] 
+    then
+	is_client_ssh_up
+	RET=$?
+	if [ "$RET" = "0" ]
+	then
+	    debug "Super user account available"
+	    debug "  trying to stop via ssh"
+	    $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND
+	    RET=$?
+	fi
+	
+	if [ "$RET" != "0" ]
+	then
+	    debug "Failed stopping client with ssh"
+	    debug "   Command: $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND"
+	else
+	    wait_until_down $WANTED_VM
+	fi
+    fi
+    
+    debug "Stop $1 using virtual machine ($VM_TYPE)"
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    debug "Stoping vbox $1"
+	    stop_vbox $1
+	    kill_vbox $1
+
+
+	    check_vbox_proc $1
+	    RET=$?
+	    log "$RET" "Stop VirtualBox" "$VM_NAME"
+	    return $RET
+	    ;;
+
+	"qemu")
+	    debug "Stoping qemu $WANTED_VM"
+	    stop_qemu "$WANTED_VM"
+
+	    check_qemu_proc $1
+	    RET=$?
+	    log "$RET" "Stop qemu" "$VM_NAME"
+	    return $RET
+	    ;;
+
+	*)
+	    echo "Failed finding vm type for $1"
+	    exit 123
+	    ;;
+    esac
+}
+
+stop_machine()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+
+    debug "stop_machine $*"
+
+    get_info_for_machine $1
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    else
+	debug "stop_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
+	stop_helper $WANTED_VM $VM_TYPE $CLI_CONF
+	return $?
+    fi
+
+    return 1
+}
+
+
+
+stop_client()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+    START_ARGS=$2
+
+    get_info_for_client $1
+#    CLIENT_FOUND=$?
+
+   
+    
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+    else
+	debug "stop_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
+	stop_helper $WANTED_VM $VM_TYPE $CLI_CONF
+	return $?
+    fi
+
+    return 1
+}
+
+find_vm_type()
+{
+    VM_NAME=$1
+    
+    VBOX_FOUND=$(vboxmanage list vms | awk ' { print $1 } ' | sed 's,\",,g' | grep $VM_NAME | wc -l)
+
+    if [ $VBOX_FOUND -ne 0 ]
+    then
+	export VM_TYPE="VirtualBox"
+    fi
+}
+
+
+start_helper()
+{
+    debug "start_helper: $*"
+
+    WANTED_NAME=$1
+    VM_TYPE=$2
+    CLI_CONF=$3
+    START_ARGS=$4
+
+    debug "Reading client conf $CLI_CONF"
+    .  $CLI_CONF
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    debug "Starting vbox $1 ($START_ARGS)"
+	    if [ "$START_ARGS" = "headless"  ]
+	    then
+		start_vbox_headless $VM_NAME
+	    else
+		start_vbox $VM_NAME
+	    fi
+
+	    check_vbox_proc $VM_NAME
+	    RET=$?
+	    
+	    if [ $RET -ne 0 ]
+		then
+		OK=0
+	    else
+		OK=1
+	    fi
+
+	    OK=$?
+	    log "$OK" "Start VirtualBox" "$VM_NAME"
+	    ;;
+	"qemu")
+	    debug "Starting qemu $1"
+	    start_qemu "$WANTED_NAME" "&"
+
+	    check_qemu_proc $VM_NAME
+	    RET=$?
+	    
+	    if [ $RET -ne 0 ]
+		then
+		OK=0
+	    else
+		OK=1
+	    fi
+
+	    OK=$?
+	    log "$OK" "Start qemu" "$VM_NAME"
+	    ;;
+	*)
+	    echo "Failed finding vm type for $1"
+	    log "1" "Unknown vm type" "$VM_NAME"
+	    exit
+	    ;;
+    esac
+    
+
+
+    if [ "$2" = "--no-wait" ]
+    then
+	return 0
+    fi
+    
+    wait_until_up $VM_NAME
+
+
+}
+
+
+start_machine()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+
+    get_info_for_machine $1
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    else
+	start_helper "$WANTED_VM" $VM_TYPE $CLI_CONF
+    fi
+}
+
+
+start_client()
+{
+    CLIENT_FOUND=false
+    WANTED_VM="$1"
+    START_ARGS="$2"
+
+    debug "start_client: $*"
+
+    get_info_for_client $1
+#    CLIENT_FOUND=$?
+
+    
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+    else
+        debug "start_client: calling 	start_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF, $START_ARGS)"
+	start_helper "$WANTED_VM" "$VM_TYPE" "$CLI_CONF" "$START_ARGS"
+    fi
+
+    return 
+}
+
+start_client_wait_for_ssh()
+{
+    auto_debug "Starting client $CLIENT_NAME"
+    $ATS_CLIENT --start-client $CLIENT_NAME
+    
+    auto_debug "Wait for ssh"
+    $ATS_CLIENT --wait-for-ssh $CLIENT_NAME 300
+    RET=$?
+
+    return $RET
+}
+
+
+is_qemu_up()
+{
+    export WANTED_VM=$1
+
+    CNT=$(send_to_qemu $WANTED_VM "info status" | grep "VM status: running" | wc -l)
+
+    debug "    is_qemu_up: $CNT"
+
+    # If the VM is running (>1), return 0
+    if [ $CNT -ne 0 ]
+    then
+	debug "qemu vm ($WANTED_VM) is running"
+	return 0
+    fi
+
+    debug "qemu vm ($WANTED_VM) is NOT running"
+    return 1
+}
+
+is_vbox_up()
+{
+    export WANTED_VM=$1
+
+    debug "    is_vbox_up? "
+
+    CNT=$(vboxmanage list runningvms | awk ' { print $1 } ' | sed 's,\",,g' | grep $WANTED_VM | wc -l)
+    
+    debug "    is_vbox_up: $CNT"
+
+    # If the VM is running (>1), return 0
+    if [ $CNT -ne 0 ]
+    then
+	debug "vbox vm ($WANTED_VM) is running"
+	return 0
+    fi
+
+    debug "vbox vm ($WANTED_VM) is NOT running"
+    return 1
+}
+
+is_client_up()
+{
+    WANTED_VM=$1
+#    VM_TYPE=$2
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    is_vbox_up $1
+	    return $?
+	    ;;
+
+	"qemu")
+	    is_qemu_up $1
+	    return $?
+	    ;;
+
+	*)
+	    echo "Failed finding vm type for $1"
+	    exit 123
+	    ;;
+    esac
+    
+
+    return $RET
+}
+
+is_client_ssh_up()
+{
+    debug "Check if Client ssh server is up"
+    debug "   ssh:     $SSH"
+    debug "   options: $SSH_TEST_OPTIONS"
+    debug "   port:    -p $SSH_PORT"
+    debug "   user     $VM_USER@$VM_IP_ADDRESS"
+    debug "   command: exit"
+    $SSH $SSH_TEST_OPTIONS \
+        -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS exit \
+         2>/dev/null
+    RET=$?
+    debug "  Returning: $RET"
+    return $RET
+}
+
+is_client_x11_up()
+{
+    WANTED_VM=$1
+
+    exec_client_command $1 "DISPLAY=:0 xdpyinfo 2>/dev/null >/dev/null "
+    return $?
+
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+
+    get_info_for_client $1
+#    CLIENT_FOUND=$?
+
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+	return 120
+    else
+	debug "Check if Client X11 is up"
+	$SSH $SSH_TEST_OPTIONS \
+            -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS DISPLAY=:0 xdpyinfo \
+            2>/dev/null >/dev/null  
+
+	RET=$?
+	debug "  Returning: $RET"
+	return $RET
+    fi
+}
+
+#    Can be used with other VM's that require Internet access
+
+is_client_online()
+{
+    echo "Check if Client is online"
+    debug "   ssh:     $SSH"
+    debug "   options: $SSH_TEST_OPTIONS"
+    debug "   port:    -p $SSH_PORT"
+    debug "   user     $VM_USER@$VM_IP_ADDRESS"
+    debug "   command: ping -c1 www.google.com"
+
+    $SSH $SSH_TEST_OPTIONS \
+        -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS ping -c1 www.google.com \
+        > /dev/null
+
+    RET=$?
+    debug "  Returning: $RET\n"
+    ## printf probably a little silly here
+    printf "  Google can be reached...\n"
+    return $RET
+
+}
+
+#    eGov specific, is service actually online, if not abort...
+#is_egovonline()
+#{
+#    if ping -c1 account.egov.bz.it > /dev/null
+#      then echo "eGov online..."
+#    else
+#      echo "Abort, server nor reachable"
+#    fi
+#}
+
+wait_for_state()
+{
+    EXPECTED_STATE="$1"
+    TIMEOUT=$2
+    VB_NAME=$3
+
+    debug "Will wait (vm:$VB_NAME) for $1 for $2 seconds"
+    
+    TIMEDOUT=false
+    START_SECS=$(date "+%s")
+    # Set to a negative integer value
+    DIFF=-12
+
+    while [ "$TIMEDOUT" = "false" ]
+    do
+	BREAK=false
+
+	debug "    Check if client is up: "
+
+	is_client_up $VB_NAME
+	RET=$?
+
+	if [ "$EXPECTED_STATE" = "up" ]
+	then
+	    if [ "$RET" = "0" ]
+	    then
+		BREAK=true
+	    fi
+	else
+	    if [ "$RET" != "0" ]
+	    then
+		BREAK=true
+	    fi
+	fi
+
+	debug "   Should we break? $BREAK  "
+
+	if [ "$BREAK" = "true" ]
+	then
+	    break
+	fi
+
+	sleep 10
+	CURRENT=$(date "+%s")
+	DIFF=$(( $START_SECS + $TIMEOUT - $CURRENT))
+	debug "  Started: $START_SECS  Current: $CURRENT Timeout:  $TIMEOUT"
+	debug "  Diff:    $DIFF"
+
+	if [ $DIFF -le 0 ]
+	then
+	    TIMEDOUT=true
+	fi
+	debug "   have we timed out?   $TIMEDOUT "
+    done
+    debug "timeout or state reached ... continuing"
+}
+
+
+wait_for_ssh()
+{
+    EXPECTED_STATE="$1"
+    TIMEOUT=$2
+    CLIENT=$3
+
+    if [ "$CLIENT" != "" ]
+    then
+	get_info_for_client $CLIENT
+    fi
+
+    debug "Will wait for (ssh) $1 for $2 seconds"
+    
+    TIMEDOUT=false
+    START_SECS=$(date "+%s")
+    # Set to a negative integer value
+    DIFF=-12
+
+    while [ "$TIMEDOUT" = "false" ]
+    do
+	BREAK=false
+
+	debug "    Check if client is up: "
+
+	is_client_ssh_up
+	RET=$?
+
+	if [ "$EXPECTED_STATE" = "up" ]
+	then
+	    if [ "$RET" = "0" ]
+	    then
+		BREAK=true
+	    fi
+	else
+	    if [ "$RET" != "0" ]
+	    then
+		BREAK=true
+	    fi
+	fi
+
+	debug "   Should we break? $BREAK  "
+
+	if [ "$BREAK" = "true" ]
+	then
+	    break
+	fi
+
+	sleep 10
+	CURRENT=$(date "+%s")
+	DIFF=$(( $START_SECS + $TIMEOUT - $CURRENT))
+	debug "  Started: $START_SECS  Current: $CURRENT Timeout:  $TIMEOUT"
+	debug "  Diff:    $DIFF"
+
+	if [ $DIFF -le 0 ]
+	then
+	    TIMEDOUT=true
+	fi
+	debug "   have we timed out?   $TIMEDOUT "
+    done
+    debug "timeout or state reached ... continuing"
+}
+
+
+wait_until_up()
+{
+    wait_for_state up $VM_STARTUP_TIMEOUT $1
+}
+
+wait_until_down()
+{
+    wait_for_state down $VM_STOP_TIMEOUT $1
+}
+
+
+check_ssh_helper()
+{
+    VM_NAME=$1
+    VM_TYPE=$2
+    CLI_CONF=$3
+
+    debug "Check ssh of $VM_NAME"
+
+    CLI_CONF=$i
+    debug "Reading client conf $CLI_CONF"
+    .  $CLI_CONF
+    
+    $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS exit \
+	2>/dev/null >/dev/null
+    RET=$?
+    
+    if [ $RET -ne 0 ]
+    then
+	echo "not available"
+	debug "   $VM_NAME down or not responding"
+    else	     
+	debug "   $VM_NAME is ok"
+	echo "ok"
+    fi
+
+
+    return $RET
+}
+
+
+send_to_qemu()
+{
+    WANTED_VM=$1
+    MSG=$2
+    echo "$MSG" | socat - unix-connect:/tmp/qemu-${WANTED_VM}.sock 2>/dev/null | \
+          grep -v "(qemu)" | grep -v "QEMU [0-9\. ]*monitor"
+}
+
+check_status_helper()
+{
+    WANTED_VM=$1
+    VM_TYPE=$2
+    CLI_CONF=$3
+
+    debug "Check status of $WANTED_VM"
+
+    CLI_CONF=$i
+    debug "Reading client conf $CLI_CONF"
+    .  $CLI_CONF
+    
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    debug "  check status with vbox"
+	    is_vbox_up "$VM_NAME"
+	    RET=$?
+	    debug "  status: $RET"
+	    return $RET
+	    ;;
+	"qemu")
+	    debug "  check status with qemu"
+	    send_to_qemu "$WANTED_VM" "info status" > /dev/null
+	    RET=$?
+	    debug "  status: $RET"
+	    return $RET
+	    ;;
+	*)
+	    debug "  Unknown vm type"
+	    echo "Failed finding vm type for $1"
+	    exit 123
+	    ;;
+    esac
+
+    return $RET
+}
+
+check_client_ssh()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+
+    get_info_for_client $1
+#    CLIENT_FOUND=$?
+
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+	return 120
+    else
+	echo -n "Client \"$WANTED_VM\" ssh connection: "
+	debug "Check ssh connection for $WANTED_VM"
+	check_ssh_helper $WANTED_VM $VM_TYPE $CLI_CONF
+	RET=$?
+	debug "  status: $RET"
+	return $RET
+	return $?
+    fi
+}
+
+check_client_status()
+{
+    CLIENT_FOUND=false
+    WANTED_VM="$1"
+
+    debug "Checking status of $1"
+
+    get_info_for_client $1
+#    CLIENT_FOUND=$?
+
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+	return 120
+    else
+	echo -n "Client \"$WANTED_VM\" status: "
+	check_status_helper "$WANTED_VM" "$VM_TYPE" "$CLI_CONF"
+	RET=$?
+	if [ "$RET" = "0" ]
+	then
+	    echo "running"
+	    return 0
+	fi
+	echo "not running"
+
+	return $RET
+    fi
+}
+
+print_client()
+{
+    WANTED_VM=$1
+
+    for d in $ETC_DIRS
+    do
+	for i in $(find $d/clients -name "$1.conf" 2>/dev/null)
+	do
+	    CLI_CONF=$i
+	    echo "Configuration file: $CLI_CONF"
+	    cat $CLI_CONF
+	done
+    done
+}
+
+exec_client_command()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+    COMMAND="$2"
+
+    debug "exec_client_command $1 $2"
+
+    get_info_for_client $1
+#    CLIENT_FOUND=$?
+
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+	return 120
+    else
+	debug "$SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS $COMMAND"
+	$SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS \
+	    "$COMMAND"
+	return $?
+    fi
+}
+
+exec_client_command_as_root()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+    COMMAND="$2"
+
+    debug "exec_client_command $1 $2"
+
+    get_info_for_client $1
+#    CLIENT_FOUND=$?
+
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+	return 120
+    else
+	debug "$SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $COMMAND"
+	$SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS \
+	    "$COMMAND"
+	return $?
+    fi
+}
+
+check_machine()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+
+    get_info_for_machine $1
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    else
+	echo -n "Machine "
+	check_helper $VM_NAME $VM_TYPE $CLI_CONF
+    fi
+}
+
+
+
+get_info_for_client()
+{
+    debug "Trying to get info for client: $1"
+
+    for d in $ETC_DIRS
+    do
+	for i in $(find $d/clients -name "$1.conf" 2>/dev/null)
+	do
+	    export VM_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
+	    
+	    CLI_CONF=$i
+	    VM_TYPE=$(grep VM_TYPE $i | sed -e 's,VM_TYPE=,,g' -e 's,\",,g' )
+
+	    . $CLI_CONF
+	    
+	    CLIENT_FOUND=true
+	    
+	done
+	if [ "$CLIENT_FOUND" = "true" ]
+	then
+	    debug "  got info for $1: $VM_NAME, $VM_TYPE, $CLI_CONF"
+	    return 0
+	fi
+    done
+
+    debug "  got no info for $1"
+    return 1
+}
+
+
+get_info_for_machine()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+
+    debug "Trying to get info for machine: $1"
+
+    for d in $ETC_DIRS
+    do
+	debug "  dir:  $d"
+	for i in $(find $d/clients -name "*.conf" 2>/dev/null)
+	do
+	    debug "     f:  $i"
+	    
+	    export VM_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
+	    debug "        wanted: $WANTED_VM "
+	    debug "        found:  $VM_NAME"
+	    if [ "$VM_NAME" = "$WANTED_VM" ]
+	    then
+		CLI_CONF=$i
+		VM_TYPE=$(grep VM_TYPE $i | sed -e 's,VM_TYPE=,,g' -e 's,\",,g' )
+		CLIENT_FOUND=true
+	    fi
+	done
+	if [ "$CLIENT_FOUND" = "true" ]
+	then
+	    debug "  got info for $1: $VM_NAME, $VM_TYPE, $CLI_CONF"
+	    return 0
+	fi
+    done
+
+    debug "  got no info for $1"
+    return 1
+}
+
+
+vnc_snapshot()
+{
+    rm -f tmp.jpg 
+   vncsnapshot :5 tmp.jpg 
+}
+
+vbox_snapshot()
+{
+    rm -f tmp.jpg 
+    VBoxManage controlvm $1 screenshotpng ~/image-`date +%s`.png
+}
+
+rename_screenshot_name()
+{
+    export IMG=$1
+    LAST_PIC=$(ls -1t Screenshot-$1-*.jpg | head -1)
+
+    LAST_NR=$(echo $LAST_PIC | sed -e "s,Screenshot-$IMG\-,,g" -e "s,.jpg,,g")
+
+    NEXT_NR=$(( $LAST_NR + 1 ))
+    NEXT_NR_STR=$(printf "%.3d" $NEXT_NR)
+    
+    NEXT_IMG=Screenshot-$1-$NEXT_NR_STR.jpg
+
+    mv tmp.jpg $NEXT_IMG
+    
+}
+
+client_screenshot()
+{
+    init_ats
+
+    debug "client_screenshot $1"
+
+    get_info_for_client "$1"
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    fi
+    
+    case $VM_TYPE in
+	"VirtualBox")
+	    echo "VBOX screenshots not implemented"
+	    ;;
+	"qemu")
+	    
+	    vnc_snapshot > /dev/null 2> /dev/null
+	    ;;
+	
+	*)
+	    echo "Screenshots not implemented for $1"
+	    ;;
+    esac
+
+    if [ -f tmp.jpg ]
+    then
+	rename_screenshot_name $1
+	echo "Stored: \"$NEXT_IMG\""
+    else
+	echo "Uh oh"
+    fi
+}
+
+
+auto_debug()
+{
+    debug "[$ATS_AUTO_NAME] $*"
+}
+
+
+
+exec_user_scripts()
+{
+    TMP=0
+    export script=bogus
+    while [ "$script" != "" ]
+    do
+	
+ 	LINE=${SCRIPTS_TO_EXECUTE[$TMP]}
+	if [ "$LINE" = "" ] ; then break ; fi
+	auto_debug "Executing user supplied script: $script"
+	
+	TYPE=${LINE:0:9}
+	script=${LINE:9}
+	
+	if [ "$TYPE" = "rem-user:" ]
+	then
+	    echo ${ATS_CLIENT} --client-exec ${CLIENT_NAME} "\"${script}\"" | bash
+	elif [ "$TYPE" = "rem-root:" ]
+	then
+	    echo ${ATS_CLIENT} --client-exec-as-root ${CLIENT_NAME} "\"${script}\"" | bash
+	else
+	    ${script}
+	fi
+	
+	RET=$?
+	auto_debug "User supplied script ($script)returned:  $RET"
+	
+	if [ $RET -ne 0 ]
+	then
+	    return $RET
+	fi
+	
+	TMP=$(( $TMP + 1 ))
+    done
+
+
+
+    return 0
+}
+
+
+
+open_ssh()
+{
+    get_info_for_client $1
+    
+    $SSH $SSH_TEST_OPTIONS \
+        -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS 
+	
+    return $?
+}

@@ -1,0 +1,84 @@
+#!/bin/sh
+
+exit_on_error()
+{
+    RET=$1
+    MSG=$2
+
+    if [ $1 -ne 0 ]
+    then
+	echo "ERROR ($RET): $MSG"
+	exit $RET
+    fi
+}
+
+ATS_DIR=__ATS_DIR__
+
+ATS=${ATS_DIR}/bin/ats-client
+
+
+
+build_project()
+{
+    MACHINE=$1
+
+    INST_DIR=/tmp/seard-tmp
+
+    export CONF_TWEAK="export CFLAGS=-I/usr/lib/jvm/java-6-openjdk-i386/include; export CXXFLAGS=-I/usr/lib/jvm/java-6-openjdk-i386/include; "
+
+
+    if [ "1" = "2" ]
+    then
+
+
+    $ATS --client-exec    $MACHINE "rm -fr searduino"
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    $ATS --client-exec    $MACHINE "git clone git://git.savannah.nongnu.org/searduino.git"
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    $ATS --client-exec    $MACHINE "cd searduino && make -f Makefile.git"
+    
+    fi
+    
+    $ATS --client-exec    $MACHINE "cd searduino && $CONF_TWEAK ./configure --prefix=$INST_DIR --disable-unittest "
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    $ATS --client-exec    $MACHINE "cd searduino && make clean all"
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    $ATS --client-exec    $MACHINE "cd searduino && make check"
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    $ATS --client-exec    $MACHINE "$INST_DIR/bin/verify-install.sh"
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+}
+
+
+build_on_host()
+{
+    MACHINE=$1
+    
+#    echo $ATS --start-client-headless   $MACHINE
+#    $ATS --start-client-headless   $MACHINE
+#    if [ $? -ne 0 ] ; then return 1 ;  fi
+    
+ #   echo $ATS --wait-for-ssh   $MACHINE
+ #   $ATS --wait-for-ssh   $MACHINE
+ #   if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    echo build_project         $MACHINE
+    build_project         $MACHINE
+    # don't return or exit after failed build.... we need to always stop the machine/client
+
+#    echo $ATS --stop-client    $MACHINE
+#    $ATS --stop-client    $MACHINE
+#    if [ $? -ne 0 ] ; then return 1 ;  fi
+}
+
+#build_on_host searduino-32-devel
+build_on_host armel-debian-6.0
+
+
+
+

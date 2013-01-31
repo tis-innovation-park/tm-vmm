@@ -1,0 +1,106 @@
+init_log_file()
+{
+    # don't call init_ats
+
+    export ATS_LOG_FILE=$LOG_FILE_DIR/ats-${DATE}.log
+
+    if [ -f $ATS_LOG_FILE ]
+    then
+	return
+    fi
+    if [ ! -d $LOG_FILE_DIR  ]
+    then
+	mkdir -p $LOG_FILE_DIR
+    fi
+
+    echo " *** ATS Log file *** " > $ATS_LOG_FILE
+    echo " *** Created: $(date +%Y-%m-%d-%H:%M:%S) *** " >> $ATS_LOG_FILE
+}
+
+init_txt_log()
+{
+    TXT_INDENTS=0
+    TXT_INDENT=""
+}
+
+logger_init()
+{
+#    init_log
+    init_log_file    
+}
+
+
+
+
+txt_dec_indent()
+{
+    TXT_INDENTS=$(( $TXT_INDENTS - 1 ))
+    
+    if [ $TXT_INDENTS -lt $TXT_INDENTS ]
+    then
+	TXT_INDENTS=0
+    fi
+
+    TMP=0
+    TXT_INDENT=""
+    while [ $TMP -ne $TXT_INDENTS ]
+    do
+	TMP=$(( $TMP + 1 ))
+	TXT_INDENT="   $TXT_INDENT"
+    done
+}
+
+txt_inc_indent()
+{
+    TXT_INDENTS=$(( $TXT_INDENTS + 1 ))
+    
+    TMP=0
+    TXT_INDENT=""
+    while [ $TMP -ne $TXT_INDENTS ]
+    do
+	TMP=$(( $TMP + 1 ))
+	TXT_INDENT="   $TXT_INDENT"
+    done
+}
+
+
+log_helper()
+{
+    RET=$1
+    shift
+    COMMAND=$1
+    shift
+
+    if [ "$RET" = "0" ]
+    then
+	RET_STR="OK"
+    else
+	RET_STR="FAIL"
+    fi
+
+    echo "  <ats-command>"  
+    echo "    <date>$(date +%Y-%m-%d)</date>"  
+    echo "    <time>$(date +%H:%M:%S)</time>"  
+    echo "    <command>$COMMAND</command>"   
+    echo "    <arguments>$*</arguments>"   
+    echo "    <return-value>$RET</return-value>"  
+    echo "    <return-string>$RET_STR</return-string>"  
+    echo "  </ats-command>" 
+}
+
+log()
+{
+    log_helper $* >> $ATS_LOG_FILE
+}
+
+log_leave()
+{
+    log "<-- $*"
+    txt_dec_indent
+}
+
+log_enter()
+{
+    txt_inc_indent
+    log "--> $*"
+}

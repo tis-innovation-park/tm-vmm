@@ -1,0 +1,81 @@
+init_debug_file()
+{
+    # don't call init_ats
+
+    if [ "$DEBUG" != "true" ]
+    then
+	return
+    fi
+
+    export ATS_DEBUG_FILE=$LOG_DEBUG_DIR/ats-${DATE}-debug.log
+
+    if [ -f $ATS_DEBUG_FILE ]
+    then
+	return
+    fi
+    if [ ! -d $LOG_DEBUG_DIR  ]
+    then
+	mkdir -p $DEBUG_FILE_DIR
+    fi
+
+    DEBUG_INDENTS=0
+    DEBUG_INDENT=""
+
+    echo " *** ATS Debug file *** " > $ATS_DEBUG_FILE
+    echo " *** Created: $(date +%Y-%m-%d-%H:%M:%S) *** " >> $ATS_DEBUG_FILE
+}
+
+
+debug()
+{
+    if [ "$DEBUG" = "true" ]
+    then
+	echo "[$(date)]:$DEBUG_INDENT$*" >>  $ATS_DEBUG_FILE
+    fi
+}
+
+
+
+debug_dec_indent()
+{
+    DEBUG_INDENTS=$(( $DEBUG_INDENTS - 1 ))
+    
+    if [ $DEBUG_INDENTS -lt $DEBUG_INDENTS ]
+    then
+	DEBUG_INDENTS=0
+    fi
+
+    TMP=0
+    DEBUG_INDENT=""
+    while [ $TMP -ne $DEBUG_INDENTS ]
+    do
+	TMP=$(( $TMP + 1 ))
+	DEBUG_INDENT="   $DEBUG_INDENT"
+    done
+}
+
+debug_inc_indent()
+{
+    DEBUG_INDENTS=$(( $DEBUG_INDENTS + 1 ))
+    
+    TMP=0
+    DEBUG_INDENT=""
+    while [ $TMP -ne $DEBUG_INDENTS ]
+    do
+	TMP=$(( $TMP + 1 ))
+	DEBUG_INDENT="   $DEBUG_INDENT"
+    done
+}
+
+
+debug_leave()
+{
+    debug "<-- $*"
+    debug_dec_indent
+}
+
+debug_enter()
+{
+    debug_inc_indent
+    debug "--> $*"
+}

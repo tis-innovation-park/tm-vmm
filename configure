@@ -1,0 +1,57 @@
+#!/bin/sh
+
+export ATS_VERSION=0.30
+export DEFAULT_INSTALL_DIR=/usr/local
+export DEFAULT_BIN_DIR=bin
+export DEFAULT_SHARE_DIR=share/ats
+
+
+parse_and_setup()
+{
+    export INSTALL_DIR=$DEFAULT_INSTALL_DIR
+    while [ "$1" != "" ]
+    do
+	case "$1" in
+
+	    "--prefix")
+		INSTALL_DIR=$2
+		shift
+		;;
+	    
+	    *)
+		echo "Parsing $1"
+		;;
+	esac
+    shift
+    done
+    export BIN_DIR=$INSTALL_DIR/bin
+    export SHARE_DIR=$INSTALL_DIR/$DEFAULT_SHARE_DIR
+}
+
+print_setup()
+{
+    if [ "${INSTALL_DIR}" = "" ]
+	then
+	echo "No prefix given"
+	exit 1
+    fi
+
+
+    echo "Installation dir: ${INSTALL_DIR}"
+    echo " - share dir:     ${SHARE_DIR}"
+    echo " - bin dir:       ${BIN_DIR}"
+}
+
+create_makefile()
+{
+    cat Makefile.tmpl | sed \
+	-e "s,__INSTALL_DIR__,${INSTALL_DIR},g" \
+	-e "s,__SHARE_DIR__,${SHARE_DIR},g" \
+	-e "s,__BIN_DIR__,${BIN_DIR},g" > Makefile
+}
+
+parse_and_setup $*
+print_setup
+create_makefile
+
+exit 0
