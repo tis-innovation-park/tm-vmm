@@ -1,18 +1,11 @@
 vvm
 ===
 
-Virtual Machine ManagerInstallation and Setup
+Virtual Machine Manager
+
+
+Installation and Setup
 ----------------------
-
-On local machine:
------------------
-
-* Edit file bin/test-burger-card:
-
-  Add virtual machine name
-
-  CLIENT_NAME=FSCRS-1
-
 
 * create dir .ats in $HOME
 * create ats.conf in .ats
@@ -42,10 +35,15 @@ VM_SUPERUSER=root
 SSH_PORT=22
 SSH_SHUTDOWN_COMMAND="shutdown -h now"
 
-* copy public key to machine																									       	    * copy public key to /root/.ssh/authorized_keys
+* copy public key to machine
 
-run install-ats.sh
-run /tmp/ats-tmp-install/bin/ats-client --start-client $VBOXNAME
+* copy public key to /root/.ssh/authorized_keys
+
+ ./configure --prefix <install dir>
+
+* Try it out:
+
+ /tmp/ats-tmp-install/bin/ats-client --list-clients
 
 Usage:
 
