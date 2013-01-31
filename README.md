@@ -9,7 +9,7 @@ Virtual Machine Manager (vvm) is a bunch of wrapper scripts on top of existing V
 Vvm is written in Bash and uses SSH to communicate/execute programs on the various machines.
 
 
-Vvm is part of ...
+Vvm is part of Free Software Client Reference System (FSCRS). FSCRS is a project at TIS Innovation Park in South Tyrol.
 
 
 # Abbreviations
@@ -100,6 +100,7 @@ First of all you need to decide what machine you want to use with your client. I
 * Set the variables as you find suitable for your project.
 
 * Example of a client configuration:
+
 `
    VM_NAME="Debian6.0"
 
@@ -114,6 +115,7 @@ First of all you need to decide what machine you want to use with your client. I
    SSH_PORT=22
 
    SSH_SHUTDOWN_COMMAND="shutdown -h now"
+
 `
 
  For more variables see section Configuration syntax below
