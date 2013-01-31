@@ -101,22 +101,21 @@ First of all you need to decide what machine you want to use with your client. I
 
 * Example of a client configuration:
 
-`
-   VM_NAME="Debian6.0"
 
-   VM_TYPE="VirtualBox"
+    `   VM_NAME="Debian6.0"`
 
-   VM_IP_ADDRESS=192.168.1.2
+    `   VM_TYPE="VirtualBox"`
 
-   VM_USER=$USER
+    `   VM_IP_ADDRESS=192.168.1.2`
 
-   VM_SUPERUSER=root
+    `   VM_USER=$USER`
 
-   SSH_PORT=22
+    `   VM_SUPERUSER=root`
 
-   SSH_SHUTDOWN_COMMAND="shutdown -h now"
+    `   SSH_PORT=22`
 
-`
+    `   SSH_SHUTDOWN_COMMAND="shutdown -h now"`
+
 
  For more variables see section Configuration syntax below
 
