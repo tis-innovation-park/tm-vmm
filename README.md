@@ -217,39 +217,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `SSH_SHUTDOWN_COMMAND="shutdown -h now"` - VVM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
 
-# OBSOLETED TEXT BELOW
-
-Basic Setup (currently not in sync)
-----------------------
-
-* create dir $HOME/.ats
-
-  `mkdir $HOME/.ats`
-
-* create ats.conf in .ats, typically with your favorite editor (emacs?)
-
-  `emacs ~/.ats/ats.conf`
-
-* add folling to file:
-
-# ATS Settings
-  LOG_FILE_DIR=/tmp/ats/log
-
-# ATSVM Settings
-  VM_STARTUP_TIMEOUT=300
-  VM_STOP_TIMEOUT=20
-  SSH=ssh
-  SSH_TEST_OPTIONS=" -o connectTimeout=3"
-
-* copy public key to /root/.ssh/authorized_keys
-
- ./configure --prefix <install dir>
-
-* Try it out:
-
- /tmp/ats-tmp-install/bin/ats-client --list-clients
-
-Usage:
+# Example use:
 
 /tmp/ats-tmp-install/ats-client --check-client-status  $VBOXNAME
 /tmp/ats-tmp-install/bin/ats-client --check-client-status  $VBOXNAME
