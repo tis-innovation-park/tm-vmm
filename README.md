@@ -11,6 +11,8 @@ Vvm is written in Bash and uses SSH to communicate/execute programs on the vario
 
 Vvm is part of Free Software Client Reference System (FSCRS). FSCRS is a project at TIS Innovation Park in South Tyrol.
 
+*Contact info:* Mailing list info@testingmachine.se  
+
 
 # Abbreviations
 
