@@ -2,7 +2,7 @@
 
 #
 #                                                                   
-#                   VVM
+#                   VMM
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -82,6 +82,9 @@ usage()
     echo ""
     echo "  --stop-machine VM_NAME"
     echo "    Stop machine called VM_NAME"
+    echo ""
+    echo "  --import-appliance APPLIANCE"
+    echo "    imports the appliance "
     echo ""
     echo "--check-client-ssh"
     echo "--check-client-status"
@@ -240,12 +243,29 @@ do
 	    shift
 	    ;;
 
+	"--import-appliance")
+	    import_appliance $2
+	    shift
+	    ;;
+
+	"--pause-client")
+	    pause_client $2
+	    shift
+	    shift
+	    ;;
+
+	"--resume-client")
+	    resume_client $2
+	    shift
+	    shift
+	    ;;
+
 	"--help")
 	    usage
 	    ;;
 	
 	*)
-	    echo "SYNTAX ERROR ($1)"
+	    echo "SYNTAX ERROR ($*)"
 	    exit 1
 	    ;;
     esac

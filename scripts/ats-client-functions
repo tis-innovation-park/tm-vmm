@@ -1,6 +1,6 @@
 #
 #                                                                   
-#                   VVM
+#                   VMM
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -424,6 +424,70 @@ stop_helper()
     esac
 }
 
+
+pause_helper()
+{
+    WANTED_VM=$1
+    VM_TYPE=$2
+    CLI_CONF=$3
+
+    debug "pause_helper: $VM_NAME"
+    debug "Reading client conf $CLI_CONF"
+    .  $CLI_CONF
+
+    debug "Pause $1 using virtual machine ($VM_TYPE)"
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    debug "Pausing vbox $1"
+	    VBoxManage controlvm $VM_NAME pause 
+#sleep 10 ; VBoxManage controlvm Ubuntu-12.04 pause ; sleep 600 ; VBoxManage controlvm Ubuntu-12.04 resume ; ssh -p 9022  root@localhost ntpdate-debian	    kill_vbox $1
+	    ;;
+
+	"qemu")
+            echo "Can't pause qemus yet!"
+	    return 1
+	    ;;
+
+	*)
+	    echo "Failed finding vm type for $1"
+	    exit 123
+	    ;;
+    esac
+}
+
+resume_helper()
+{
+    WANTED_VM=$1
+    VM_TYPE=$2
+    CLI_CONF=$3
+
+    debug "resume_helper: $VM_NAME"
+    debug "Reading client conf $CLI_CONF"
+    .  $CLI_CONF
+
+    debug "Resume $1 using virtual machine ($VM_TYPE)"
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    debug "Resuming vbox $1"
+	    VBoxManage controlvm $VM_NAME resume
+	    printf "\n\n\t*****RESET TIME LATER!!!!\n\n\n"
+#sleep 10 ; VBoxManage controlvm Ubuntu-12.04 pause ; sleep 600 ; VBoxManage controlvm Ubuntu-12.04 resume ; ssh -p 9022  root@localhost ntpdate-debian	    kill_vbox $1
+	    ;;
+
+	"qemu")
+            echo "Can't pause qemus yet!"
+	    return 1
+	    ;;
+
+	*)
+	    echo "Failed finding vm type for $1"
+	    exit 123
+	    ;;
+    esac
+}
+
 stop_machine()
 {
     CLIENT_FOUND=false
@@ -457,14 +521,101 @@ stop_client()
     get_info_for_client $1
 #    CLIENT_FOUND=$?
 
-   
-    
     if [ "$CLIENT_FOUND" = "false" ]
     then
 	echo "No client configuration found for: $1"
     else
 	debug "stop_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
 	stop_helper $WANTED_VM $VM_TYPE $CLI_CONF
+	return $?
+    fi
+
+    return 1
+}
+
+
+pause_machine()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+
+    debug "pause_machine $*"
+
+    get_info_for_machine $1
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    else
+	debug "pause_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
+	pause_helper $WANTED_VM $VM_TYPE $CLI_CONF
+	return $?
+    fi
+
+    return 1
+}
+
+
+
+pause_client()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+    START_ARGS=$2
+
+    get_info_for_client $1
+    
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+    else
+	debug "pause_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
+	pause_helper $WANTED_VM $VM_TYPE $CLI_CONF
+	return $?
+    fi
+
+    return 1
+}
+
+resume_machine()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+
+    debug "resume_machine $*"
+
+    get_info_for_machine $1
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    else
+	debug "resume_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
+	resume_helper $WANTED_VM $VM_TYPE $CLI_CONF
+	return $?
+    fi
+
+    return 1
+}
+
+
+
+resume_client()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+    START_ARGS=$2
+
+    get_info_for_client $1
+    
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+    else
+	debug "resume_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
+	resume_helper $WANTED_VM $VM_TYPE $CLI_CONF
 	return $?
     fi
 
@@ -1283,3 +1434,22 @@ open_ssh()
 	
     return $?
 }
+
+
+
+import_appliance()
+{
+    OVA_FILE=$1
+    if [ ! -f $OVA_FILE ]
+    then
+	echo "Can't find the ova file $OVA_FILE"
+	return 1
+    fi
+
+    VBoxManage import "$OVA_FILE" 
+
+}
+
+
+
+
