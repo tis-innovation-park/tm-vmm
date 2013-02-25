@@ -51,8 +51,10 @@ init_debug_file()
 
 debug()
 {
+
     if [ "$DEBUG" = "true" ]
     then
+	init_debug_file
 	echo "[$(date)]:$DEBUG_INDENT$*" >>  $ATS_DEBUG_FILE
     fi
 }
