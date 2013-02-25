@@ -1,6 +1,6 @@
 #
 #                                                                   
-#                   VVM
+#                   VMM
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -30,7 +30,7 @@ init_debug_file()
 	return
     fi
 
-    export ATS_DEBUG_FILE=$LOG_DEBUG_DIR/ats-${DATE}-debug.log
+    export ATS_DEBUG_FILE=$LOG_DEBUG_DIR/$USER/ats-${DATE}-debug.log
 
     if [ -f $ATS_DEBUG_FILE ]
     then
