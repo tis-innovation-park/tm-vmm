@@ -25,7 +25,7 @@ init_log_file()
 {
     # don't call init_ats
 
-    export ATS_LOG_FILE=$LOG_FILE_DIR/$USER/ats-${DATE}.log
+    export ATS_LOG_FILE=$LOG_FILE_DIR/$(whoami)/ats-${DATE}.log
 
     if [ -f $ATS_LOG_FILE ]
     then
@@ -33,7 +33,7 @@ init_log_file()
     fi
     if [ ! -d $LOG_FILE_DIR  ]
     then
-	mkdir -p $LOG_FILE_DIR
+	mkdir -p $LOG_FILE_DIR/$(whoami)
     fi
 
     echo " *** ATS Log file *** " > $ATS_LOG_FILE
