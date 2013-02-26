@@ -1044,10 +1044,9 @@ check_ssh_helper()
 
     debug "Check ssh of $VM_NAME"
 
-    CLI_CONF=$i
-    debug "Reading client conf $CLI_CONF"
-    .  $CLI_CONF
+    get_info_for_client $1
     
+#echo     $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS 
     $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS exit \
 	2>/dev/null >/dev/null
     RET=$?
@@ -1242,6 +1241,27 @@ check_machine()
     fi
 }
 
+get_vbox_specific_info()
+{
+#	echo find ssh port
+#	echo	vboxmanage   showvminfo $VM_NAME 
+    if [ "$SSH_PORT" = "auto" ]
+    then
+	SSH_PORT=$(vboxmanage   showvminfo $VM_NAME | grep "NIC" | grep Rule | grep 22 | grep "host port" | sed 's,[a-zA-Z0-9,: \ =()]*host port[ \t]*=,,g' | awk '{print $1}' | sed 's/,//g')
+    fi
+#    echo "SSH_PORT=$SSH_PORT"
+}
+
+get_vm_specific_info()
+{
+    if [ "$VM_TYPE" = "VirtualBox" ]
+    then
+	get_vbox_specific_info
+    else
+	echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
+    fi
+	
+}
 
 
 get_info_for_client()
@@ -1260,6 +1280,7 @@ get_info_for_client()
 	    . $CLI_CONF
 	    
 	    CLIENT_FOUND=true
+	    get_vm_specific_info
 	    
 	done
 	if [ "$CLIENT_FOUND" = "true" ]
@@ -1296,6 +1317,7 @@ get_info_for_machine()
 		CLI_CONF=$i
 		VM_TYPE=$(grep VM_TYPE $i | sed -e 's,VM_TYPE=,,g' -e 's,\",,g' )
 		CLIENT_FOUND=true
+		get_vm_specific_info
 	    fi
 	done
 	if [ "$CLIENT_FOUND" = "true" ]
