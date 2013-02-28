@@ -1181,6 +1181,7 @@ exec_client_command()
     CLIENT_FOUND=false
     WANTED_VM=$1
     COMMAND="$2"
+    ON_FAIL="$3"
 
     debug "exec_client_command $1 $2"
 
@@ -1195,6 +1196,7 @@ exec_client_command()
 	debug "$SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS $COMMAND"
 	$SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS \
 	    "$COMMAND"
+	
 	return $?
     fi
 }

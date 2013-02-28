@@ -25,12 +25,20 @@ init_log_file()
 {
     # don't call init_ats
 
+    if [ "$LOG_FILE_DIR" = "" ]
+    then   	 		 
+	echo "You must set the LOG_FILE_DIR variable"
+	echo " can't log at the moment so bailing out"
+	return 1
+    fi
+
     export ATS_LOG_FILE=$LOG_FILE_DIR/$(whoami)/ats-${DATE}.log
 
     if [ -f $ATS_LOG_FILE ]
     then
 	return
     fi
+
     if [ ! -d $LOG_FILE_DIR/$(whoami)  ]
     then
 	mkdir -p $LOG_FILE_DIR/$(whoami)
@@ -113,7 +121,12 @@ log_helper()
 
 log()
 {
-    log_helper $* >> $ATS_LOG_FILE
+    if [ ! -f $ATS_LOG_FILE ]
+	then 
+	echo "Missing log file: $ATS_LOG_FILE"
+    else
+	log_helper $* >> $ATS_LOG_FILE
+    fi
 }
 
 log_leave()

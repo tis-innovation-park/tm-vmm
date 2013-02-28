@@ -204,9 +204,38 @@ do
 	    shift
 	    ;;
 
+	"--client-exec")
+	    VCLIENT=$2
+	    COMMAND="$3"
+	    ON_FAIL="$4"
+	    exec_client_command $VCLIENT "$COMMAND" "$ON_FAIL"
+	    RET=$?
+	    shift
+	    shift
+	    ;;
+
+	"--client-exec-fail")
+	    VCLIENT=$2
+	    COMMAND="$3"
+
+	    exec_client_command $VCLIENT "$COMMAND"
+	    RET=$?
+
+	    if [ "$RET" != "0" ]
+		then
+		echo "STOPPING CLIENT due to failure"
+		stop_client $VCLIENT
+		return $RET
+	    fi
+
+	    shift
+	    shift
+	    ;;
+
 	"--client-exec-as-root"	)
 	    VCLIENT=$2
 	    COMMAND="$3"
+	    
 	    exec_client_command_as_root $VCLIENT "$COMMAND"
 	    RET=$?
 	    shift

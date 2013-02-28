@@ -25,6 +25,13 @@ init_debug_file()
 {
     # don't call init_ats
 
+    if [ "$LOG_DEBUG_DIR" = "" ]
+    then   	 		 
+	echo "You must set the LOG_DEBUG_DIR variable"
+	echo " can't log at the moment so bailing out"
+	return 1
+    fi
+
     if [ "$DEBUG" != "true" ]
     then
 	return
@@ -36,9 +43,10 @@ init_debug_file()
     then
 	return
     fi
-    if [ ! -d $LOG_DEBUG_DIR  ]
+
+    if [ ! -d $LOG_DEBUG_DIR/$(whoami)  ]
     then
-	mkdir -p $DEBUG_FILE_DIR/$(whoami)
+	mkdir -p $LOG_DEBUG_DIR/$(whoami)
     fi
 
     DEBUG_INDENTS=0
@@ -55,7 +63,12 @@ debug()
     if [ "$DEBUG" = "true" ]
     then
 	init_debug_file
-	echo "[$(date)]:$DEBUG_INDENT$*" >>  $ATS_DEBUG_FILE
+	    if [ ! -f $ATS_DEBUG_FILE ]
+	    then 
+		echo  "Missing log file: $ATS_DEBUG_FILE"
+	    else	  
+		echo "[$(date)]:$DEBUG_INDENT$*" >>  $ATS_DEBUG_FILE
+	    fi
     fi
 }
 
