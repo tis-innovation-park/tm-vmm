@@ -217,8 +217,6 @@ start_vbox()
     fi
     VBoxManage startvm "$VM_NAME"   2>/dev/null >/dev/null &
 
-
-    sleep 2
     maximise_vbox "$VM_NAME"
 }
 
@@ -346,7 +344,7 @@ check_qemu_proc()
 check_vbox_proc()
 {
     PROC_EXPR=$1
-    RET=$(ps auxww | grep -i virtualbox | grep -c $PROC_EXPR )
+    RET=$(ps -u hesa awww | grep -i virtualbox | grep -c $PROC_EXPR )
 
     debug "Number of vbox processes: $RET"
     
