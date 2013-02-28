@@ -94,6 +94,7 @@ usage()
     echo "--check-client-status"
     echo "--check-machine"
     echo "--client-exec"
+    echo "--client-exec-fail"
     echo "--client-exec-as-root"
     echo "--client-x11"
     echo "--client-screenshot"
@@ -207,8 +208,7 @@ do
 	"--client-exec")
 	    VCLIENT=$2
 	    COMMAND="$3"
-	    ON_FAIL="$4"
-	    exec_client_command $VCLIENT "$COMMAND" "$ON_FAIL"
+	    exec_client_command $VCLIENT "$COMMAND" 
 	    RET=$?
 	    shift
 	    shift
