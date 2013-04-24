@@ -1,0 +1,50 @@
+#
+#                                                                   
+#                   VVM
+#                      
+#   Copyright (C) 2012, 2013 TIS Innovation Park
+#                                                                   
+# This program is free software; you can redistribute it and/or     
+# modify it under the terms of the GNU General Public License       
+# as published by the Free Software Foundation; either version 3    
+# of the License, or any later version.                             
+#                                                                   
+#                                                                   
+# This program is distributed in the hope that it will be useful,   
+# but WITHOUT ANY WARRANTY; without even the implied warranty of    
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     
+# GNU General Public License for more details.                      
+#                                                                   
+# You should have received a copy of the GNU General Public License 
+# along with this program; if not, write to the Free Software       
+# Foundation, Inc., 51 Franklin Street, Boston,            
+# MA  02110-1301, USA.                                              
+#
+
+#
+# directory setup
+#
+INSTALL_DIR=__INSTALL_DIR__
+SHARE_DIR=__SHARE_DIR__
+BIN_DIR=__BIN_DIR__
+
+MD_FILES=manual.md
+
+PDF_FILES=$(MD_FILES:.md=.pdf)
+
+MANUALS=$(PDF_FILES)
+
+%.pdf:%.md
+	pandoc -o $@ $<
+
+$(PDF_FILES): $(MD_FILES)
+
+all: $(PDF_FIlES)  $(MD_FIlES) 
+
+clean:
+	rm -f $(PDF_FILES)
+
+install: $(MANUALS)
+	-mkdir -p $(SHARE_DIR)/doc/
+	cp $(MANUALS) $(SHARE_DIR)/doc/
+
