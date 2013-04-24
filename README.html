@@ -1,0 +1,132 @@
+<h1 id="vmm---virtual-machine-manager">vmm - Virtual Machine Manager</h1>
+<h1 id="overview">Overview</h1>
+<p>Virtual Machine Manager (vvm) is a bunch of wrapper scripts on top of existing Virtualization softwares. Vvm makes it easier to start and stop such machines and execute program (typically to perform tests) on these virtual machines.</p>
+<p>Vvm is written in Bash and uses SSH to communicate/execute programs on the various machines.</p>
+<p>Vvm is part of Free Software Client Reference System (FSCRS). FSCRS is a project at TIS Innovation Park in South Tyrol.</p>
+<h1 id="contact-info-join-us">Contact info &amp; Join us</h1>
+<p><em>Mailing list</em> info@testingmachine.eu</p>
+<p><em>Web site:</em> https://github.com/tis-innovation-park/vmm</p>
+<p><em>How to join:</em> clone the repo, try it out -- join the mailing list :)</p>
+<h1 id="abbreviations">Abbreviations</h1>
+<p><em>Machine</em> - A virtual image as accessible by the supported virtualization softwares (e.g Virtualbox, qemu). A machine may be used by several clients (or none).</p>
+<p><em>Client</em> - A system configuration used by vvm to manage machines. Each client must belong to one (and only) one machine for the client. Separating clients from machines makes it easy for you to use one machine (the actual runnable virtual image) in many clients with different setups such as user, log files and timeouts.</p>
+<h1 id="required-software">Required software</h1>
+<ul>
+<li><p>ssh (client)</p></li>
+<li><p>at least one virtualization software (see list of supported softwares below)</p></li>
+<li><p>bash</p></li>
+</ul>
+<h1 id="supported-virtualization-software">Supported Virtualization software</h1>
+<ul>
+<li><p>Virtualbox</p></li>
+<li><p>qemu</p></li>
+</ul>
+<p>We're looking into supporting: vmware,</p>
+<h1 id="installation">Installation</h1>
+<ul>
+<li>Download git code</li>
+</ul>
+<p><code>git://github.com/tis-innovation-park/vvm.git</code></p>
+<ul>
+<li>Go to the vvm directory</li>
+</ul>
+<p><code>cd vvm</code></p>
+<ul>
+<li>Configure the software</li>
+</ul>
+<p><code>./configure --prefix &lt;installationdir&gt;</code></p>
+<ul>
+<li>Build the software</li>
+</ul>
+<p><code>make</code></p>
+<ul>
+<li>Install the software</li>
+</ul>
+<p><code>make install</code></p>
+<ul>
+<li>Verify the installation</li>
+</ul>
+<p><code>&lt;installationdir&gt;/bin/vmm-client --list-clients</code></p>
+<h1 id="setup">Setup</h1>
+<ul>
+<li>Create the directory $HOME/.vmm</li>
+</ul>
+<p><code>mkdir $HOME/.vmm</code></p>
+<ul>
+<li>Create vmm.conf in .vmm, typically with your favorite editor (emacs?)</li>
+</ul>
+<p><code>emacs ~/.vmm/vmm.conf</code></p>
+<p>In this file you can configure settings you want to use as default in your clients. It is perfectly possible to override these settings in your individual client configurations.</p>
+<p>For a list of variables, see section Configuration syntax below.</p>
+<h2 id="creating-a-machine">Creating a machine</h2>
+<p>To create a machine vvm relies on the virtualization software. So if you want to manage a Virtualbox machine you (at least for now) create it with Virtualbox.</p>
+<h2 id="creating-a-client">Creating a client</h2>
+<p>First of all you need to decide what machine you want to use with your client. In the example below we will assume it is called Debian6.0</p>
+<ul>
+<li>Create a directory for all clients:</li>
+</ul>
+<p><code>mkdir ~/.vmm/clients</code></p>
+<ul>
+<li>Create a configuration file for the client (using a virtual machine):</li>
+</ul>
+<p>[CLIENT NAME].conf</p>
+<ul>
+<li><p>Set the variables as you find suitable for your project.</p></li>
+<li><p>Example of a client configuration:</p>
+<p><code>VM_NAME=&quot;Debian6.0&quot;</code></p>
+<p><code>VM_TYPE=&quot;VirtualBox&quot;</code></p>
+<p><code>VM_IP_ADDRESS=192.168.1.2</code></p>
+<p><code>VM_USER=$USER</code></p>
+<p><code>VM_SUPERUSER=root</code></p>
+<p><code>SSH_PORT=22</code></p>
+<p><code>SSH_SHUTDOWN_COMMAND=&quot;shutdown -h now&quot;</code></p></li>
+</ul>
+<p>For more variables see section Configuration syntax below</p>
+<ul>
+<li>Copy the public ssh key to the machine, e.g</li>
+</ul>
+<p><code>ssh-copy-id 192.168.1.2</code></p>
+<h1 id="using-vvm">Using VVM</h1>
+<h2 id="client-management">Client management</h2>
+<p><em>Command line options</em>:</p>
+<p><code>--list-clients</code> - lists all configured clients</p>
+<p><code>--start-clients client</code> - starts client</p>
+<p><code>--start-client-headless CLIENT_NAME</code> - Start client called CLIENT_NAME as headless (no screen)</p>
+<p><code>--stop-clients client</code> - stops client</p>
+<p><code>--list-running-clients</code> - Lists all clients currently running</p>
+<p><code>--check-client-ssh</code> - Checks if ssh is up on client</p>
+<p><code>--check-client-status</code> - Checks if clients is up and running</p>
+<p><code>--client-exec CLIENT cmd</code> - Execeute cmd on client</p>
+<p><code>--client-exec-as-root</code> - Execeute cmd on client as root</p>
+<p><code>--client-x11 CLIENT</code> - Checks if X11 is up and running on CLIENT</p>
+<p><code>--client-screenshot CLIENT</code> - Take a screenshot on CLIENT (not 100% ready)</p>
+<p><code>--print-client CLIENT</code> - Print the configuration for CLIENT</p>
+<p><code>--wait-for-ssh CLIENT</code> - Wait until ssh is up and running on CLIENT</p>
+<p><code>--open-ssh CLIENT</code> - Open an interactive shell (using ssh) on CLIENT</p>
+<p><code>--check-client-online CLIENT</code> - Check if CLIENT can ping the outside world</p>
+<h2 id="machine-management">Machine management</h2>
+<p><code>--list-machines</code> - lists all machines known to VVM</p>
+<p><code>--start-machine client</code> - starts machine</p>
+<p><code>--start-machine-headless VM_NAME</code> - Start machine called VM_NAME as headless (no screen)</p>
+<p><code>--stop-machine client</code> - stops machine</p>
+<p><code>--check-machine</code></p>
+<p><code>--stop-client CLIENT_NAME</code> - Stop client called CLIENT_NAME</p>
+<p><code>--stop-machine VM_NAME</code> - Stop machine called VM_NAME</p>
+<h1 id="configuration-syntax">Configuration syntax</h1>
+<p>The syntax for setting a variable is the same as in bash scrips (no coincidence!). Basically you write:</p>
+<p><code>VARIABLE=VALUE</code></p>
+<h2 id="variables">Variables</h2>
+<p><code>LOG_FILE_DIR=/tmp/vmm/log</code> - sets the log file base directory to /tmp/vmm/log. This means that all logs can be found here.</p>
+<p><code>VM_STARTUP_TIMEOUT=10</code> - the time to wait for a virtual machine to start up before considering it to be 'dead'.</p>
+<p><code>VM_STOP_TIMEOUT=20</code> - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately VVM will take down a machine with a <code>kill</code>.</p>
+<p><code>SSH=ssh</code> - the SSH program to use</p>
+<p><code>SSH_TEST_OPTIONS=&quot; -o connectTimeout=3&quot;</code> - the options to pass to the SSH program (see SSH variable above) when testing of the machine is up (or not).</p>
+<p><code>VM_NAME=&quot;Debian6.0&quot;</code> - the name of the machine to use in this client. It is important that your Virtualization software can find this machine.</p>
+<p><code>VM_TYPE=&quot;VirtualBox&quot;</code> - what type of Virtulization software this machine belongs to. Currently you can use: VirtualBox and qemu</p>
+<p><code>VM_IP_ADDRESS=192.168.x.x</code> - the IP address of the virtual machine</p>
+<p><code>VM_USER=$USER</code> - the user you want to use when accessing the virtual machine</p>
+<p><code>VM_SUPERUSER=root</code> - the name of the super user/administrator account, typically used to reboot the machine</p>
+<p><code>SSH_PORT=22</code> - the port where the SSH server is running on the client</p>
+<p><code>SSH_SHUTDOWN_COMMAND=&quot;shutdown -h now&quot;</code> - VVM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.</p>
+<h1 id="example-use">Example use:</h1>
+<p>/tmp/vmm-tmp-install/vmm-client --check-client-status $VBOXNAME /tmp/vmm-tmp-install/bin/vmm-client --check-client-status $VBOXNAME /tmp/vmm-tmp-install/bin/vmm-client --check-client-ssh $VBOXNAME /tmp/vmm-tmp-install/bin/vmm-client --client-exec $VBOXNAME &quot;pkcs15-tool -L&quot;</p>

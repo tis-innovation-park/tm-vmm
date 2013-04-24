@@ -1,0 +1,312 @@
+#!/bin/bash
+
+#
+#                                                                   
+#                   VMM
+#                      
+#   Copyright (C) 2012, 2013 TIS Innovation Park
+#                                                                   
+# This program is free software; you can redistribute it and/or     
+# modify it under the terms of the GNU General Public License       
+# as published by the Free Software Foundation; either version 3    
+# of the License, or any later version.                             
+#                                                                   
+#                                                                   
+# This program is distributed in the hope that it will be useful,   
+# but WITHOUT ANY WARRANTY; without even the implied warranty of    
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     
+# GNU General Public License for more details.                      
+#                                                                   
+# You should have received a copy of the GNU General Public License 
+# along with this program; if not, write to the Free Software       
+# Foundation, Inc., 51 Franklin Street, Boston,            
+# MA  02110-1301, USA.                                              
+#
+
+ATS_DIR=__ATS_DIR__
+ATS_NAME=$(basename $0)
+
+SHARE_DIR=
+SCRIPT_DIR=$ATS_DIR/share/vmm/scripts
+
+
+
+#
+# Read in functions file
+#
+ATS_FUNCTION=$SCRIPT_DIR/functions
+if [ ! -f  $ATS_FUNCTION ]
+then
+    echo "$ATS_NAME: Could not find functions file ($ATS_FUNCTION)"
+    # exit 6 - means we couldn't find the functions file
+    exit 6
+fi
+. $ATS_FUNCTION
+
+
+
+usage()
+{
+    echo "$ATS_NAME [OPTIONS]" 
+    echo ""
+    echo "RETURN VALUES"
+    for i in $(seq 0 $LAST_ERROR)
+    do
+	echo "  $i - " ${ERROR_STRINGS[$i]}
+    done
+    echo ""
+    echo "OPTIONS"
+    echo "  --help"
+    echo ""
+    echo "    Prints usage text"
+    echo ""
+    echo "  --list-clients"
+    echo "    Lists all available clients"
+    echo ""
+    echo "  --list-machines"
+    echo "    Lists all available machines"
+    echo ""
+    echo "  --list-running-clients"
+    echo ""
+    echo "  --start-client CLIENT_NAME"
+    echo "    Start client called CLIENT_NAME"
+    echo ""
+    echo "  --start-client-headless CLIENT_NAME"
+    echo "    Start client called CLIENT_NAME as headless (no screen)"
+    echo ""
+    echo "  --start-machine-headless VM_NAME"
+    echo "    Start machine called VM_NAME as headless (no screen)"
+    echo ""
+    echo "  --stop-client CLIENT_NAME"
+    echo "    Stop client called CLIENT_NAME"
+    echo ""
+    echo "  --stop-machine VM_NAME"
+    echo "    Stop machine called VM_NAME"
+    echo ""
+    echo "  --import-appliance APPLIANCE"
+    echo "    imports the appliance "
+    echo ""
+    echo "--pause-machine VM_NAME"
+    echo "--resume-machine VM_NAME"
+    echo "--pause-client CLIENT_NAME"
+    echo "--resume-client CLIENT_NAME"
+    echo "--check-client-ssh"
+    echo "--check-client-status"
+    echo "--check-machine"
+    echo "--client-exec"
+    echo "--client-exec-fail"
+    echo "--client-exec-as-root"
+    echo "--client-x11"
+    echo "--client-screenshot"
+    echo "--print-client"
+    echo "--wait-for-ssh"
+    echo "--open-ssh"
+    echo "--check-client-online"
+    echo ""
+
+    exit 0
+}
+
+
+while [ "$1" != "" ]
+do
+    case "$1" in 
+	
+	"--list-clients")
+	    list_clients
+	    ;;
+	
+	"--list-running-clients")
+	    LIST_RUNNING=true
+	    list_running_clients
+	    RET=$?
+	    ;;
+	
+	"--list-machines")
+	    list_machines
+	    ;;
+	
+	"--start-client")
+	    VCLIENT=$2
+	    start_client $VCLIENT
+	    RET=$?
+	    shift
+	    ;;
+	
+	"--start-client-headless")
+	    VCLIENT=$2
+	    start_client  $VCLIENT headless
+	    RET=$?
+	    shift
+	    ;;
+	
+	"--start-machine")
+	    VCLIENT=$2
+	    start_machine $VCLIENT
+	    RET=$?
+	    shift
+	    ;;
+	
+	"--start-client-headless")
+	    VCLIENT=$2
+	    start_machine  $VCLIENT headless
+	    RET=$?
+	    shift
+	    ;;
+	
+	"--check-client-ssh")
+	    VCLIENT=$2
+	    check_client_ssh  $VCLIENT
+	    RET=$?
+	    shift
+	    ;;
+
+	"--check-client-online")
+	    VCLIENT=$2
+	    is_client_online  $VCLIENT
+	    RET=$?
+	    shift
+	    ;;
+	
+	"--check-client-status")
+	    VCLIENT="$2"
+	    check_client_status  "$VCLIENT"
+	    RET=$?
+	    shift
+	    ;;
+	
+	"--check-machine")
+	    VCLIENT=$2
+	    check_machine  $VCLIENT
+	    RET=$?
+	    shift
+	    ;;
+	
+	"--stop-client")
+	    VCLIENT=$2
+	    stop_client  $VCLIENT
+	    RET=$?
+	    shift
+	    ;;
+	
+	"--stop-machine")
+	    VCLIENT=$2
+	    stop_machine  $VCLIENT
+	    RET=$?
+	    shift
+	    ;;
+	
+	"--client-exec")
+	    VCLIENT=$2
+	    COMMAND="$3"
+	    exec_client_command $VCLIENT "$COMMAND"
+	    RET=$?
+	    shift
+	    shift
+	    ;;
+
+	"--client-exec")
+	    VCLIENT=$2
+	    COMMAND="$3"
+	    exec_client_command $VCLIENT "$COMMAND" 
+	    RET=$?
+	    shift
+	    shift
+	    ;;
+
+	"--client-exec-fail")
+	    VCLIENT=$2
+	    COMMAND="$3"
+
+	    exec_client_command $VCLIENT "$COMMAND"
+	    RET=$?
+
+	    if [ "$RET" != "0" ]
+		then
+		echo "STOPPING CLIENT due to failure"
+		stop_client $VCLIENT
+		exit $RET
+	    fi
+
+	    shift
+	    shift
+	    ;;
+
+	"--client-exec-as-root"	)
+	    VCLIENT=$2
+	    COMMAND="$3"
+	    
+	    exec_client_command_as_root $VCLIENT "$COMMAND"
+	    RET=$?
+	    shift
+	    shift
+	    ;;
+
+	"--client-x11")
+	    is_client_x11_up $2
+	    shift
+	    ;;
+
+	"--wait-for-ssh")
+	    CLIENT=$2
+	    TIMEOUT=$3
+	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
+	    wait_for_ssh up "$TIMEOUT" $CLIENT 
+	    shift
+	    shift
+	    ;;
+
+	"--open-ssh")
+	    CLIENT=$2
+	    TIMEOUT=$3
+	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
+	    wait_for_ssh up "$TIMEOUT" $CLIENT 
+	    shift
+	    shift
+	    open_ssh
+	    ;;
+
+	"--print-client")
+	    print_client $2
+	    shift
+	    ;;
+	
+	"--client-screenshot")
+	    client_screenshot $2
+	    shift
+	    ;;
+
+	"--import-appliance")
+	    import_appliance $2
+	    shift
+	    ;;
+
+	"--pause-client")
+	    pause_client $2
+	    shift
+	    shift
+	    ;;
+
+	"--resume-client")
+	    resume_client $2
+	    shift
+	    shift
+	    ;;
+
+	"--help")
+	    usage
+	    ;;
+	
+	*)
+	    echo "SYNTAX ERROR ($*)"
+	    exit 1
+	    ;;
+    esac
+    shift
+done
+
+
+
+
+exit $RET
+

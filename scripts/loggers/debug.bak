@@ -1,0 +1,104 @@
+#
+#                                                                   
+#                   VMM
+#                      
+#   Copyright (C) 2012, 2013 TIS Innovation Park
+#                                                                   
+# This program is free software; you can redistribute it and/or     
+# modify it under the terms of the GNU General Public License       
+# as published by the Free Software Foundation; either version 3    
+# of the License, or any later version.                             
+#                                                                   
+#                                                                   
+# This program is distributed in the hope that it will be useful,   
+# but WITHOUT ANY WARRANTY; without even the implied warranty of    
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     
+# GNU General Public License for more details.                      
+#                                                                   
+# You should have received a copy of the GNU General Public License 
+# along with this program; if not, write to the Free Software       
+# Foundation, Inc., 51 Franklin Street, Boston,            
+# MA  02110-1301, USA.                                              
+#
+
+init_debug_file()
+{
+    # don't call init_vmm
+
+    if [ "$DEBUG" != "true" ]
+    then
+	return
+    fi
+
+    export ATS_DEBUG_FILE=$LOG_DEBUG_DIR/$(whoami)/vmm-${DATE}-debug.log
+
+    if [ -f $ATS_DEBUG_FILE ]
+    then
+	return
+    fi
+    if [ ! -d $LOG_DEBUG_DIR  ]
+    then
+	mkdir -p $DEBUG_FILE_DIR/$(whoami)
+    fi
+
+    DEBUG_INDENTS=0
+    DEBUG_INDENT=""
+
+    echo " *** ATS Debug file *** " > $ATS_DEBUG_FILE
+    echo " *** Created: $(date +%Y-%m-%d-%H:%M:%S) *** " >> $ATS_DEBUG_FILE
+}
+
+
+debug()
+{
+    if [ "$DEBUG" = "true" ]
+    then
+	echo "[$(date)]:$DEBUG_INDENT$*" >>  $ATS_DEBUG_FILE
+    fi
+}
+
+
+
+debug_dec_indent()
+{
+    DEBUG_INDENTS=$(( $DEBUG_INDENTS - 1 ))
+    
+    if [ $DEBUG_INDENTS -lt $DEBUG_INDENTS ]
+    then
+	DEBUG_INDENTS=0
+    fi
+
+    TMP=0
+    DEBUG_INDENT=""
+    while [ $TMP -ne $DEBUG_INDENTS ]
+    do
+	TMP=$(( $TMP + 1 ))
+	DEBUG_INDENT="   $DEBUG_INDENT"
+    done
+}
+
+debug_inc_indent()
+{
+    DEBUG_INDENTS=$(( $DEBUG_INDENTS + 1 ))
+    
+    TMP=0
+    DEBUG_INDENT=""
+    while [ $TMP -ne $DEBUG_INDENTS ]
+    do
+	TMP=$(( $TMP + 1 ))
+	DEBUG_INDENT="   $DEBUG_INDENT"
+    done
+}
+
+
+debug_leave()
+{
+    debug "<-- $*"
+    debug_dec_indent
+}
+
+debug_enter()
+{
+    debug_inc_indent
+    debug "--> $*"
+}

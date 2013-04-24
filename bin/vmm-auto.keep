@@ -1,0 +1,131 @@
+#!/bin/bash
+
+#
+#                                                                   
+#                   VVM
+#                      
+#   Copyright (C) 2012, 2013 TIS Innovation Park
+#                                                                   
+# This program is free software; you can redistribute it and/or     
+# modify it under the terms of the GNU General Public License       
+# as published by the Free Software Foundation; either version 3    
+# of the License, or any later version.                             
+#                                                                   
+#                                                                   
+# This program is distributed in the hope that it will be useful,   
+# but WITHOUT ANY WARRANTY; without even the implied warranty of    
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     
+# GNU General Public License for more details.                      
+#                                                                   
+# You should have received a copy of the GNU General Public License 
+# along with this program; if not, write to the Free Software       
+# Foundation, Inc., 51 Franklin Street, Boston,            
+# MA  02110-1301, USA.                                              
+#
+
+VMM_DIR=/tmp
+VMM_CLIENT=$VMM_DIR/bin/vmm-client
+VMM_AUTO_NAME=$(basename $0)
+
+SCRIPT_DIR=$VMM_DIR/share/vmm/scripts
+
+usage()
+{
+    echo "Syntax error"
+    echo "  $VMM_AUTO_NAME <client> <external-script>"
+}
+
+#
+# Read in functions file
+#
+VMM_FUNCTION=$SCRIPT_DIR/functions
+if [ ! -f  $VMM_FUNCTION ]
+then
+    echo "$VMM_NAME: Could not find functions file ($VMM_FUNCTION)"
+    # exit 6 - means we couldn't find the functions file
+    exit 6
+fi
+. $VMM_FUNCTION
+
+SCRIPT_IDX=0
+
+while [ "$1" != "" ]
+do
+    case "$1" in
+	"--client")
+	    CLIENT_NAME=$2
+	    shift
+	    ;;
+	
+	"--remote-script")
+	    shift
+	    SCRIPTS_TO_EXECUTE[$SCRIPT_IDX]="rem-user:$1"
+	    SCRIPT_IDX=$(( $SCRIPT_IDX + 1 ))
+	    ;;
+	
+	"--remote-script-root")
+	    shift
+	    SCRIPTS_TO_EXECUTE[$SCRIPT_IDX]="rem-root:$1"
+	    SCRIPT_IDX=$(( $SCRIPT_IDX + 1 ))
+	    ;;
+	
+	"--local-script")
+	    shift
+	    SCRIPTS_TO_EXECUTE[$SCRIPT_IDX]="loc-user:$1"
+	    SCRIPT_IDX=$(( $SCRIPT_IDX + 1 ))
+	    
+	    ;;
+	
+	*)
+	    echo "SYNTAX ERROR \"$1\""
+	    ;;
+	
+    esac
+    shift
+done
+
+if [ $SCRIPT_IDX -eq 0 ]
+then
+    echo "You supply at least one script to execute. Either"
+    echo "   --remote-script your-script.sh"
+    echo "   --local-script your-script.sh"
+    exit 1
+fi
+
+if [ "$CLIENT_NAME" = "" ]
+then
+	echo "Missing client name"
+	echo "   --client YOUR-CLIENT"
+	exit 1
+fi
+
+
+
+#######################################
+#
+# Start up client
+#
+#######################################
+start_client_wait_for_ssh $CLIENT_NAME 
+exit_on_error "$RET" "Start up client"
+
+
+#######################################
+#
+# Execute user supplied scripts
+#
+#######################################
+exec_user_scripts
+exit_on_error "$RET" "Executing user supplied scripts ($script)"
+
+
+#######################################
+#
+# Stop client
+#
+#######################################
+auto_debug "Stopping client $CLIENT_NAME"
+$VMM_CLIENT --stop-client $CLIENT_NAME
+auto_debug "  stopping client returned: $?"
+
+exit $RET
