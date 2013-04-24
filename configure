@@ -22,7 +22,7 @@
 # MA  02110-1301, USA.                                              
 #
 
-export VMM_VERSION=0.30
+export VMM_VERSION=0.31
 export DEFAULT_INSTALL_DIR=/usr/local
 export DEFAULT_BIN_DIR=bin
 export DEFAULT_SHARE_DIR=share/vmm
@@ -64,16 +64,23 @@ print_setup()
     echo " - bin dir:       ${BIN_DIR}"
 }
 
-create_makefile()
+create_makefiles()
 {
     cat Makefile.tmpl | sed \
 	-e "s,__INSTALL_DIR__,${INSTALL_DIR},g" \
 	-e "s,__SHARE_DIR__,${SHARE_DIR},g" \
 	-e "s,__BIN_DIR__,${BIN_DIR},g" > Makefile
+
+    cat doc/Makefile.tmpl | sed \
+	-e "s,__INSTALL_DIR__,${INSTALL_DIR},g" \
+	-e "s,__SHARE_DIR__,${SHARE_DIR},g" \
+	-e "s,__BIN_DIR__,${BIN_DIR},g" > doc/Makefile
+
+
 }
 
 parse_and_setup $*
 print_setup
-create_makefile
+create_makefiles
 
 exit 0
