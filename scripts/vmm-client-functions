@@ -626,7 +626,7 @@ find_vm_type()
 {
     VM_NAME=$1
     
-    VBOX_FOUND=$(vboxmanage list vms | awk ' { print $1 } ' | sed 's,\",,g' | grep $VM_NAME | wc -l)
+    VBOX_FOUND=$(vboxmanage list vms | awk ' { print $1 } ' | sed 's,\",,g' | grep -w $VM_NAME | wc -l)
 
     if [ $VBOX_FOUND -ne 0 ]
     then
@@ -750,10 +750,10 @@ start_client()
 start_client_wait_for_ssh()
 {
     auto_debug "Starting client $CLIENT_NAME"
-    $ATS_CLIENT --start-client $CLIENT_NAME
+    $VMM_CLIENT --start-client $CLIENT_NAME
     
     auto_debug "Wait for ssh"
-    $ATS_CLIENT --wait-for-ssh $CLIENT_NAME 300
+    $VMM_CLIENT --wait-for-ssh $CLIENT_NAME 300
     RET=$?
 
     return $RET
@@ -1364,7 +1364,7 @@ rename_screenshot_name()
 
 client_screenshot()
 {
-    init_ats
+    init_vmm
 
     debug "client_screenshot $1"
 
@@ -1402,7 +1402,7 @@ client_screenshot()
 
 auto_debug()
 {
-    debug "[$ATS_AUTO_NAME] $*"
+    debug "[$VMM_AUTO_NAME] $*"
 }
 
 
@@ -1423,10 +1423,10 @@ exec_user_scripts()
 	
 	if [ "$TYPE" = "rem-user:" ]
 	then
-	    echo ${ATS_CLIENT} --client-exec ${CLIENT_NAME} "\"${script}\"" | bash
+	    echo ${VMM_CLIENT} --client-exec ${CLIENT_NAME} "\"${script}\"" | bash
 	elif [ "$TYPE" = "rem-root:" ]
 	then
-	    echo ${ATS_CLIENT} --client-exec-as-root ${CLIENT_NAME} "\"${script}\"" | bash
+	    echo ${VMM_CLIENT} --client-exec-as-root ${CLIENT_NAME} "\"${script}\"" | bash
 	else
 	    ${script}
 	fi

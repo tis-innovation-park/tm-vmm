@@ -21,8 +21,8 @@
 # MA  02110-1301, USA.                                              
 #
 
-BINS=bin/ats-client bin/ats-auto
-SCRIPTS=scripts/ats-client-functions scripts/functions 
+BINS=bin/vmm bin/vmm-auto
+SCRIPTS=scripts/vmm-client-functions scripts/functions scripts/generate-conf
 LOGGERS=scripts/loggers/debug-logger scripts/loggers/txt-logger 
 EXAMPLES=examples/searduino.sh
 
@@ -40,18 +40,18 @@ BIN_DIR=__BIN_DIR__
 # 
 #
 
-$(BINS): bin/ats-client.tmpl  bin/ats-auto.tmpl Makefile
+$(BINS): bin/vmm.tmpl  bin/vmm-auto.tmpl Makefile
 	@echo "*** Creating scripts ***"
-	if [ -f bin/ats-client ] ; then mv bin/ats-client bin/ats-client.keep ; fi
-	if [ -f bin/ats-auto ]   ; then mv bin/ats-auto   bin/ats-auto.keep   ; fi
-	cat bin/ats-client.tmpl | sed "s,__ATS_DIR__,$(INSTALL_DIR),g" > bin/ats-client
-	cat bin/ats-auto.tmpl   | sed "s,__ATS_DIR__,$(INSTALL_DIR),g" > bin/ats-auto
-	chmod a+x bin/ats-client
-	chmod a+x bin/ats-auto
+	if [ -f bin/vmm ] ; then mv bin/vmm bin/vmm.keep ; fi
+	if [ -f bin/vmm-auto ]   ; then mv bin/vmm-auto   bin/vmm-auto.keep   ; fi
+	cat bin/vmm.tmpl | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > bin/vmm
+	cat bin/vmm-auto.tmpl   | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > bin/vmm-auto
+	chmod a+x bin/vmm
+	chmod a+x bin/vmm-auto
 
 $(EXAMPLES): examples/searduino.tmpl
 	@echo "*** Creating examples ***"
-	cat examples/searduino.tmpl | sed "s,__ATS_DIR__,$(INSTALL_DIR),g" > examples/searduino.sh
+	cat examples/searduino.tmpl | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > examples/searduino.sh
 	chmod a+x examples/searduino.sh
 
 install: $(BINS) $(SCRIPTS) $(EXAMPLES) 
