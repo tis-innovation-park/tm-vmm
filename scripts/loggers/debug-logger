@@ -23,13 +23,14 @@
 
 init_debug_file()
 {
-    # don't call init_ats
+    # don't call init_vmm
 
     if [ "$LOG_DEBUG_DIR" = "" ]
     then   	 		 
-	echo "You must set the LOG_DEBUG_DIR variable"
-	echo " can't log at the moment so bailing out"
-	return 1
+#	echo "You must set the LOG_DEBUG_DIR variable"
+#	echo " can't log at the moment so bailing out"
+#	return 1
+	return 0
     fi
 
     if [ "$DEBUG" != "true" ]
@@ -37,9 +38,9 @@ init_debug_file()
 	return
     fi
 
-    export ATS_DEBUG_FILE=$LOG_DEBUG_DIR/$(whoami)/ats-${DATE}-debug.log
+    export VMM_DEBUG_FILE=$LOG_DEBUG_DIR/$(whoami)/vmm-${DATE}-debug.log
 
-    if [ -f $ATS_DEBUG_FILE ]
+    if [ -f $VMM_DEBUG_FILE ]
     then
 	return
     fi
@@ -52,8 +53,8 @@ init_debug_file()
     DEBUG_INDENTS=0
     DEBUG_INDENT=""
 
-    echo " *** ATS Debug file *** " > $ATS_DEBUG_FILE
-    echo " *** Created: $(date +%Y-%m-%d-%H:%M:%S) *** " >> $ATS_DEBUG_FILE
+    echo " *** VMM Debug file *** " > $VMM_DEBUG_FILE
+    echo " *** Created: $(date +%Y-%m-%d-%H:%M:%S) *** " >> $VMM_DEBUG_FILE
 }
 
 
@@ -63,11 +64,11 @@ debug()
     if [ "$DEBUG" = "true" ]
     then
 	init_debug_file
-	    if [ ! -f $ATS_DEBUG_FILE ]
+	    if [ ! -f $VMM_DEBUG_FILE ]
 	    then 
-		echo  "Missing log file: $ATS_DEBUG_FILE"
+		echo  "Missing log file: $VMM_DEBUG_FILE"
 	    else	  
-		echo "[$(date)]:$DEBUG_INDENT$*" >>  $ATS_DEBUG_FILE
+		echo "[$(date)]:$DEBUG_INDENT$*" >>  $VMM_DEBUG_FILE
 	    fi
     fi
 }

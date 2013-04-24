@@ -67,18 +67,18 @@ We're looking into supporting: vmware,
 
 * Verify the installation
 
-  `<installationdir>/bin/ats-client --list-clients`
+  `<installationdir>/bin/vmm-client --list-clients`
 
 
 # Setup
 
-* Create the directory $HOME/.ats
+* Create the directory $HOME/.vmm
 
-  `mkdir $HOME/.ats`
+  `mkdir $HOME/.vmm`
 
-* Create ats.conf in .ats, typically with your favorite editor (emacs?)
+* Create vmm.conf in .vmm, typically with your favorite editor (emacs?)
 
-  `emacs ~/.ats/ats.conf`
+  `emacs ~/.vmm/vmm.conf`
 
 In this file you can configure settings you want to use as default in your clients. It is perfectly possible to override these settings in your individual client configurations.
 
@@ -98,7 +98,7 @@ First of all you need to decide what machine you want to use with your client. I
 
 * Create a directory for all clients:
 
-  `mkdir ~/.ats/clients`
+  `mkdir ~/.vmm/clients`
 
 * Create a configuration file for the client (using a virtual machine):
 
@@ -200,7 +200,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 ## Variables
 
-`LOG_FILE_DIR=/tmp/ats/log` - sets the log file base directory to /tmp/ats/log. This means that all logs can be found here.
+`LOG_FILE_DIR=/tmp/vmm/log` - sets the log file base directory to /tmp/vmm/log. This means that all logs can be found here.
 
 `VM_STARTUP_TIMEOUT=10` - the time to wait for a virtual machine to start up before considering it to be 'dead'.
 
@@ -226,8 +226,8 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 # Example use:
 
-/tmp/ats-tmp-install/ats-client --check-client-status  $VBOXNAME
-/tmp/ats-tmp-install/bin/ats-client --check-client-status  $VBOXNAME
-/tmp/ats-tmp-install/bin/ats-client --check-client-ssh  $VBOXNAME
-/tmp/ats-tmp-install/bin/ats-client --client-exec $VBOXNAME "pkcs15-tool -L"
+/tmp/vmm-tmp-install/vmm-client --check-client-status  $VBOXNAME
+/tmp/vmm-tmp-install/bin/vmm-client --check-client-status  $VBOXNAME
+/tmp/vmm-tmp-install/bin/vmm-client --check-client-ssh  $VBOXNAME
+/tmp/vmm-tmp-install/bin/vmm-client --client-exec $VBOXNAME "pkcs15-tool -L"
 
