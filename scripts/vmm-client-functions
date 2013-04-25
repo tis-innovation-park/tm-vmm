@@ -90,10 +90,16 @@ list_running_vbox()
     if [ "$VB_NAME" != "" ]
     then
 	echo "  |--$VB_NAME  which is used in"
-	for vb in $(find $ETC_DIRS -name clients/*.conf | xargs grep -l $VB_NAME )
+	for dir in  $ETC_DIRS
 	do
-	    VB_SHORT_NAME=$(basename $vb)
-	    echo "    |--$VB_SHORT_NAME"  
+	    if [ -d $dir ]
+	    then
+		for vb in $(find $dir/clients -name *.conf | xargs grep -l $VB_NAME )
+		do
+		    VB_SHORT_NAME=$(basename $vb)
+		    echo "    |--$VB_SHORT_NAME  [$vb]"  
+		done
+	    fi
 	done
     else
 	echo "   no virtualbox machines currently running"
