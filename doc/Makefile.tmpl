@@ -21,6 +21,7 @@
 # MA  02110-1301, USA.                                              
 #
 
+
 #
 # directory setup
 #
@@ -28,13 +29,27 @@ INSTALL_DIR=__INSTALL_DIR__
 SHARE_DIR=__SHARE_DIR__
 BIN_DIR=__BIN_DIR__
 
-MD_FILES=manual.md
 
-PDF_FILES=$(MD_FILES:.md=.pdf)
-HTML_FILES=$(MD_FILES:.md=.html)
+#
+# Sources for manuals
+#
+MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md configuration.md using.md create-virtual.md examples.md contact.md devel.md vmm-manual.md
 
-MANUALS=$(PDF_FILES)
+#
+# Generated docs
+#
+GEN_DIR=generated-files/
+EGOV_MD=$(GEN_DIR)/egov-manual.md
+DEVEL_MD=$(GEN_DIR)/vmm-manual.md
 
+GEN_SRC= $(DEVEL_MD) $(EGOV_MD)
+PDF_FILES=$(GEN_SRC:.md=.pdf)
+HTML_FILES=$(GEN_SRC:.md=.html)
+MANUALS=$(PDF_FILES) $(HTML_FILES)
+
+#
+# Rules for pdf and html generation
+#
 %.pdf:%.md
 	pandoc --section-divs -N --chapters -o $@ $<
 
@@ -42,12 +57,34 @@ MANUALS=$(PDF_FILES)
 	pandoc -s -S --toc -o $@ $<
 
 
-$(PDF_FILES): $(MD_FILES)
+$(EGOV_MD):
+	-mkdir -p $(GEN_DIR)
+	cp egov-manual.md $@
+	cat  egov-overview.md  >> $@ 
+	cat  install.md        >> $@ 
+	cat  setup.md          >> $@ 
+	cat  configuration.md  >> $@ 
+	cat  using.md          >> $@ 
+	cat  create-virtual.md >> $@
+	cat  examples.md       >> $@
+	cat  contact.md        >> $@
 
-all: $(PDF_FIlES)  $(MD_FIlES) 
+$(DEVEL_MD):
+	-mkdir -p $(GEN_DIR)
+	cp vmm-manual.md      $@
+	cat  install.md       >> $@ 
+	cat  devel.md         >> $@ 
+	cat  contact.md       >> $@
+
+pdf: $(PDF_FILES)
+
+$(PDF_FILES): $(GEN_SRC)
+$(HTML_FILES): $(GEN_SRC)
+
+all: $(PDF_FILES) $(HTML_FILES)
 
 clean:
-	rm -f $(PDF_FILES)
+	@-rm -fr $(PDF_FILES)  $(GEN_DIR)
 
 install: $(MANUALS)
 	-mkdir -p $(SHARE_DIR)/doc/
