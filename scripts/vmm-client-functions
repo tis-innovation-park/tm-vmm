@@ -1249,7 +1249,7 @@ get_vbox_specific_info()
 #	echo	vboxmanage   showvminfo $VM_NAME 
     if [ "$SSH_PORT" = "auto" ]
     then
-	SSH_PORT=$(vboxmanage   showvminfo $VM_NAME | grep "NIC" | grep Rule | grep 22 | grep "host port" | sed 's,[a-zA-Z0-9,: \ =()]*host port[ \t]*=,,g' | awk '{print $1}' | sed 's/,//g')
+	SSH_PORT=$(vboxmanage   showvminfo $VM_NAME | grep "NIC" | grep -e Rule -e ssh | grep 22 | grep "host port" | sed 's,[a-zA-Z0-9,: \ =()]*host port[ \t]*=,,g' | awk '{print $1}' | sed 's/,//g')
     fi
 #    echo "SSH_PORT=$SSH_PORT"
 }
