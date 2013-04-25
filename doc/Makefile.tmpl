@@ -31,11 +31,16 @@ BIN_DIR=__BIN_DIR__
 MD_FILES=manual.md
 
 PDF_FILES=$(MD_FILES:.md=.pdf)
+HTML_FILES=$(MD_FILES:.md=.html)
 
 MANUALS=$(PDF_FILES)
 
 %.pdf:%.md
 	pandoc -o $@ $<
+
+%.html:%.md
+	pandoc -s -S --toc -o $@ $<
+
 
 $(PDF_FILES): $(MD_FILES)
 
