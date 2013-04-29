@@ -13,28 +13,40 @@ Note: If you’re on a Ubuntu system you might have to add your user to the vbox
 * Type:	  Linux
 * Version:  Ubuntu (64 bit)
 
-
 **Make sure that you have**
 
 ### Memory size
 
 * 2048 MB
 
+![Memory size](screenshots/memory-size.png)
+
+
 ### Hard drive
 
 * Choose to create a virtual hard drive now
+
+![Hard drive](screenshots/hard-drive.png)
 
 ### Hard drive file type
 
 * Choose VDI 
 
+![Hard drive file type](screenshots/hard-drive-file-type.png)
+
 ### Storage on physical hard drive
 
 * Choose Dynamically allocated
 
+![Hard drive file type](screenshots/storage-on-physical-hard-disk.png)
+
+
 ### File location and size
 
 * 8 GB should be enough
+
+![File location and size](screenshots/file-location-and-size.png)
+
 
 Your disk has now been created. Before starting it we need to do some additional settings.
 
@@ -48,7 +60,7 @@ Your disk has now been created. Before starting it we need to do some additional
 
 The following settings should be applied to Adapter 1.
 
-**Attached to**:  Bridged adaptor
+**Attached to**:  NAT (previously Bridged adaptor was advised)
 
 * **Name**:       eth0
 * **Advanced**:     
@@ -60,6 +72,10 @@ The following settings should be applied to Adapter 1.
 *This gives your virtual machine an IP address on the same subnet as
  the host computer. See http://www.virtualbox.org/manual/ Chapter 6
  for additional information on bridged networking.*
+
+![Network](screenshots/network-1.png)
+
+
 
 ##### Allowing SSH logins to your virtual machine
 
@@ -77,6 +93,8 @@ Add a new rule by clicking the + sign. Enter
 * **Host Port**: 2256   (the value can basically be any free port on your host computer)
 * **Guest IP**:
 * **Guest Port**: 22
+
+![Network](screenshots/network-port-forward.png)
 
 #### USB
 Make sure USB is enabled if you plan to use a smart card reader or another USB device 
@@ -98,7 +116,12 @@ Click Settings and choose storage.
 
 Add the downloaded iso image to the virtual machine as a CD-ROM by clicking the Empty icon (image missing) under Controller: IDE and then click on the disc icon right of the text CD/DVD Drive: . 
 
+![Storage](screenshots/storage-pre.png)
+
+
 Choose a virtual CD/DVD disk file ... and point out the downloaded iso image (e.g. ubuntu-12.10-desktop-amd64.iso).
+
+![Storage](screenshots/storage-post.png)
 
 Click Start
 
