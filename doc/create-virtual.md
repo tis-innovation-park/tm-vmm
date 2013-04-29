@@ -9,11 +9,13 @@ Note: If you’re on a Ubuntu system you might have to add your user to the vbox
 
 ### Name and operating system
 
-* Name:	  eGov testing machine
-* Type:	  Linux
+* Name:	    eGov testing machine
+* Type:	    Linux
 * Version:  Ubuntu (64 bit)
 
-**Make sure that you have**
+![Name and os](screenshots/name-and-operating-system.png "Name and operating system")
+
+
 
 ### Memory size
 
