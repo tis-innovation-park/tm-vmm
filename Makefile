@@ -29,9 +29,9 @@ EXAMPLES=examples/searduino.sh
 #
 # directory setup
 #
-INSTALL_DIR=/tmp
-SHARE_DIR=/tmp/share/vmm
-BIN_DIR=/tmp/bin
+INSTALL_DIR=/usr/local
+SHARE_DIR=/usr/local/share/vmm
+BIN_DIR=/usr/local/bin
 
 
 
