@@ -33,7 +33,7 @@ BIN_DIR=__BIN_DIR__
 #
 # Sources for manuals
 #
-MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md configuration.md using.md create-virtual.md examples.md contact.md devel.md vmm-manual.md
+MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md configuration.md using.md create-virtual.md examples.md contact.md devel.md vmm-manual.md egov-detailed.md
 
 #
 # Generated docs
@@ -65,6 +65,7 @@ $(EGOV_MD):
 	cat  setup.md          >> $@ 
 	cat  configuration.md  >> $@ 
 	cat  using.md          >> $@ 
+	cat  egov-detailed.md  >> $@ 
 	cat  create-virtual.md >> $@
 	cat  examples.md       >> $@
 	cat  contact.md        >> $@
