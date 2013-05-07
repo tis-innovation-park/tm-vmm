@@ -8,22 +8,22 @@ There are two types of cards that are currently being tested in Italy.
 
 * Running pkcs15-tool -D from a shell outputs the following:
 
-`Using reader with a card: ACS ACR38U-CCID 00 00  
-PKCS#15 Card [USER]:  
-	Version        : 0  
-	Serial number  : 6041110748903908  
-	Manufacturer ID: IC: Infineon; mask: Siemens  
-	Flags          :   
-`  
+`Using reader with a card: ACS ACR38U-CCID 00 00`  
+`PKCS#15 Card [USER]:`
+`	Version        : 0`
+`	Serial number  : 6041110748903908`  
+`	Manufacturer ID: IC: Infineon; mask: Siemens`  
+`	Flags          :`   
+  
 
 * A newer card has recently been released:
-
-`Using reader with a card: ACS ACR38U-CCID 00 00  
-PKCS#15 Card [BEATRICE CORALIA DALI]:  
-	Version        : 0  
-	Serial number  : 6041500113627001  
-	Manufacturer ID: IC: ATMEL; mask: Athena  
-	Flags          :   
-`  
+  
+`Using reader with a card: ACS ACR38U-CCID 00 00`  
+`PKCS#15 Card [BEATRICE CORALIA DALI]:`  
+`	Version        : 0`
+`	Serial number  : 6041500113627001`
+`	Manufacturer ID: IC: ATMEL; mask: Athena`  
+`	Flags          :`   
+  
 
 With the OpenSC drivers installed (found in the repos of most major Linux distributions) and Firefox setup everything works.
