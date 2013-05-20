@@ -26,4 +26,11 @@ There are two types of cards that are currently being tested in Italy.
 `	Flags          :`   
   
 
-With the OpenSC drivers installed (found in the repos of most major Linux distributions) and Firefox setup everything works.
+With the OpenSC drivers installed (found in the repos of most major Linux distributions) and Firefox setup, everything works.
+
+## eGov mobile testing
+
+Another challenge to overcome will be testing eGov services on mobile platforms, more specifially automating tests under Android.
+Good news is this is possible using Selenium. The one major obstacle that we face is getting around the smart card login. So
+far I am unaware of getting this to work under Android unless you patch the kernel and this is of course no an option. More documentation
+and research is needed concerning this.
