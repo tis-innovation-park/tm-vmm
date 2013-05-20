@@ -13,7 +13,7 @@ Vvm is part of Free Software Client Reference System (FSCRS). FSCRS is a project
 
 # Contact info & Join us
 
-*Mailing list* info@testingmachine.eu  
+*Mailing list* community@testingmachine.eu  
 
 *Web site:* https://github.com/tis-innovation-park/vmm
 
