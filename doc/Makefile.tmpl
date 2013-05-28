@@ -33,16 +33,16 @@ BIN_DIR=__BIN_DIR__
 #
 # Sources for manuals
 #
-MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md configuration.md using.md create-virtual.md examples.md contact.md devel.md vmm-manual.md egov-detailed.md
+MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md using.md create-virtual.md examples.md contact.md devel.md vmm-devel-manual.md egov-detailed.md testingmachine-manual.md selenium.md  misc-tools.md automating.md vmm-options.md
 
 #
 # Generated docs
 #
 GEN_DIR=generated-files/
-EGOV_MD=$(GEN_DIR)/egov-manual.md
-DEVEL_MD=$(GEN_DIR)/vmm-manual.md
+TESTINGMACHINE_MD=$(GEN_DIR)/testingmachine-manual.md
+DEVEL_MD=$(GEN_DIR)/vmm-devel-manual.md
 
-GEN_SRC= $(DEVEL_MD) $(EGOV_MD)
+GEN_SRC= $(DEVEL_MD) $(TESTINGMACHINE_MD)
 PDF_FILES=$(GEN_SRC:.md=.pdf)
 HTML_FILES=$(GEN_SRC:.md=.html)
 MANUALS=$(PDF_FILES) $(HTML_FILES)
@@ -51,28 +51,32 @@ MANUALS=$(PDF_FILES) $(HTML_FILES)
 # Rules for pdf and html generation
 #
 %.pdf:%.md
-	pandoc --section-divs -N --chapters -o $@ $<
+	pandoc  -N -o $@ $<
+# --section-divs  --chapters
 
 %.html:%.md
 	pandoc -s -S --toc -o $@ $<
 
 
-$(EGOV_MD):
+$(TESTINGMACHINE_MD): $(MD_SRC)
 	-mkdir -p $(GEN_DIR)
-	cp egov-manual.md $@
+	cp testingmachine-manual.md $@
 	cat  egov-overview.md  >> $@ 
 	cat  install.md        >> $@ 
 	cat  setup.md          >> $@ 
-	cat  configuration.md  >> $@ 
 	cat  using.md          >> $@ 
+	cat  selenium.md       >> $@ 
+	cat  misc-tools.md     >> $@ 
+	cat  automating.md     >> $@ 
 	cat  egov-detailed.md  >> $@ 
 	cat  create-virtual.md >> $@
 	cat  examples.md       >> $@
 	cat  contact.md        >> $@
+	cat  vmm-options.md    >> $@
 
 $(DEVEL_MD):
 	-mkdir -p $(GEN_DIR)
-	cp vmm-manual.md      $@
+	cp vmm-devel-manual.md      $@
 	cat  install.md       >> $@ 
 	cat  devel.md         >> $@ 
 	cat  contact.md       >> $@
@@ -90,4 +94,5 @@ clean:
 install: $(MANUALS)
 	-mkdir -p $(SHARE_DIR)/doc/
 	cp $(MANUALS) $(SHARE_DIR)/doc/
+
 
