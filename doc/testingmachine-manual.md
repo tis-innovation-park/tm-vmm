@@ -1,13 +1,9 @@
-
 ![](pics/fscrs.png)
 
 
 # eGov Testing Machine Manual
 
-
-
-## The eGovernment services
-
+## About the project
 The Autonomous Province of Bolzano currently offers important digital
 services (for eg, online applications to start businesses, pay
 property taxes and initiate e-Payments etc), the number is expected to
@@ -23,6 +19,23 @@ The project takes its name from the Free Software Client Reference
 System, a specific reference system (OS + defined set of software
 applications) that during testing simulates a user accessing the
 services.
+
+## About the software
+
+Testingmachine is used to test eGovernment services.  The eGovernment
+services can vary from country to country but generally it grants
+citizens access to important documents and information. In most EU
+countries there are additional services like paying property tax that
+can be done online. Most governments in Europe are leaning in this
+direction in order to decrease administrative overhead.
+
+Another challenge to overcome will be testing eGov services on mobile
+platforms, more specifially automating tests under Android.  Good news
+is this is possible using Selenium. The one major obstacle that we
+face is getting around the smart card login. So far I am unaware of
+getting this to work under Android unless you patch the kernel and
+this is of course no an option. More documentation and research is
+needed concerning this.
 
 
 ## The eGov Testing Machine
@@ -40,7 +53,9 @@ offered to all citizens.
 
 ## Software Overview
 
-The Testing Machine is currently made up by Virtual Machine Manager (VMM) and documentation on how to wite, execute and automate tests of eGov sites in particular but also other softwares.
+The Testing Machine is currently made up by Virtual Machine Manager
+(VMM) and documentation on how to wite, execute and automate tests of
+eGov sites in particular but also other softwares.
 
 ### Virtual Machine Manager (VMM)
 
