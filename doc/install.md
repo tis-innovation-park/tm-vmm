@@ -1,7 +1,6 @@
-# Overview
+# Installation 
 
-
-#  Software requirement
+##  Software requirement
  
 * ssh (client)
 
@@ -9,7 +8,7 @@
 
 * bash
 
-# Supported Virtualization software
+## Supported Virtualization software
 
 * Virtualbox
 
@@ -17,19 +16,19 @@
 
 We're looking into supporting: vmware, 
 
-# Downloading Virtual Machine Manager
+## Downloading Virtual Machine Manager
 
-## Via git
+### Via git
 
 * Download git code
 
   `git clone git://github.com/tis-innovation-park/vvm.git`
 
-## Via a dist file (.tar.gz)
+### Via a dist file (.tar.gz)
 
  Coming later
 
-# Building and installing Virtual Machine Manager
+## Building and installing Virtual Machine Manager
 
 * Go to the vvm directory
 
@@ -45,16 +44,11 @@ We're looking into supporting: vmware,
 
 * Install the software
 
-  `make install`
+  `sudo make install`
 
 * Verify the installation
 
   `<installationdir>/bin/vmm-client --list-clients`
-
-
-# Setup
-
-# Using Virtual Machine Manager
 
 
 

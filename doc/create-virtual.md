@@ -1,11 +1,13 @@
-# Creating a virtual machine
-Follow the normal procedure, as described in the VirtualBox manual, on how to create a new virtual machine. 
+# Creating virtual machines
 
 ## Creating a VirtualBox machine with Ubuntu 12.10 
 
-Below we provide settings for creating a Virtualbox machine for Ubuntu 12.10. You can choose to use our settings or change some at your will.
+Basically you should follow the normal procedure, as described in the
+VirtualBox manual, on how to create a new virtual machine. However we
+provide a guide below to make this easier. You can choose to use our
+settings or change some at your will.
 
-Note: If you’re on a Ubuntu system you might have to add your user to the vboxusers group.
+**Note:** *If you’re on a Ubuntu system you might have to add your user to the vboxusers group.*
 
 ### Name and operating system
 
@@ -13,7 +15,7 @@ Note: If you’re on a Ubuntu system you might have to add your user to the vbox
 * Type:	    Linux
 * Version:  Ubuntu (64 bit)
 
-![Name and os](screenshots/name-and-operating-system.png "Name and operating system")
+![Name and os] (screenshots/name-and-operating-system.png "Name and operating system")
 
 
 
