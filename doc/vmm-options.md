@@ -1,4 +1,4 @@
-# VMM configuration
+# Testing Machine VMM configuration
 
 ## Configuration file syntax
 
@@ -33,7 +33,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 `SSH_SHUTDOWN_COMMAND="shutdown -h now"` - VVM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
 
 
-# VMM Command line options
+# tm-vmm Command line options
 
 
 ## Client options

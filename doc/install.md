@@ -48,7 +48,7 @@ We're looking into supporting: vmware,
 
 * Verify the installation
 
-  `<installationdir>/bin/vmm-client --list-clients`
+  `<installationdir>/bin/tm-vmm --list-clients`
 
 
 

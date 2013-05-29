@@ -1,6 +1,6 @@
 #
 #                                                                   
-#                   VMM
+#                   Testing Machine
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -22,14 +22,14 @@
 #
 
 CONF_READ=false
-DEFAULT_LOG_DEBUG_DIR=/tmp/vmm/
+DEFAULT_LOG_DEBUG_DIR=/tmp/testing-machine/vmm/
 DEFAULT_LOG_FORMAT=txt
 INIT_DONE=0
 
 DEBUG=true
 
 
-PERSONAL_ETC_DIR=${HOME}/.vmm/
+PERSONAL_ETC_DIR=${HOME}/.testingmachine/
 
 #DEBUG=true
 
@@ -40,7 +40,7 @@ ERROR_STRINGS[3]="could not start client"
 ERROR_STRINGS[4]="could not stop client"
 ERROR_STRINGS[5]="error when executing a command"
 ERROR_STRINGS[6]="could not find functions file"
-ERROR_STRINGS[7]="could not find vmmvm-functions file"
+ERROR_STRINGS[7]="could not find vmm-functions file"
 LAST_ERROR=6
 
 DATE=$(date +%Y-%m-%d)
@@ -83,7 +83,7 @@ init_vmm()
 
     if [ "$ETC_DIRS" = "" ]
     then
-	ETC_DIRS="/etc/vmm $VMM_DIR/etc/ ${PERSONAL_ETC_DIR}"
+	ETC_DIRS="/etc/testingmachine $VMM_DIR/etc/ ${PERSONAL_ETC_DIR}"
     fi
  
     for d in $ETC_DIRS

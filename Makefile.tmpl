@@ -1,6 +1,6 @@
 #
 #                                                                   
-#                   VVM
+#                   Testing Machine
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -21,7 +21,10 @@
 # MA  02110-1301, USA.                                              
 #
 
-BINS=bin/vmm bin/vmm-auto
+TM_VMM=bin/tm-vmm
+TM_VMM_AUTO=bin/tm-vmm-auto
+
+BINS=${TM_VMM} ${TM_VMM_AUTO}
 SCRIPTS=scripts/vmm-client-functions scripts/functions scripts/generate-conf
 LOGGERS=scripts/loggers/debug-logger scripts/loggers/txt-logger 
 EXAMPLES=examples/searduino.sh
@@ -40,14 +43,14 @@ BIN_DIR=__BIN_DIR__
 # 
 #
 
-$(BINS): bin/vmm.tmpl  bin/vmm-auto.tmpl Makefile
+$(BINS): ${TM_VMM}.tmpl  ${TM_VMM_AUTO}.tmpl Makefile
 	@echo "*** Creating scripts ***"
-	if [ -f bin/vmm ] ; then mv bin/vmm bin/vmm.keep ; fi
-	if [ -f bin/vmm-auto ]   ; then mv bin/vmm-auto   bin/vmm-auto.keep   ; fi
-	cat bin/vmm.tmpl | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > bin/vmm
-	cat bin/vmm-auto.tmpl   | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > bin/vmm-auto
-	chmod a+x bin/vmm
-	chmod a+x bin/vmm-auto
+	if [ -f ${TM_VMM} ] ; then mv ${TM_VMM} ${TM_VMM}.keep ; fi
+	if [ -f ${TM_VMM_AUTO} ]   ; then mv ${TM_VMM_AUTO} ${TM_VMM_AUTO}.keep   ; fi
+	cat ${TM_VMM}.tmpl | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > ${TM_VMM}
+	cat ${TM_VMM_AUTO}   | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > ${TM_VMM_AUTO}
+	chmod a+x ${TM_VMM}
+	chmod a+x ${TM_VMM_AUTO}
 
 $(EXAMPLES): examples/searduino.tmpl
 	@echo "*** Creating examples ***"

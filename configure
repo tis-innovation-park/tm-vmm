@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #                                                                   
-#                   VVM
+#                   Testing Machine
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -22,10 +22,10 @@
 # MA  02110-1301, USA.                                              
 #
 
-export VMM_VERSION=0.31
+export TM_VMM_VERSION=0.1
 export DEFAULT_INSTALL_DIR=/usr/local
 export DEFAULT_BIN_DIR=bin
-export DEFAULT_SHARE_DIR=share/vmm
+export DEFAULT_SHARE_DIR=share/testingmachine
 
 
 parse_and_setup()

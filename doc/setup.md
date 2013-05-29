@@ -1,20 +1,25 @@
 ## Setup 
 
-* Create the directory $HOME/.vmm
+* Create the directory $HOME/.testingmachine
 
-  `mkdir $HOME/.vmm`
+  `mkdir $HOME/.testingmachine`
 
-* Create vmm.conf in .vmm, typically with your favorite editor (emacs?)
+* Create tm-vmm.conf in .testingmachine, typically with your favorite editor (emacs?)
 
-  `emacs ~/.vmm/vmm.conf`
+  `emacs ~/.testingmachine/tm-vmm.conf`
 
-In this file you can configure settings you want to use as default in your clients. It is perfectly possible to override these settings in your individual client configurations.
+In this file you can configure settings you want to use as default in
+your clients. It is perfectly possible to override these settings in
+your individual client configurations.
 
 For a list of variables, see section Configuration syntax below.
 
 ## Creating a machine
 
-To create a machine vvm relies on the virtualization software. So if you want to manage a Virtualbox machine you (at least for now) create it with Virtualbox. For information about how to do this, read the chapter "Creating a Virtualbox machine".
+To create a machine vvm relies on the virtualization software. So if
+you want to manage a Virtualbox machine you (at least for now) create
+it with Virtualbox. For information about how to do this, read the
+chapter "Creating a Virtualbox machine".
 
 
 ## Creating a client
@@ -24,7 +29,7 @@ First of all you need to decide what machine you want to use with your client. I
 
 * Create a directory for all clients:
 
-  `mkdir ~/.vmm/clients`
+  `mkdir ~/.testingmachine/clients`
 
 ## Create a client configuration
 

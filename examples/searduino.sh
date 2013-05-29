@@ -2,7 +2,7 @@
 
 #
 #                                                                   
-#                   VVM
+#                   Testing Machine
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -37,7 +37,7 @@ exit_on_error()
 
 VMM_DIR=/tmp
 
-VMM=${VMM_DIR}/bin/vmm-client
+VMM=${VMM_DIR}/bin/tm-vmm
 
 
 

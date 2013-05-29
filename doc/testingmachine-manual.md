@@ -54,20 +54,20 @@ offered to all citizens.
 ## Software Overview
 
 The Testing Machine is currently made up by Virtual Machine Manager
-(VMM) and documentation on how to wite, execute and automate tests of
-eGov sites in particular but also other softwares.
+(tm-vmm) and documentation on how to wite, execute and automate tests
+of eGov sites in particular but also other softwares.
 
 ### Virtual Machine Manager (VMM)
 
-VMM is made up by bash scripts that let the user manage various
-virtual machine software in a general way. See the VMM manual for more
-information.
+tm-vmm is made up by bash scripts that let the user manage various
+virtual machine software in a general way. See the tm-vmm manual for
+more information.
 
 ### eGov Manuals
 
 Writing tests of eGov sites is not hard but we believe that some help
 will still be useful for most people. The manuals and guides provided
-together with VMM make it possible to test eGov sites automatically
+together with tm-vmm make it possible to test eGov sites automatically
 and unattended.
 
 

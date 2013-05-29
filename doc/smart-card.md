@@ -1,6 +1,6 @@
 ## Smart Card Overview
 
-VMM is used to test eGovernment services that can only be accessed
+tm-vmm is used to test eGovernment services that can only be accessed
 using a smart card. eGovernment services can vary from country to
 country but generally it grants citizens access to important documents
 and information. In most EU countries there are additional services
