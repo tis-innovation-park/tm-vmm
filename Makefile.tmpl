@@ -24,6 +24,8 @@
 TM_VMM=bin/tm-vmm
 TM_VMM_AUTO=bin/tm-vmm-auto
 
+TM_VERSION=__TM_VERSION__
+
 BINS=${TM_VMM} ${TM_VMM_AUTO}
 SCRIPTS=scripts/vmm-client-functions scripts/functions scripts/generate-conf
 LOGGERS=scripts/loggers/debug-logger scripts/loggers/txt-logger 
@@ -37,7 +39,7 @@ SHARE_DIR=__SHARE_DIR__
 BIN_DIR=__BIN_DIR__
 
 
-
+DIST_DIR_TMP=testing-machine-$(TM_VERSION)
 
 #
 # 
@@ -69,10 +71,26 @@ install: $(BINS) $(SCRIPTS) $(EXAMPLES)
 	cp -r $(SCRIPTS)  $(SHARE_DIR)/scripts
 	cp -r $(LOGGERS)  $(SHARE_DIR)/scripts/loggers
 
+	cd doc && make install
+
 check:
 	test/install-and-test-auto.sh
 
 
+dist:
+	rm -fr tmp/$(DIST_DIR_TMP)
+	mkdir -p  tmp/$(DIST_DIR_TMP)/doc
+
+	make clean
+	cd doc && make clean all
+
+	cp -r doc/      tmp/$(DIST_DIR_TMP)/
+	cp -r bin/      tmp/$(DIST_DIR_TMP)/
+	cp -r examples/ tmp/$(DIST_DIR_TMP)/
+	cp -r scripts/  tmp/$(DIST_DIR_TMP)/
+
+	cp configure Makefile.tmpl README.md    tmp/$(DIST_DIR_TMP)/
+	
 #
 # clean 
 #
