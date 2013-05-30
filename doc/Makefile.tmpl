@@ -64,6 +64,8 @@ $(QUICK_GUIDE_MD): $(MD_SRC)
 	cp  tm-quick-guide.md      $@ 
 	cat  tm-about.md        >> $@ 
 	cat  tm-features.md     >> $@ 
+	cat  tm-quick-instructions.md          >> $@ 
+	cat  using.md          >> $@ 
 
 $(TESTINGMACHINE_MD): $(MD_SRC)
 	-mkdir -p $(GEN_DIR)
