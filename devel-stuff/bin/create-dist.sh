@@ -55,7 +55,7 @@ exit_on_error()
 {
     RET=$1
     CMD=$2
-    if [ $RET -nee 0 ]
+    if [ $RET -ne 0 ]
 	then
 	echo "Failed: $CMD"
 	exit $RET
@@ -66,6 +66,7 @@ exec_cmd()
 {
     COMMAND="$*"
 
+    echo "*** $COMMAND *** "
     $DEBUG $COMMAND
     exit_on_error $? "$COMMAND"
 }
