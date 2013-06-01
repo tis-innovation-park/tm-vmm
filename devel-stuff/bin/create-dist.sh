@@ -72,7 +72,6 @@ exec_cmd()
 }
 
 exec_cmd git tag $GIT_ARG $VERSION
-exec_cmd make clean
 exec_cmd ./configure --prefix /opt
 exec_cmd make 
 exec_cmd make dist
