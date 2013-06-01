@@ -94,6 +94,8 @@ dist:
 
 	cp configure Makefile.tmpl README.md    tmp/$(DIST_DIR_TMP)/
 
+	cd tmp && tar cvfz $(DIST_DIR_TMP).tar.gz $(DIST_DIR_TMP)/
+
 #
 # clean 
 #
