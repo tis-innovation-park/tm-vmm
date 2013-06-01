@@ -62,7 +62,7 @@ exit_on_error()
     fi
 }
 
-exex_cmd()
+exec_cmd()
 {
     COMMAND="$*"
 
