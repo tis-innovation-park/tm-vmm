@@ -51,7 +51,6 @@ then
     exit 2
 fi
 
-exit 0
 $DEBUG git tag $GIT_ARG $VERSION
 $DEBUG make clean
 $DEBUG ./configure --prefix /opt
