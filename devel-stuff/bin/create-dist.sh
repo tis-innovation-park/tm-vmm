@@ -51,11 +51,30 @@ then
     exit 2
 fi
 
-$DEBUG git tag $GIT_ARG $VERSION
-$DEBUG make clean
-$DEBUG ./configure --prefix /opt
-$DEBUG make 
-$DEBUG make dist
+exit_on_error()
+{
+    RET=$1
+    CMD=$2
+    if [ $RET -nee 0 ]
+	then
+	echo "Failed: $CMD"
+	exit $RET
+    fi
+}
+
+exex_cmd()
+{
+    COMMAND="$*"
+
+    $DEBUG $COMMAND
+    exit_on_error $? "$COMMAND"
+}
+
+exec_cmd git tag $GIT_ARG $VERSION
+exec_cmd make clean
+exec_cmd ./configure --prefix /opt
+exec_cmd make 
+exec_cmd make dist
 
 
 if [ "$PUSH" = true ]
