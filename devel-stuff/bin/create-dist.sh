@@ -12,9 +12,9 @@ do
     elif [ "$1" = "--push" ]
     then
 	PUSH=true
-    elif [ "$1" = "-d" ]
+    elif [ "$1" = "--force-tag" ]
     then
-	GIT_ARG=$1
+	GIT_TAG_ARG="-f"
     elif [ "$1" = "--dry-run" ]
     then
 	DEBUG=echo
@@ -44,12 +44,12 @@ fi
 GIT_DIFF=$(git diff | wc -l)
 
 
-if [ $GIT_DIFF -gt 0 ]
-then
-    echo "You seem to have uncommited stuff in your repo (git diff gives $GIT_DIFF lines)"
-    echo "  you need to commit first"
-    exit 2
-fi
+#if [ $GIT_DIFF -gt 0 ]
+#then
+#    echo "You seem to have uncommited stuff in your repo (git diff gives $GIT_DIFF lines)"
+#    echo "  you need to commit first"
+#    exit 2
+#fi
 
 exit_on_error()
 {
@@ -67,11 +67,11 @@ exec_cmd()
     COMMAND="$*"
 
     echo "*** $COMMAND *** "
-    $DEBUG $COMMAND
+    $COMMAND
     exit_on_error $? "$COMMAND"
 }
 
-exec_cmd git tag $GIT_ARG $VERSION
+exec_cmd git tag $GIT_TAG_ARG $BASE_TM_VERSION
 exec_cmd ./configure --prefix /opt
 exec_cmd make 
 exec_cmd make dist
