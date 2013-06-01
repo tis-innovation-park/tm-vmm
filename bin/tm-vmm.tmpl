@@ -25,6 +25,7 @@
 
 VMM_DIR=__VMM_DIR__
 VMM_NAME=$(basename $0)
+TM_VERSION=__TM_VERSION__
 
 SHARE_DIR=
 SCRIPT_DIR=$VMM_DIR/share/testingmachine/scripts
@@ -103,6 +104,7 @@ usage()
     echo "--open-ssh"
     echo "--check-client-online"
     echo "--create-client-conf"
+    echo "--version"
     echo ""
 
     exit 0
@@ -301,9 +303,12 @@ do
 	    ;;
 
 
-
 	"--help")
 	    usage
+	    ;;
+	"--version")
+	    echo "$TM_VERSION"
+	    exit 0
 	    ;;
 	
 	*)

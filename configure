@@ -22,11 +22,15 @@
 # MA  02110-1301, USA.                                              
 #
 
-export TM_VERSION=0.1
+export BASE_TM_VERSION=0.1
 export DEFAULT_INSTALL_DIR=/usr/local
 export DEFAULT_BIN_DIR=bin
 export DEFAULT_SHARE_DIR=share/testingmachine
 
+if [ "$VERSION" != "" ]
+then
+    BASE_TM_VERSION=$VERSION
+fi
 
 parse_and_setup()
 {
@@ -69,12 +73,13 @@ create_makefiles()
     cat Makefile.tmpl | sed \
 	-e "s,__INSTALL_DIR__,${INSTALL_DIR},g" \
 	-e "s,__SHARE_DIR__,${SHARE_DIR},g" \
-	-e "s,__TM_VERSION__,${TM_VERSION},g" \
+	-e "s,__MAKEFILE_TM_VERSION__,${BASE_TM_VERSION},g" \
 	-e "s,__BIN_DIR__,${BIN_DIR},g" > Makefile
 
     cat doc/Makefile.tmpl | sed \
 	-e "s,__INSTALL_DIR__,${INSTALL_DIR},g" \
 	-e "s,__SHARE_DIR__,${SHARE_DIR},g" \
+	-e "s,__MAKEFILE_TM_VERSION__,${BASE_TM_VERSION},g" \
 	-e "s,__BIN_DIR__,${BIN_DIR},g" > doc/Makefile
 
 

@@ -24,7 +24,7 @@
 TM_VMM=bin/tm-vmm
 TM_VMM_AUTO=bin/tm-vmm-auto
 
-TM_VERSION=__TM_VERSION__
+TM_VERSION=__MAKEFILE_TM_VERSION__
 
 BINS=${TM_VMM} ${TM_VMM_AUTO}
 SCRIPTS=scripts/vmm-client-functions scripts/functions scripts/generate-conf
@@ -45,12 +45,15 @@ DIST_DIR_TMP=testing-machine-$(TM_VERSION)
 # 
 #
 
+all: $(BINS)
+	cd doc && make
+
 $(BINS): ${TM_VMM}.tmpl  ${TM_VMM_AUTO}.tmpl Makefile
 	@echo "*** Creating scripts ***"
 	if [ -f ${TM_VMM} ] ; then mv ${TM_VMM} ${TM_VMM}.keep ; fi
 	if [ -f ${TM_VMM_AUTO} ]   ; then mv ${TM_VMM_AUTO} ${TM_VMM_AUTO}.keep   ; fi
-	cat ${TM_VMM}.tmpl | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > ${TM_VMM}
-	cat ${TM_VMM_AUTO}   | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > ${TM_VMM_AUTO}
+	cat ${TM_VMM}.tmpl   | sed -e "s,__VMM_DIR__,$(INSTALL_DIR),g" -e "s,__TM_VERSION__,$(TM_VERSION),g" > ${TM_VMM}
+	cat ${TM_VMM_AUTO}   | sed -e "s,__VMM_DIR__,$(INSTALL_DIR),g" -e "s,__TM_VERSION__,$(TM_VERSION),g" > ${TM_VMM_AUTO}
 	chmod a+x ${TM_VMM}
 	chmod a+x ${TM_VMM_AUTO}
 
@@ -90,7 +93,7 @@ dist:
 	cp -r scripts/  tmp/$(DIST_DIR_TMP)/
 
 	cp configure Makefile.tmpl README.md    tmp/$(DIST_DIR_TMP)/
-	
+
 #
 # clean 
 #

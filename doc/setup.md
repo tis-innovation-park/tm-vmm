@@ -45,7 +45,11 @@ You can create client configuration in two different ways:
 
     `--create-client-conf`
 
-Example of a client configuration:
+Example usage of the option.
+
+    `tm-vmm --create-client-conf  Debian-6.0`
+
+## Example of a client configuration:
 
 
 `   VM_NAME=Debian6.0`
