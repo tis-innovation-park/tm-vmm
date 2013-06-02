@@ -34,14 +34,13 @@ TM_VERSION=__TM_VERSION__
 #
 # Sources for manuals
 #
-MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md using.md create-virtual.md examples.md contact.md devel.md vmm-devel-manual.md egov-detailed.md testingmachine-manual.md selenium.md  misc-tools.md automating.md vmm-options.md tm-quick-guide.md tm-features.md tm-developer.md tm-developer-intro.md tm-communication.md
+MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md using.md create-virtual.md examples.md contact.md devel.md  egov-detailed.md testingmachine-manual.md selenium.md  misc-tools.md automating.md vmm-options.md tm-quick-guide.md tm-features.md tm-developer.md tm-developer-intro.md tm-communication.md
 
 #
 # Generated docs
 #
 GEN_DIR=generated-files/
 TESTINGMACHINE_MD=$(GEN_DIR)/testingmachine-manual.md
-DEVEL_MD=$(GEN_DIR)/vmm-devel-manual.md
 QUICK_GUIDE_MD=$(GEN_DIR)/tm-quick-guide.md
 DEVEL_GUIDE_MD=$(GEN_DIR)/tm-developer.md
 
@@ -99,12 +98,6 @@ $(TESTINGMACHINE_MD): $(MD_SRC)
 #	cat  contact.md        >> $@
 	cat  vmm-options.md    >> $@
 
-$(DEVEL_MD):
-	-mkdir -p $(GEN_DIR)
-	cp vmm-devel-manual.md      $@
-	cat  install.md       >> $@ 
-	cat  devel.md         >> $@ 
-	cat  contact.md       >> $@
 
 pdf: $(PDF_FILES)
 
