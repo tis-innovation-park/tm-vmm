@@ -85,6 +85,7 @@ $(TESTINGMACHINE_MD): $(MD_SRC)
 	cat  tm-about.md       >> $@ 
 	cat  egov-overview.md  >> $@ 
 	cat  tm-features.md    >> $@ 
+	cat  tm-communication.md >> $@ 
 	cat  install.md        >> $@ 
 	cat  setup.md          >> $@ 
 	cat  using.md          >> $@ 
@@ -110,4 +111,9 @@ clean:
 install: $(MANUALS)
 	-mkdir -p $(SHARE_DIR)/doc/
 	cp $(MANUALS) $(SHARE_DIR)/doc/
+
+doc-stat: $(PDF_FILES)
+	$(foreach i,$(PDF_FILES), pdfinfo $i ;) 
+	echo "Sizes:"
+	@du -sb $(PDF_FILES)
 
