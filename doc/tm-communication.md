@@ -1,3 +1,4 @@
+
 # Communication
 
 ## Reporting bugs
@@ -15,11 +16,15 @@ For more information read the developer guidelines.
 
 ## Mailing list
 
-community@testingmachine.eu  
+We have one mailing list for the project:
+`  community@testingmachine.eu  `
 
+Join this list here:
 `https://lists.testingmachine.eu/cgi-bin/mailman/listinfo/community`
 
-More soon
+If you send emails to this list as a non subscriber chances are it
+will get list. If you want to report a bug, use github or subscribe to
+the mailing list.
 
 ## Home page
 
