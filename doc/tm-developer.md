@@ -64,5 +64,74 @@ distributions:
 `sudo apt-get pandoc texlive-latex-base`
 
 
+# Releasing
+
+## Manual release
+
+To release we go through the following procedure:
+
+* Edit the version number in the configure script
+
+`emacs -nw configure`
+
+* Commit all your code and push it to github
+
+`git commit -m <some comment>`
+
+* configure and build 
+
+`./configure --prefix /tmp && make clean all install`
+
+* Verify the build
+
+     * Check the version
+       `/tmp/bin/tm-vmm --version`
+
+     * Make sure all script are installed
+       `/tmp/bin/tm-vmm --list-clients`
+
+     * Make sure all pdfs are installed
+       `ls -l /tmp/share/testingmachine/doc`
+
+* Tag the code with the same version as you used in the configure script.
+
+     `git commit -m <some comment>`
+
+* Push the code and the tag
+     `git push`
+     `git push --tags`
+
+* Build 
+
+      `make dist`
+
+* Upload ....
+
+## Scripted release
+
+We've written a script to help release a new version of Testing
+Machine. Before you call it:
+
+* Edit the version number in the configure script
+
+`emacs -nw configure`
+
+* Commit all your code and push it to github
+
+`git commit -m <some comment>`
+
+Now we're ready to call the script:
+
+`./devel-stuff/bin/create-dist.sh --version <new-version>  --force-tag --push`
+
+The scripts accepts some options:
+
+`--version <VERSION>` - Set the version number for the new release
+`--push` - Push the code (and tags) up to github
+`--force-tag` - If the tag already exists, overwrite it
+
+
+
+
 
 
