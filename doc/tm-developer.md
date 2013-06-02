@@ -19,3 +19,24 @@ we had use the Makefile to cp/cat together the various
 manuals. Perhaps not the most optimal way of doing things - but it
 works. If you have improvement suggestion you're more than welcome.
 
+# Generating Manuals
+
+
+## Requirements
+
+To generate the manuals from the Markdown sources you need to install:
+
+* pandoc 
+* pdflatex
+
+We provide a list of packages to install for some GNU/Linux
+distributions:
+
+### Debian based GNU/Linux distributions
+
+`sudo apt-get install`
+`sudo apt-get pandoc texlive-latex-base`
+
+
+
+
