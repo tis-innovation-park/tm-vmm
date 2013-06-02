@@ -17,11 +17,16 @@ For more information read the developer guidelines.
 
 community@testingmachine.eu  
 
+`https://lists.testingmachine.eu/cgi-bin/mailman/listinfo/community`
+
 More soon
 
 ## Home page
 
-https://github.com/tis-innovation-park/vmm
+https://testingmachine.eu/
+
+Source code is located here:
+`https://github.com/tis-innovation-park/vmm`
 
 ## Social media
 
