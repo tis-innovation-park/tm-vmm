@@ -40,3 +40,4 @@ A scripts that makes it possible to write pretty advanced one-liners.
 # Developing VMM
 
 VMM is written in bash. 
+

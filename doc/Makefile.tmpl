@@ -34,7 +34,7 @@ TM_VERSION=__TM_VERSION__
 #
 # Sources for manuals
 #
-MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md using.md create-virtual.md examples.md contact.md devel.md vmm-devel-manual.md egov-detailed.md testingmachine-manual.md selenium.md  misc-tools.md automating.md vmm-options.md tm-quick-guide.md tm-features.md
+MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md using.md create-virtual.md examples.md contact.md devel.md vmm-devel-manual.md egov-detailed.md testingmachine-manual.md selenium.md  misc-tools.md automating.md vmm-options.md tm-quick-guide.md tm-features.md tm-developer.md tm-developer-intro.md tm-communication.md
 
 #
 # Generated docs
@@ -43,11 +43,14 @@ GEN_DIR=generated-files/
 TESTINGMACHINE_MD=$(GEN_DIR)/testingmachine-manual.md
 DEVEL_MD=$(GEN_DIR)/vmm-devel-manual.md
 QUICK_GUIDE_MD=$(GEN_DIR)/tm-quick-guide.md
+DEVEL_GUIDE_MD=$(GEN_DIR)/tm-developer.md
 
-GEN_SRC= $(DEVEL_MD) $(TESTINGMACHINE_MD) $(QUICK_GUIDE_MD)
+GEN_SRC= $(DEVEL_MD) $(TESTINGMACHINE_MD) $(QUICK_GUIDE_MD) $(DEVEL_GUIDE_MD)
 PDF_FILES=$(GEN_SRC:.md=.pdf)
 HTML_FILES=$(GEN_SRC:.md=.html)
 MANUALS=$(PDF_FILES) $(HTML_FILES)
+
+all: $(PDF_FILES) $(HTML_FILES)
 
 #
 # Rules for pdf and html generation
@@ -62,11 +65,20 @@ MANUALS=$(PDF_FILES) $(HTML_FILES)
 
 $(QUICK_GUIDE_MD): $(MD_SRC)
 	-mkdir -p $(GEN_DIR)
-	cp  tm-quick-guide.md      $@ 
-	cat  tm-about.md        >> $@ 
-	cat  tm-features.md     >> $@ 
+	cp  tm-quick-guide.md       $@ 
+	cat  tm-about.md         >> $@ 
+	cat  tm-features.md      >> $@ 
 	cat  tm-quick-instructions.md          >> $@ 
-	cat  using.md          >> $@ 
+	cat  tm-communication.md >> $@ 
+	cat  using.md            >> $@ 
+
+$(DEVEL_GUIDE_MD): $(MD_SRC)
+	-mkdir -p $(GEN_DIR)
+	cp   tm-developer-intro.md  $@ 
+	cat  tm-about.md         >> $@ 
+	cat  tm-communication.md >> $@ 
+	cat  tm-developer.md     >> $@
+
 
 $(TESTINGMACHINE_MD): $(MD_SRC)
 	-mkdir -p $(GEN_DIR)
@@ -83,7 +95,8 @@ $(TESTINGMACHINE_MD): $(MD_SRC)
 	cat  egov-detailed.md  >> $@ 
 	cat  create-virtual.md >> $@
 	cat  examples.md       >> $@
-	cat  contact.md        >> $@
+	cat  tm-communication.md >> $@ 
+#	cat  contact.md        >> $@
 	cat  vmm-options.md    >> $@
 
 $(DEVEL_MD):
@@ -97,8 +110,6 @@ pdf: $(PDF_FILES)
 
 $(PDF_FILES): $(GEN_SRC)
 $(HTML_FILES): $(GEN_SRC)
-
-all: $(PDF_FILES) $(HTML_FILES)
 
 clean:
 	@-rm -fr $(PDF_FILES)  $(GEN_DIR)

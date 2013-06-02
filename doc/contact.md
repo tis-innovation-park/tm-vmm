@@ -1,8 +1,0 @@
-# Contact info & Join us
-
-*Mailing list* community@testingmachine.eu  
-
-*Web site:* https://github.com/tis-innovation-park/vmm
-
-*How to join:* clone the repo, try it out -- join the mailing list :)
-
