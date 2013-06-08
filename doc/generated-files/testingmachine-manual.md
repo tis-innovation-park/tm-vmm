@@ -105,7 +105,7 @@ We're looking into supporting: vmware,
 
 * Download git code
 
-  `git clone git://github.com/tis-innovation-park/vvm.git`
+  `git clone git://github.com/tis-innovation-park/vmm.git`
 
 ### Via a dist file (.tar.gz)
 
@@ -113,9 +113,9 @@ We're looking into supporting: vmware,
 
 ## Building and installing Virtual Machine Manager
 
-* Go to the vvm directory
+* Go to the vmm directory
 
-  `cd vvm`
+  `cd vmm`
 
 * Configure the software
 
@@ -156,7 +156,7 @@ For a list of variables, see section Configuration syntax below.
 
 ## Creating a machine
 
-To create a machine vvm relies on the virtualization software. So if
+To create a machine vm relies on the virtualization software. So if
 you want to manage a Virtualbox machine you (at least for now) create
 it with Virtualbox. For information about how to do this, read the
 chapter "Creating a Virtualbox machine".
@@ -597,7 +597,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `VM_STARTUP_TIMEOUT=10` - the time to wait for a virtual machine to start up before considering it to be 'dead'.
 
-`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately VVM will take down a machine with a `kill`.
+`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately VMM will take down a machine with a `kill`.
 
 `SSH=ssh` - the SSH program to use
 
@@ -615,7 +615,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `SSH_PORT=22` - the port where the SSH server is running on the client
 
-`SSH_SHUTDOWN_COMMAND="shutdown -h now"` - VVM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
+`SSH_SHUTDOWN_COMMAND="shutdown -h now"` - VMM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
 
 
 # tm-vmm Command line options
@@ -656,7 +656,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 ## Machine options
 
-`  --list-machines` - lists all machines known to VVM
+`  --list-machines` - lists all machines known to VMM
 
 `  --start-machine client` - starts machine 
 
