@@ -156,7 +156,7 @@ For a list of variables, see section Configuration syntax below.
 
 ## Creating a machine
 
-To create a machine vm relies on the virtualization software. So if
+To create a machine vmm relies on the virtualization software. So if
 you want to manage a Virtualbox machine you (at least for now) create
 it with Virtualbox. For information about how to do this, read the
 chapter "Creating a Virtualbox machine".
