@@ -45,8 +45,10 @@ DIST_DIR_TMP=testing-machine-$(TM_VERSION)
 # 
 #
 
-all: $(BINS)
-	cd doc && make
+
+
+all: $(BINS) 
+
 
 $(BINS): ${TM_VMM}.tmpl  ${TM_VMM_AUTO}.tmpl Makefile
 	@echo "*** Creating scripts ***"
@@ -73,8 +75,6 @@ install: $(BINS) $(SCRIPTS) $(EXAMPLES)
 	cp $(EXAMPLES)    $(SHARE_DIR)/examples
 	cp -r $(SCRIPTS)  $(SHARE_DIR)/scripts
 	cp -r $(LOGGERS)  $(SHARE_DIR)/scripts/loggers
-
-	cd doc && make install
 
 check:
 	test/install-and-test-auto.sh
