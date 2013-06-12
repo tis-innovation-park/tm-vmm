@@ -41,7 +41,8 @@ In this file you can configure settings you want to use as default in
 your clients. It is perfectly possible to override these settings in
 your individual client configurations.
 
-For a list of variables, see section Configuration syntax below.
+For a list of variables, see section Configuration syntax in the full
+manual of Testing Machine..
 
 ## Creating a client
 
