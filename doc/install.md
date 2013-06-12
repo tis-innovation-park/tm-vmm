@@ -28,7 +28,7 @@ We're looking into supporting: vmware,
 
 * Download git code
 
-  `git clone git://github.com/tis-innovation-park/vvm.git`
+  `git clone git://github.com/tis-innovation-park/vmm.git`
 
 ### Via a dist file (.tar.gz)
 
