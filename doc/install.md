@@ -8,6 +8,12 @@
 
 * bash
 
+### Additional requirements for VMM developers
+
+* pandoc - to generate documentation
+
+* pdflatex - to generate documentation
+
 ## Supported Virtualization software
 
 * Virtualbox
