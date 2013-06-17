@@ -123,7 +123,7 @@ check_dist()
 
 
 exec_cmd git tag $GIT_TAG_ARG $BASE_TM_VERSION
-exec_cmd ./configure --prefix /tmp/test-1
+exec_cmd ./configure --prefix /tmp/test-1  --build-doc
 exec_cmd make all install 
 exec_cmd check_install /tmp/test-1
 exec_cmd make dist
