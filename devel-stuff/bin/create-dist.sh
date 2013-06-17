@@ -112,7 +112,7 @@ check_dist()
 
     cd $DIST_DIR
 
-    exec_cmd ./configure --prefix /tmp/test-2
+    exec_cmd ./configure --prefix /tmp/test-2 --build-doc
     exec_cmd make all install 
     exec_cmd check_install /tmp/test-2
 
