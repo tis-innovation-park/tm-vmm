@@ -51,7 +51,6 @@ parse_and_setup()
 	    
 	    "--build-doc")
 		BUILD_DOC=true
-		shift
 		;;
 	    
 	    *)
