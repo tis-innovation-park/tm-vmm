@@ -89,10 +89,10 @@ check_install()
     PDFS=$(ls -1 $INSTALL_DIR/share/testingmachine/doc/*.pdf | wc -l )
     HTMLS=$(ls -1 $INSTALL_DIR/share/testingmachine/doc/*.html | wc -l)
 
-    NR_MANUALS=3
+    NR_MANUALS=4
     if [ $PDFS -ne $NR_MANUALS ]
     then
-	echo "Can't find the $NR_MANUALS pdf manuals"
+	echo "Can't find the $NR_MANUALS pdf manuals ($PDFS != $NR_MANUALS) in $INSTALL_DIR/share/testingmachine/doc/"
 	return 1
     fi
 
@@ -114,6 +114,7 @@ check_dist()
 
     exec_cmd ./configure --prefix /tmp/test-2 --build-doc
     exec_cmd make all install 
+    exec_cmd cd doc && make clean all install && cd ..
     exec_cmd check_install /tmp/test-2
 
     cd -
@@ -125,6 +126,7 @@ check_dist()
 exec_cmd git tag $GIT_TAG_ARG $BASE_TM_VERSION
 exec_cmd ./configure --prefix /tmp/test-1  --build-doc
 exec_cmd make all install 
+exec_cmd cd doc && make clean all install && cd ..
 exec_cmd check_install /tmp/test-1
 exec_cmd make dist
 exec_cmd check_dist

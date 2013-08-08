@@ -126,9 +126,12 @@ Now we're ready to call the script:
 
 The scripts accepts some options:
 
-`--version <VERSION>` - Set the version number for the new release
-`--push` - Push the code (and tags) up to github
-`--force-tag` - If the tag already exists, overwrite it
+
+* `--version <VERSION>` - Set the version number for the new release
+
+* `--push` - Push the code (and tags) up to github
+
+* `--force-tag` - If the tag already exists, overwrite it
 
 
 

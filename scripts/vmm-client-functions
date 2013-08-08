@@ -51,12 +51,48 @@ list_vbox_machines()
     done
 }
 
+list_android_machines()
+{
+    ANDROID_AVD_DIR=${HOME}/.android/avd/
+
+    debug "Listing android machines"
+    VB_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
+    for VB_NAME_LONG in $VB_NAMES
+    do
+	VB_NAME=$(basename $VB_NAME_LONG)
+	FOUND=false
+	if [ "$VB_NAME" != "" ]
+	then
+	    echo  "  |--$VB_NAME  which is used in client(s):"
+	    for vb in $(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+	    do
+#		echo " ---- $VB_NAME"
+		VB_SHORT_NAME=$(basename $vb)
+		echo "     |--$VB_SHORT_NAME"  
+		FOUND=true
+	    done
+#	    if [ "$FOUND" = "false" ]
+#	    then
+#		echo "      not in use"
+#	    fi
+	else
+	    echo "   no android machines currently running"
+	fi
+    done
+
+}
+
+
+
+
 list_machines()
 {
     debug "Listing available machines:"
     echo "Available machines:"
     echo "  VirtualBox"
     list_vbox_machines
+    echo "  Android"
+    list_android_machines
 }
 
 list_clients()

@@ -81,6 +81,49 @@ With Testing Machine you can:
 * take screenshots of running virtual machines
 
 * execute commands in running virtual machines
+
+# Communication
+
+## Reporting bugs
+
+Try to be as precise as possible when reporting bugs. The more
+information we get the bigger chance we have of fixing the problem.
+
+Use the mailing list below to report bugs.
+
+## Getting involved
+
+*How to join:* clone the repo, try it out -- join the mailing list :)
+
+For more information read the developer guidelines.
+
+## Mailing list
+
+We have one mailing list for the project:
+`  community@testingmachine.eu  `
+
+Join this list here:
+`https://lists.testingmachine.eu/cgi-bin/mailman/listinfo/community`
+
+If you send emails to this list as a non subscriber chances are it
+will get list. 
+
+If you want to report a bug:
+* use a github account and add an issue
+* subscribe to the mailing and send the report to the list
+
+## Home page
+
+https://testingmachine.eu/
+
+Source code is located here:
+`https://github.com/tis-innovation-park/vmm`
+
+## Social media
+
+### Twitter
+
+
 # Installation 
 
 ##  Software requirement
@@ -90,6 +133,12 @@ With Testing Machine you can:
 * at least one virtualization software (see list of supported softwares below)
 
 * bash
+
+### Additional requirements for VMM developers
+
+* pandoc - to generate documentation
+
+* pdflatex - to generate documentation
 
 ## Supported Virtualization software
 
@@ -113,9 +162,9 @@ We're looking into supporting: vmware,
 
 ## Building and installing Virtual Machine Manager
 
-* Go to the vmm directory
+* Go to the vvm directory
 
-  `cd vmm`
+  `cd vvm`
 
 * Configure the software
 
@@ -156,7 +205,7 @@ For a list of variables, see section Configuration syntax below.
 
 ## Creating a machine
 
-To create a machine vmm relies on the virtualization software. So if
+To create a machine vvm relies on the virtualization software. So if
 you want to manage a Virtualbox machine you (at least for now) create
 it with Virtualbox. For information about how to do this, read the
 chapter "Creating a Virtualbox machine".
@@ -550,6 +599,7 @@ Open up a user management tool by pressing the dasher (logo missing) and type us
 
 /opt/bin/tm-vmm --client-exec         Ubuntu-12.10 "pkcs15-tool -L"
 
+
 # Communication
 
 ## Reporting bugs
@@ -567,21 +617,30 @@ For more information read the developer guidelines.
 
 ## Mailing list
 
-community@testingmachine.eu  
+We have one mailing list for the project:
+`  community@testingmachine.eu  `
 
-More soon
+Join this list here:
+`https://lists.testingmachine.eu/cgi-bin/mailman/listinfo/community`
+
+If you send emails to this list as a non subscriber chances are it
+will get list. 
+
+If you want to report a bug:
+* use a github account and add an issue
+* subscribe to the mailing and send the report to the list
 
 ## Home page
 
-https://github.com/tis-innovation-park/vmm
+https://testingmachine.eu/
+
+Source code is located here:
+`https://github.com/tis-innovation-park/vmm`
 
 ## Social media
 
 ### Twitter
 
-https://twitter.com/FSCRS 
-
-Tweet with #fscrs
 
 # Testing Machine VMM configuration
 
@@ -597,7 +656,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `VM_STARTUP_TIMEOUT=10` - the time to wait for a virtual machine to start up before considering it to be 'dead'.
 
-`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately VMM will take down a machine with a `kill`.
+`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately VVM will take down a machine with a `kill`.
 
 `SSH=ssh` - the SSH program to use
 
@@ -615,7 +674,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `SSH_PORT=22` - the port where the SSH server is running on the client
 
-`SSH_SHUTDOWN_COMMAND="shutdown -h now"` - VMM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
+`SSH_SHUTDOWN_COMMAND="shutdown -h now"` - VVM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
 
 
 # tm-vmm Command line options
@@ -656,7 +715,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 ## Machine options
 
-`  --list-machines` - lists all machines known to VMM
+`  --list-machines` - lists all machines known to VVM
 
 `  --start-machine client` - starts machine 
 
