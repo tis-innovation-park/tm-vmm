@@ -108,9 +108,10 @@ list_clients()
 	do
 	    debug_enter " using file $i"
 	    debug "    file: $i"
+	    TYPE=$(grep VM_TYPE "$i" | sed 's,[ ]*VM_TYPE=,,g' | sed 's,\",,g')
 	    echo -n "   " 
 	    printf "%s " $(basename $i | sed 's,\.conf,,g' )
-	    printf "  ($i)\n"
+	    printf " [%.12s] ($i)\n" $TYPE
 	    debug_leave " "
 	done
 	debug_leave " "
