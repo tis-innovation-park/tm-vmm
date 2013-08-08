@@ -24,6 +24,11 @@
 declare -a SCRIPTS_TO_EXECUTE
 export SCRIPTS_TO_EXECUTE
 
+ANDROID_AVD_DIR=${HOME}/.android/avd/
+ANDROID_ADT_PATH=/home/hesa/opt/adt-bundle-linux-x86_64-20130219
+
+
+
 list_vbox_machines()
 {
     debug "Listing vbox machines"
@@ -53,8 +58,6 @@ list_vbox_machines()
 
 list_android_machines()
 {
-    ANDROID_AVD_DIR=${HOME}/.android/avd/
-
     debug "Listing android machines"
     VB_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
     for VB_NAME_LONG in $VB_NAMES
@@ -143,10 +146,34 @@ list_running_vbox()
     fi
 }
 
+list_running_android()
+{
+    echo "  Android"
+    VB_NAME=$(adb devices | grep -v "List of devices attached" | awk ' { printf "%s", $1}' | sed 's,\",,g')
+    if [ "$VB_NAME" != "" ]
+    then
+	echo "  |--$VB_NAME  which is used in"
+	for dir in  $ETC_DIRS
+	do
+	    if [ -d $dir ]
+	    then
+		for vb in $(find $dir/clients -name *.conf | xargs grep -l $VB_NAME )
+		do
+		    VB_SHORT_NAME=$(basename $vb)
+		    echo "    |--$VB_SHORT_NAME  [$vb]"  
+		done
+	    fi
+	done
+    else
+	echo "   no virtualbox machines currently running"
+    fi
+}
+
 list_running_clients()
 {
     echo "Running clients:"
     list_running_vbox 
+    list_running_android
 }
 
 
@@ -264,6 +291,23 @@ start_vbox()
     sleep 2
     maximise_vbox "$VM_NAME"
 }
+
+start_android()
+{
+    export PROC_EXPR=$1
+    debug "Start android: $VM_NAME"
+
+    $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR  -netspeed full -netdelay none
+}
+
+start_android_headless()
+{
+    export PROC_EXPR=$1
+    debug "Start android in headless mode: $VM_NAME"
+
+    $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR  -netspeed full -netdelay none -no-window
+}
+
 
 kill_vb_proc()
 {
@@ -712,6 +756,17 @@ start_helper()
 
 	    OK=$?
 	    log "$OK" "Start VirtualBox" "$VM_NAME"
+	    ;;
+	"Android")
+	    debug "Starting android $1 ($START_ARGS)"
+	    if [ "$START_ARGS" = "headless"  ]
+	    then
+		start_android_headless $VM_NAME
+	    else
+		start_android $VM_NAME
+	    fi
+
+		
 	    ;;
 	"qemu")
 	    debug "Starting qemu $1"
@@ -1297,11 +1352,25 @@ get_vbox_specific_info()
 #    echo "SSH_PORT=$SSH_PORT"
 }
 
+get_android_specific_info()
+{
+    echo "$VM_NAME : $WANTED_NAME | $CLI_CONF"
+
+    
+    ANDROID_SYS=$( grep ANDROID_SYS $CLI_CONF | sed 's,ANDROID_SYS=,,g' | sed 's,\",,g')
+
+    echo "SYS: $ANDROID_SYS"
+    
+}
+
 get_vm_specific_info()
 {
     if [ "$VM_TYPE" = "VirtualBox" ]
     then
 	get_vbox_specific_info
+    elif [ "$VM_TYPE" = "Android" ]
+    then
+	get_android_specific_info
     else
 	echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
     fi
