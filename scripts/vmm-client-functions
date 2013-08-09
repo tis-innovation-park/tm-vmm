@@ -38,20 +38,26 @@ list_vbox_machines()
 	FOUND=false
 	if [ "$VB_NAME" != "" ]
 	then
-	    echo  "  |--$VB_NAME  which is used in client(s):"
-	    for vb in $(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
-	    do
+	    SUB_CLIENTS=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+	    echo  "  |--$VB_NAME  "
+	    if [ "$SUB_CLIENTS" != "" ]
+	    then
+		for vb in $SUB_CLIENTS
+		do
 #		echo " ---- $VB_NAME"
-		VB_SHORT_NAME=$(basename $vb)
-		echo "     |--$VB_SHORT_NAME"  
-		FOUND=true
-	    done
+		    VB_SHORT_NAME=$(basename $vb)
+		    echo "     |--$VB_SHORT_NAME (client)"  
+		    FOUND=true
+		done
 #	    if [ "$FOUND" = "false" ]
 #	    then
 #		echo "      not in use"
 #	    fi
+#	    else
+#		echo ""
+	    fi
 	else
-	    echo "   no virtualbox machines currently running"
+	    echo "   no virtualbox machines found"
 	fi
     done
 }
@@ -66,20 +72,26 @@ list_android_machines()
 	FOUND=false
 	if [ "$VB_NAME" != "" ]
 	then
-	    echo  "  |--$VB_NAME  which is used in client(s):"
-	    for vb in $(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
-	    do
+	    echo  "  |--$VB_NAME  "
+	    SUB_CLIENTS=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+
+#	    echo "SUB_CLIENTS: $SUB_CLIENTS"
+	    if [ "$SUB_CLIENTS" != "" ]
+	    then
+		for vb in $SUB_CLIENTS
+		do
 #		echo " ---- $VB_NAME"
-		VB_SHORT_NAME=$(basename $vb)
-		echo "     |--$VB_SHORT_NAME"  
-		FOUND=true
-	    done
+		    VB_SHORT_NAME=$(basename $vb)
+		    echo "     |--$VB_SHORT_NAME  (client)"  
+		    FOUND=true
+		done
 #	    if [ "$FOUND" = "false" ]
 #	    then
 #		echo "      not in use"
 #	    fi
+	    fi
 	else
-	    echo "   no android machines currently running"
+	    echo "   no android machines found"
 	fi
     done
 
