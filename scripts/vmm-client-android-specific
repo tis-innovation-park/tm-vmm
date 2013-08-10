@@ -39,10 +39,14 @@ get_avd_port_for_name()
 
 get_connected_avds() 
 {
-    adb devices | grep -v "List of devices attached" | grep -v "^[ \t]*$" | awk ' { print $1 } '
+    adb devices | grep -v "List of devices attached" | \
+	grep -v "^[ \t]*$"   | \
+	awk ' { print $1 } ' | \
+	sed  -e "s,[\n\r]*,,g"
 }
 
-get_connected_avds_ports() 
+get_connected_avds_ports()
 {
-    get_connected_avds | sed 's,[ \t]*emulator\-,,g'
+    get_connected_avds | sed -e "s,[ \t]*emulator\-,,g" 
 }
+
