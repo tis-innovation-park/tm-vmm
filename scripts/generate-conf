@@ -35,6 +35,33 @@ echo_vbox_client_conf()
 
 }
 
+echo_android_client_conf()
+{
+    VM_MACHINE=$1
+
+    echo VM_NAME=\"$VM_MACHINE\"
+    echo VM_TYPE=\"Android\"
+    VM_TYPE="Android"
+    ANDROID_SYS="emulator64-arm"
+
+    CPU_ARCH=$(grep cpu.arch ~/.android/avd/$1.avd/config.ini | sed 's,hw\.cpu\.arch=,,g')
+    CPU_MODEL=$(grep cpu.model ~/.android/avd/$1.avd/config.ini | sed 's,hw\.cpu\.model=,,g')
+
+    ANDROID_SYS=""
+    if [ "$CPU_ARCH" = "arm" ]
+	then
+	if [ "$CPU_MODEL" = "cortex-a8" ]
+	    then
+	    ANDROID_SYS="emulator64-arm"
+	fi
+    else
+	echo "Unsupported CPU"
+    fi
+    echo "ANDROID_SYS=$ANDROID_SYS"
+
+    echo "TODO: get CPU: $CPU_ARCH $CPU_MODEL"
+}
+
 create_vbox_client_conf()
 {
     VM_MACHINE=$1
@@ -59,6 +86,31 @@ create_vbox_client_conf()
 
 }
 
+create_android_client_conf()
+{
+    VM_MACHINE=$1
+
+    CONF_NAME=${PERSONAL_ETC_DIR}/clients/$VM_MACHINE.conf
+
+    if [ -f $CONF_NAME ]
+	then
+	echo "Configuration file for $VM_MACHINE already exists"
+	echo "   $CONF_NAME"
+	return 1
+    fi
+
+    if [ ! -d ${PERSONAL_ETC_DIR} ]
+    then
+	mkdir -p ${PERSONAL_ETC_DIR}
+    fi
+
+    echo "Creating $CONF_NAME"
+
+    echo_android_client_conf $VM_MACHINE 
+#> $CONF_NAME
+
+}
+
 
 create_client_conf()
 {
@@ -72,6 +124,10 @@ create_client_conf()
     elif [ "$VM_TYPE" = "VirtualBox" ]
     then
 	create_vbox_client_conf $VM_MACHINE
+    elif [ "$VM_TYPE" = "Android" ]
+    then
+	create_android_client_conf $VM_MACHINE
+	
     else
 	echo "Can't create conf for $VM_MACHINE ($VM_TYPE)"
     fi
