@@ -34,7 +34,7 @@ Join this list here:
 `https://lists.testingmachine.eu/cgi-bin/mailman/listinfo/community`
 
 If you send emails to this list as a non subscriber chances are it
-will get list. 
+will get lost. 
 
 If you want to report a bug:
 * use a github account and add an issue
