@@ -151,6 +151,34 @@ list_running_vbox()
     then
 	for i in $VB_NAME
 	do
+	    FOUND=0
+	    for dir in  $ETC_DIRS
+	    do
+		if [ -d $dir ]
+		then
+		    for vb in $(find $dir/clients -name *.conf | xargs grep -l $i )
+		    do
+			VB_SHORT_NAME=$(basename $vb | sed 's,\.conf,,g')
+			echo "  |--$VB_SHORT_NAME  [$vb] (machine: $i )"  
+			FOUND=1
+		    done
+		fi
+	    done
+	    if [ $FOUND -eq 0 ] ; then echo "    * avd is not in use"; fi
+	done
+    else
+	echo "   no virtualbox machines currently running"
+    fi
+}
+
+list_running_vbox_machines()
+{
+    echo "  VirtualBox"
+    VB_NAME=$(vboxmanage list runningvms | awk ' { printf "%s", $1}' | sed 's,\",,g')
+    if [ "$VB_NAME" != "" ]
+    then
+	for i in $VB_NAME
+	do
 	    echo "  |--$i  "
 	    FOUND=0
 	    for dir in  $ETC_DIRS
@@ -181,6 +209,34 @@ list_running_android()
 	for i in $VB_NAME
 	do
 	    AVD_NAME=$(get_avd_name_for_port $i)
+	    FOUND=0
+	    for dir in  $ETC_DIRS
+	    do
+		if [ -d $dir ]
+		then
+		    for vb in $(find $dir/clients -name *.conf | xargs grep -l $AVD_NAME )
+		    do
+			VB_SHORT_NAME=$(basename $vb | sed 's,\.conf,,g')
+			echo "  |--$VB_SHORT_NAME  [$vb] (machine: $(get_avd_name_for_port $i))"  
+			FOUND=1
+		done
+		fi
+	    done
+	done
+    else
+	echo "   no virtualbox machines currently running"
+    fi
+}
+
+list_running_android_machines()
+{
+    echo "  Android"
+    VB_NAME=$(get_connected_avds_ports)
+    if [ "$VB_NAME" != "" ]
+    then
+	for i in $VB_NAME
+	do
+	    AVD_NAME=$(get_avd_name_for_port $i)
 	    echo "  |-- $AVD_NAME  (using port $i)"
 
 	    FOUND=0
@@ -196,7 +252,11 @@ list_running_android()
 		done
 		fi
 	    done
-	    if [ $FOUND -eq 0 ] ; then echo "    * avd is not in use"; fi
+	    if [ $FOUND -eq 0 ] ; 
+	    then 
+		echo "    * avd is not registered as Testingmachine machine" ; 
+		echo "    * to create a configuration file, try: --create-client-conf $AVD_NAME" ; 
+	    fi
 	done
     else
 	echo "   no virtualbox machines currently running"
@@ -208,6 +268,14 @@ list_running_clients()
     echo "Running clients:"
     list_running_vbox 
     list_running_android
+}
+
+
+list_running_machines()
+{
+    echo "Running machines:"
+    list_running_vbox_machines 
+    list_running_android_machines
 }
 
 
@@ -749,9 +817,14 @@ find_vm_type()
     
     VBOX_FOUND=$(vboxmanage list vms | awk ' { print $1 } ' | sed 's,\",,g' | grep -w $VM_NAME | wc -l)
 
+    ANDROID_FOUND=$(list_android_machines  | grep -w $VM_NAME | wc -l)
+
     if [ $VBOX_FOUND -ne 0 ]
     then
-	export VM_TYPE="VirtualBox"
+	export VM_TYPE="Android"
+    elif [ $ANDROID_FOUND -ne 0 ]
+    then
+	export VM_TYPE="Android"
     fi
 }
 
@@ -1381,9 +1454,16 @@ get_vbox_specific_info()
 #	echo	vboxmanage   showvminfo $VM_NAME 
     if [ "$SSH_PORT" = "auto" ]
     then
-	SSH_PORT=$(vboxmanage   showvminfo $VM_NAME | grep "NIC" | grep -e Rule -e ssh | grep 22 | grep "host port" | sed 's,[a-zA-Z0-9,: \ =()]*host port[ \t]*=,,g' | awk '{print $1}' | sed 's/,//g')
+	SSH_PORT=$(vboxmanage   showvminfo $VM_NAME 2>/dev/null | grep "NIC" | grep -e Rule -e ssh | grep 22 | grep "host port" | sed 's,[a-zA-Z0-9,: \ =()]*host port[ \t]*=,,g' | awk '{print $1}' | sed 's/,//g' )
     fi
+
+    if [ "$SSH_PORT" = "" ]
+    then
+	return 1
+    fi
+
 #    echo "SSH_PORT=$SSH_PORT"
+    return 0
 }
 
 get_android_specific_info()
@@ -1426,10 +1506,12 @@ get_info_for_client()
 	    VM_TYPE=$(grep VM_TYPE $i | sed -e 's,VM_TYPE=,,g' -e 's,\",,g' )
 
 	    . $CLI_CONF
-	    
+
 	    CLIENT_FOUND=true
 	    get_vm_specific_info
+	    RET=$?
 	    
+	    if [ $RET -ne 0 ] ; then debug "Client seems to be down"; CLIENT_FOUND=false; fi
 	done
 	if [ "$CLIENT_FOUND" = "true" ]
 	then
@@ -1623,3 +1705,20 @@ import_appliance()
 
 
 
+client_copy_file()
+{
+    MY_CLIENT="$1"
+    MY_SRC="$2"
+    MY_DST="$3"
+
+
+    get_info_for_client $1
+    
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found or client is not running: $1"
+    else
+	echo "client_copy_file   $MY_CLIENT, $MY_SRC, $MY_DST"
+    fi
+
+}
