@@ -488,7 +488,7 @@ stop_vbox()
 stop_qemu()
 {
     VB_NAME=$1
-    debug "Stopping vbox $VM_NAME"
+    debug "Stopping qemu $VM_NAME"
 
     if [ "$VB_NAME" != "" ]
     then
