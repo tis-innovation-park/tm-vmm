@@ -1008,14 +1008,49 @@ is_vbox_up()
     return 1
 }
 
+is_android_up()
+{
+    export WANTED_VM=$1
+
+    get_info_for_client "$1"
+
+    debug "    is_android_up? "
+
+    CNT=$(adb  -s emulator-$ANDROID_PORT get-state | grep device | wc -l)
+    
+    debug "    is_vbox_up: $CNT"
+
+    # If the VM is running (>1), return 0
+    if [ $CNT -ne 0 ]
+    then
+	debug "vbox vm ($WANTED_VM) is running"
+	return 0
+    fi
+
+    debug "vbox vm ($WANTED_VM) is NOT running"
+    return 1
+}
+
 is_client_up()
 {
+
+    
+
     WANTED_VM=$1
-#    VM_TYPE=$2
+
+    if  [ "$VM_TYPE" = "" ]
+    then
+	get_info_for_client $1
+    fi
 
     case $VM_TYPE in
 	"VirtualBox")
 	    is_vbox_up $1
+	    return $?
+	    ;;
+
+	"Android")
+	    is_android_up $1
 	    return $?
 	    ;;
 
@@ -1580,10 +1615,9 @@ vbox_snapshot()
 
 android_snapshot()
 {
-    echo ".... $1 - $2"
 
     # COmmand line fron http://blog.shvetsov.com/2013/02/grab-android-screenshot-to-computer-via.html
-   adb  -s emulator-$1 shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > $2
+    adb  -s emulator-$1 shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > $2
 }
 
 rename_screenshot_name()
@@ -1742,5 +1776,4 @@ client_copy_file()
     else
 	echo "client_copy_file   $MY_CLIENT, $MY_SRC, $MY_DST"
     fi
-
 }
