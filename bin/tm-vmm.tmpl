@@ -325,6 +325,12 @@ do
 	    client_copy_file "$CLIENT" "$SRC" "$DST"
 	    ;;
 
+	"--is-client-up")
+	    CLIENT=$2
+	    shift
+	    
+	    is_client_up $CLIENT
+	    ;;
 
 	"--help")
 	    usage
