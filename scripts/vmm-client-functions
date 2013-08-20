@@ -24,8 +24,10 @@
 declare -a SCRIPTS_TO_EXECUTE
 export SCRIPTS_TO_EXECUTE
 
+ANDROID=~/opt/adt-bundle-linux-x86_64-20130219/sdk/tools/android
 ANDROID_AVD_DIR=${HOME}/.android/avd/
 ANDROID_ADT_PATH=/home/hesa/opt/adt-bundle-linux-x86_64-20130219
+TM_IMAGE_DIR=/tmp/tm-images
 
 ANDROID_SPEC_FILE=$(dirname $0)/../share/testingmachine/scripts/vmm-client-android-specific
 if [ -f $ANDROID_SPEC_FILE ]
@@ -73,7 +75,8 @@ list_vbox_machines()
 list_android_machines()
 {
     debug "Listing android machines"
-    VB_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
+#    VB_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
+    VB_NAMES=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g')
     for VB_NAME_LONG in $VB_NAMES
     do
 	VB_NAME=$(basename $VB_NAME_LONG)
@@ -1468,23 +1471,22 @@ get_vbox_specific_info()
 
 get_android_specific_info()
 {
-    echo "$VM_NAME : $WANTED_NAME | $CLI_CONF"
+    MY_VM="$1"
 
-    
     ANDROID_SYS=$( grep ANDROID_SYS $CLI_CONF | sed 's,ANDROID_SYS=,,g' | sed 's,\",,g')
-
-    echo "SYS: $ANDROID_SYS"
-    
+    ANDROID_PORT=$(get_avd_port_for_name $MY_VM )
 }
 
 get_vm_specific_info()
 {
+    MY_VM="$1"
+
     if [ "$VM_TYPE" = "VirtualBox" ]
     then
 	get_vbox_specific_info
     elif [ "$VM_TYPE" = "Android" ]
     then
-	get_android_specific_info
+	get_android_specific_info $MY_VM
     else
 	echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
     fi
@@ -1508,7 +1510,7 @@ get_info_for_client()
 	    . $CLI_CONF
 
 	    CLIENT_FOUND=true
-	    get_vm_specific_info
+	    get_vm_specific_info $VM_NAME
 	    RET=$?
 	    
 	    if [ $RET -ne 0 ] ; then debug "Client seems to be down"; CLIENT_FOUND=false; fi
@@ -1568,10 +1570,20 @@ vnc_snapshot()
    vncsnapshot :5 tmp.jpg 
 }
 
+
+
 vbox_snapshot()
 {
-    rm -f tmp.jpg 
-    VBoxManage controlvm $1 screenshotpng ~/image-`date +%s`.png
+    
+    VBoxManage controlvm $1 screenshotpng "$2"
+}
+
+android_snapshot()
+{
+    echo ".... $1 - $2"
+
+    # COmmand line fron http://blog.shvetsov.com/2013/02/grab-android-screenshot-to-computer-via.html
+   adb  -s emulator-$1 shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > $2
 }
 
 rename_screenshot_name()
@@ -1604,13 +1616,23 @@ client_screenshot()
 	return 111
     fi
     
+    echo "VM_TYPE:$VM_TYPE"
+
+    if [ ! -d $TM_IMAGE_DIR ] ; then mkdir -p $TM_IMAGE_DIR ; fi
+    PIC_NAME=$TM_IMAGE_DIR/image-$VM_NAME-`date +%s`.png
+
     case $VM_TYPE in
 	"VirtualBox")
+	    vbox_snapshot $VM_NAME $PIC_NAME
 	    echo "VBOX screenshots not implemented"
 	    ;;
 	"qemu")
-	    
 	    vnc_snapshot > /dev/null 2> /dev/null
+	    ;;
+	
+	"Android")
+	    android_snapshot "$ANDROID_PORT" "$PIC_NAME"
+# > /dev/null 2> /dev/null
 	    ;;
 	
 	*)
