@@ -67,6 +67,7 @@ usage()
     echo "    Lists all available machines"
     echo ""
     echo "  --list-running-clients"
+    echo "  --list-running-machines"
     echo ""
     echo "  --start-client CLIENT_NAME"
     echo "    Start client called CLIENT_NAME"
@@ -103,6 +104,8 @@ usage()
     echo "--open-ssh"
     echo "--check-client-online"
     echo "--create-client-conf"
+    echo "--copy-to-client"
+    echo "--copy-from-client"
     echo "--version"
     echo ""
 
@@ -121,6 +124,12 @@ do
 	"--list-running-clients")
 	    LIST_RUNNING=true
 	    list_running_clients
+	    RET=$?
+	    ;;
+	
+	"--list-running-machines")
+	    LIST_RUNNING=true
+	    list_running_machines
 	    RET=$?
 	    ;;
 	
@@ -299,6 +308,21 @@ do
 	    create_client_conf $2
 	    shift
 	    shift
+	    ;;
+
+	"--snapshot-client")
+	    client_screenshot $2
+	    shift
+	    ;;
+
+	"--client-copy-file")
+	    CLIENT=$2
+	    SRC=$3
+	    DST=$4
+	    shift
+	    shift
+	    shift
+	    client_copy_file "$CLIENT" "$SRC" "$DST"
 	    ;;
 
 
