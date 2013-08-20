@@ -110,6 +110,7 @@ usage()
     echo "--client-copy-file"
     echo "--is-client-up"
     echo "--version"
+    echo "--wait-for-client"
     echo ""
 
     exit 0
@@ -266,6 +267,15 @@ do
 	    TIMEOUT=$3
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
 	    wait_for_ssh up "$TIMEOUT" $CLIENT 
+	    shift
+	    shift
+	    ;;
+
+	"--wait-for-client")
+	    CLIENT=$2
+	    TIMEOUT=$3
+	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
+	    wait_for_state up "$TIMEOUT" $CLIENT 
 	    shift
 	    shift
 	    ;;
