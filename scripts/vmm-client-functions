@@ -525,10 +525,47 @@ stop_qemu()
 }
 
 
+
+stop_android()
+{
+    VB_NAME=$1
+    debug "Stopping Android $VM_NAME"
+
+    if [ "$VB_NAME" != "" ]
+    then
+	debug "Killing Android $VB_NAME"
+	adb  -s emulator-$ANDROID_PORT emu kill  >/dev/null 2>/dev/null
+	
+	wait_for_state down 20 $VB_NAME
+
+	is_android_up $VB_NAME 
+	RET=$?
+	if [ "$RET" != "0" ]
+	then
+	    debug "    client is up, returning"
+	    return
+	fi
+
+
+	break
+    fi	
+}
+
+
 check_qemu_proc()
 {
     PROC_EXPR=$1
     RET=$(ps auxww | grep qemu | grep -c $PROC_EXPR )
+
+    debug "Number of qemu processes: $RET"
+    
+    return $RET
+}
+
+check_android_proc()
+{
+    PROC_EXPR=$1
+    RET=$(ps auxww | grep emulator | grep -c $PROC_EXPR )
 
     debug "Number of qemu processes: $RET"
     
@@ -604,6 +641,16 @@ stop_helper()
 	    stop_qemu "$WANTED_VM"
 
 	    check_qemu_proc $1
+	    RET=$?
+	    log "$RET" "Stop qemu" "$VM_NAME"
+	    return $RET
+	    ;;
+
+	"Android")
+	    debug "Stoping Android $WANTED_VM"
+	    stop_android "$WANTED_VM"
+
+	    check_android_proc $1
 	    RET=$?
 	    log "$RET" "Stop qemu" "$VM_NAME"
 	    return $RET
