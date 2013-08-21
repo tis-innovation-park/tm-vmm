@@ -42,10 +42,10 @@ echo_android_client_conf()
     echo VM_NAME=\"$VM_MACHINE\"
     echo VM_TYPE=\"Android\"
     VM_TYPE="Android"
-    ANDROID_SYS="emulator64-arm"
+    ANDROID_SYS=""
 
-    CPU_ARCH=$(grep cpu.arch ~/.android/avd/$1.avd/config.ini | sed 's,hw\.cpu\.arch=,,g')
-    CPU_MODEL=$(grep cpu.model ~/.android/avd/$1.avd/config.ini | sed 's,hw\.cpu\.model=,,g')
+    CPU_ARCH=$(grep cpu.arch $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.arch=,,g')
+    CPU_MODEL=$(grep cpu.model $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.model=,,g')
 
     ANDROID_SYS=""
     if [ "$CPU_ARCH" = "arm" ]
@@ -59,7 +59,7 @@ echo_android_client_conf()
     fi
     echo "ANDROID_SYS=$ANDROID_SYS"
 
-    echo "TODO: get CPU: $CPU_ARCH $CPU_MODEL"
+    echo "TODO: handle  CPU: $CPU_ARCH $CPU_MODEL   in a proper way :)"
 }
 
 create_vbox_client_conf()

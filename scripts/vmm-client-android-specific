@@ -50,3 +50,20 @@ get_connected_avds_ports()
     get_connected_avds | sed -e "s,[ \t]*emulator\-,,g" 
 }
 
+check_android_settings()
+{
+    if [ "$ANDROID" = "" ]
+    then   	 
+	echo "no android command found"
+	return 1
+    fi
+
+
+    if [ "$ANDROID_ADT_PATH" = "" ]
+    then   	 
+	echo "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
+	return 1
+    fi
+
+    return 0
+}

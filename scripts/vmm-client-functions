@@ -24,10 +24,6 @@
 declare -a SCRIPTS_TO_EXECUTE
 export SCRIPTS_TO_EXECUTE
 
-ANDROID=~/opt/adt-bundle-linux-x86_64-20130219/sdk/tools/android
-ANDROID_AVD_DIR=${HOME}/.android/avd/
-ANDROID_ADT_PATH=/home/hesa/opt/adt-bundle-linux-x86_64-20130219
-TM_IMAGE_DIR=/tmp/tm-images
 
 ANDROID_SPEC_FILE=$(dirname $0)/../share/testingmachine/scripts/vmm-client-android-specific
 if [ -f $ANDROID_SPEC_FILE ]
@@ -74,6 +70,10 @@ list_vbox_machines()
 
 list_android_machines()
 {
+    check_android_settings
+    RET=$?
+    if [ $RET -ne 0 ] ; then return $RET; fi
+
     debug "Listing android machines"
 #    VB_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
     VB_NAMES=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g')
