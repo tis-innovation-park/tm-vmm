@@ -327,13 +327,12 @@ do
 	    ;;
 
 	"--client-copy-file")
-	    CLIENT=$2
-	    SRC=$3
-	    DST=$4
+	    SRC=$2
+	    DST=$3
 	    shift
 	    shift
-	    shift
-	    client_copy_file "$CLIENT" "$SRC" "$DST"
+	    debug "client_copy_file '$SRC' '$DST'"
+	    client_copy_file "$SRC" "$DST"
 	    ;;
 
 	"--is-client-up")
