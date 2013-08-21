@@ -1016,18 +1016,19 @@ is_android_up()
 
     debug "    is_android_up? "
 
-    CNT=$(adb  -s emulator-$ANDROID_PORT get-state | grep device | wc -l)
+    adb  -s emulator-$ANDROID_PORT shell ls >/dev/null 2>/dev/null
+    RET=$?
     
-    debug "    is_vbox_up: $CNT"
+    debug "    is_android_up: $CNT"
 
     # If the VM is running (>1), return 0
-    if [ $CNT -ne 0 ]
+    if [ $RET -eq 0 ]
     then
-	debug "vbox vm ($WANTED_VM) is running"
+	debug "android avd ($WANTED_VM) is running"
 	return 0
     fi
 
-    debug "vbox vm ($WANTED_VM) is NOT running"
+    debug "android avd ($WANTED_VM) is NOT running"
     return 1
 }
 
@@ -1535,8 +1536,10 @@ get_info_for_client()
 
     for d in $ETC_DIRS
     do
-	for i in $(find $d/clients -name "$1.conf" 2>/dev/null)
+	TMP_CLIENTS=$(find $d/clients -name "$1.conf" 2>/dev/null)
+	for i in $TMP_CLIENTS
 	do
+	    
 	    export VM_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
 	    
 	    CLI_CONF=$i
@@ -1758,22 +1761,118 @@ import_appliance()
 
 }
 
-
-
-
-client_copy_file()
+copy_from_host()
 {
-    MY_CLIENT="$1"
-    MY_SRC="$2"
-    MY_DST="$3"
+    MY_SRC_HOST=$1
+    MY_SRC_LOC=$2
+    MY_DST_LOC=$3
 
-
-    get_info_for_client $1
+    get_info_for_client $MY_SRC_HOST
     
     if [ "$CLIENT_FOUND" = "false" ]
     then
 	echo "No client configuration found or client is not running: $1"
-    else
-	echo "client_copy_file   $MY_CLIENT, $MY_SRC, $MY_DST"
+	return 1
     fi
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    echo "copy vbox"
+	    ;;
+    
+	"Android")
+	    debug "copy android"
+	    debug "     adb  -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC"
+	    adb  -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC
+	    ;;
+	*)
+	    echo "copy not supported"
+	    return 1
+	    ;;
+
+    esac
+    
+    return 0
+} 
+
+
+copy_to_host()
+{
+    MY_SRC_LOC=$1
+    MY_DST_HOST=$2
+    MY_DST_LOC=$3
+
+    get_info_for_client $MY_DST_HOST
+    
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found or client is not running: $1"
+	return 1
+    fi
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    echo "copy vbox"
+	    ;;
+    
+	"Android")
+	    debug "copy android"
+	    debug "     adb  -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC"
+	    adb  -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC
+	    ;;
+	*)
+	    echo "copy not supported"
+	    return 1
+	    ;;
+
+    esac
+    
+    return 0
+} 
+
+
+client_copy_file()
+{
+    MY_SRC="$1"
+    MY_DST="$2"
+
+    IFS=":"; declare -a MY_SRC_ARR=($MY_SRC) 
+    SRC_HOST=${MY_SRC_ARR[0]}
+    SRC_LOC=${MY_SRC_ARR[1]}
+    if [ "$SRC_LOC" = "" ] ; then SRC_LOC=$SRC_HOST; SRC_HOST="" ; fi
+    
+    IFS=":"; declare -a MY_DST_ARR=($MY_DST) 
+    DST_HOST=${MY_DST_ARR[0]}
+    DST_LOC=${MY_DST_ARR[1]}
+    if [ "$DST_LOC" = "" ] ; then DST_LOC=$DST_HOST; DST_HOST="" ; fi
+
+    # Set IFS back to space :) .... otherwise things will start behave odd
+    IFS=" "
+
+    debug "Copy:"
+    debug "  '$SRC_HOST' ::: $SRC_LOC"
+    debug "  '$DST_HOST' ::: $DST_LOC"
+
+    RET=1
+
+    if [ "$SRC_HOST" != "" ] && [ "$DST_HOST" != "" ] 
+    then
+	echo "Currently tm-vmm does not support copying from one client to another"
+    elif [ "$SRC_HOST" != "" ]
+    then
+	debug copy_from_host $SRC_HOST $SRC_LOC  $DST_LOC
+	copy_from_host $SRC_HOST $SRC_LOC  $DST_LOC
+	RET=$?
+    elif [ "$DST_HOST" != "" ]
+    then
+	debug copy_to_host   $SRC_LOC  $DST_HOST $DST_LOC
+	copy_to_host         $SRC_LOC  $DST_HOST $DST_LOC
+	RET=$?
+    else
+	echo "uh oh"
+    fi
+
+    echo "RETURN $RET"
+
+    return $RET
 }
