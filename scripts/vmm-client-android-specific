@@ -1,0 +1,69 @@
+
+#
+# Given an AVD port this function will find the coresponding name
+#   this function telnets in to the device and execs a command 'avd name'
+#   and prints out the name .... there must be a better way
+#
+get_avd_name_for_port()
+{
+    AVD_PORT=$1
+    expect -c "spawn telnet localhost $AVD_PORT; expect \"OK\" ; send \"avd name\n\" ; expect OK" \
+	| grep -v -e "^OK"  -e Trying  -e Connected \
+	          -e "Android Console" -e "Escape character" \
+	          -e "spawn telnet"    -e "avd name" \
+	| sed 's,[\n\r]*,,g'
+}
+
+#
+# Given an AVD name this function will find the coresponding port
+#
+get_avd_port_for_name()
+{
+    AVD_NAME=$1
+    for i in $(get_connected_avds_ports)
+    do
+	AVD_FOUND=$(get_avd_name_for_port $i)
+#	echo "will test"
+#	echo "i:           '$i'"
+#	echo "FOUND:       '$AVD_FOUND'"
+#	echo "NAME:        '$AVD_NAME'"
+#	echo -n "   "
+	if [ "$AVD_FOUND" = "$AVD_NAME" ]
+	then
+#	    echo " ==========> $i"
+	    echo $i
+	fi
+    done
+}
+
+
+get_connected_avds() 
+{
+    adb devices | grep -v "List of devices attached" | \
+	grep -v "^[ \t]*$"   | \
+	awk ' { print $1 } ' | \
+	sed  -e "s,[\n\r]*,,g"
+}
+
+get_connected_avds_ports()
+{
+    get_connected_avds | sed -e "s,[ \t]*emulator\-,,g" 
+}
+
+check_android_settings()
+{
+    if [ "$ANDROID" = "" ]
+    then   	 
+	echo "no android command found"
+	return 1
+    fi
+
+
+    if [ "$ANDROID_ADT_PATH" = "" ]
+    then   	 
+	echo "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
+	return 1
+    fi
+
+    return 0
+}

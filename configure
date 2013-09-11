@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #                                                                   
-#                   VVM
+#                   Testing Machine
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -22,11 +22,20 @@
 # MA  02110-1301, USA.                                              
 #
 
-export ATS_VERSION=0.30
+export BASE_TM_VERSION=0.11
 export DEFAULT_INSTALL_DIR=/usr/local
 export DEFAULT_BIN_DIR=bin
-export DEFAULT_SHARE_DIR=share/ats
+export DEFAULT_SHARE_DIR=share/testingmachine
 
+
+# By default, do not build doc
+BUILD_DOC=false
+
+
+if [ "$VERSION" != "" ]
+then
+    BASE_TM_VERSION=$VERSION
+fi
 
 parse_and_setup()
 {
@@ -38,6 +47,10 @@ parse_and_setup()
 	    "--prefix")
 		INSTALL_DIR=$2
 		shift
+		;;
+	    
+	    "--build-doc")
+		BUILD_DOC=true
 		;;
 	    
 	    *)
@@ -64,16 +77,25 @@ print_setup()
     echo " - bin dir:       ${BIN_DIR}"
 }
 
-create_makefile()
+create_makefiles()
 {
     cat Makefile.tmpl | sed \
 	-e "s,__INSTALL_DIR__,${INSTALL_DIR},g" \
 	-e "s,__SHARE_DIR__,${SHARE_DIR},g" \
+	-e "s,__MAKEFILE_TM_VERSION__,${BASE_TM_VERSION},g" \
 	-e "s,__BIN_DIR__,${BIN_DIR},g" > Makefile
+
+    cat doc/Makefile.tmpl | sed \
+	-e "s,__INSTALL_DIR__,${INSTALL_DIR},g" \
+	-e "s,__SHARE_DIR__,${SHARE_DIR},g" \
+	-e "s,__MAKEFILE_TM_VERSION__,${BASE_TM_VERSION},g" \
+	-e "s,__BIN_DIR__,${BIN_DIR},g" > doc/Makefile
+
+
 }
 
 parse_and_setup $*
 print_setup
-create_makefile
+create_makefiles
 
 exit 0

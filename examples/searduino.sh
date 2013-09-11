@@ -2,7 +2,7 @@
 
 #
 #                                                                   
-#                   VVM
+#                   Testing Machine
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -35,9 +35,9 @@ exit_on_error()
     fi
 }
 
-ATS_DIR=/opt/vmm
+VMM_DIR=/tmp
 
-ATS=${ATS_DIR}/bin/ats-client
+VMM=${VMM_DIR}/bin/tm-vmm
 
 
 
@@ -64,16 +64,27 @@ build_project()
     
     fi
     
-    $ATS --client-exec    $MACHINE "cd searduino && $CONF_TWEAK ./configure --prefix=$INST_DIR --disable-unittest "
+    $VMM --client-exec    $MACHINE "rm -fr searduino"
     if [ $? -ne 0 ] ; then return 1 ;  fi
 
-    $ATS --client-exec    $MACHINE "cd searduino && make clean all"
+    $VMM --client-exec    $MACHINE "git clone git://git.savannah.nongnu.org/searduino.git"
     if [ $? -ne 0 ] ; then return 1 ;  fi
 
-    $ATS --client-exec    $MACHINE "cd searduino && make check"
+    $VMM --client-exec    $MACHINE "cd searduino && make -f Makefile.git"
+    
+    fi
+    
+    $VMM --client-exec    $MACHINE "cd searduino && $CONF_TWEAK ./configure --prefix=$INST_DIR --disable-unittest "
     if [ $? -ne 0 ] ; then return 1 ;  fi
 
-    $ATS --client-exec    $MACHINE "$INST_DIR/bin/verify-install.sh"
+    $VMM --client-exec    $MACHINE "cd searduino && make clean all"
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    $VMM --client-exec    $MACHINE "cd searduino && make check"
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    $VMM --client-exec    $MACHINE "$INST_DIR/bin/verify-install.sh"
+
     if [ $? -ne 0 ] ; then return 1 ;  fi
 }
 
@@ -82,20 +93,20 @@ build_on_host()
 {
     MACHINE=$1
     
-#    echo $ATS --start-client-headless   $MACHINE
-#    $ATS --start-client-headless   $MACHINE
+#    echo $VMM --start-client-headless   $MACHINE
+#    $VMM --start-client-headless   $MACHINE
 #    if [ $? -ne 0 ] ; then return 1 ;  fi
     
- #   echo $ATS --wait-for-ssh   $MACHINE
- #   $ATS --wait-for-ssh   $MACHINE
+ #   echo $VMM --wait-for-ssh   $MACHINE
+ #   $VMM --wait-for-ssh   $MACHINE
  #   if [ $? -ne 0 ] ; then return 1 ;  fi
 
     echo build_project         $MACHINE
     build_project         $MACHINE
     # don't return or exit after failed build.... we need to always stop the machine/client
 
-#    echo $ATS --stop-client    $MACHINE
-#    $ATS --stop-client    $MACHINE
+#    echo $VMM --stop-client    $MACHINE
+#    $VMM --stop-client    $MACHINE
 #    if [ $? -ne 0 ] ; then return 1 ;  fi
 }
 

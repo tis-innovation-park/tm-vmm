@@ -1,8 +1,7 @@
-#!/bin/bash
-
+#
 #
 #                                                                   
-#                   VVM
+#                   Testing Machine
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -23,29 +22,29 @@
 # MA  02110-1301, USA.                                              
 #
 
-ATS_DIR=__ATS_DIR__
-ATS_CLIENT=$ATS_DIR/bin/ats-client
-ATS_AUTO_NAME=$(basename $0)
+VMM_DIR=__VMM_DIR__
+VMM_CLIENT=$VMM_DIR/bin/vmm-client
+VMM_AUTO_NAME=$(basename $0)
 
-SCRIPT_DIR=$ATS_DIR/share/ats/scripts
+SCRIPT_DIR=$VMM_DIR/share/vmm/scripts
 
 usage()
 {
     echo "Syntax error"
-    echo "  $ATS_AUTO_NAME <client> <external-script>"
+    echo "  $VMM_AUTO_NAME <client> <external-script>"
 }
 
 #
 # Read in functions file
 #
-ATS_FUNCTION=$SCRIPT_DIR/functions
-if [ ! -f  $ATS_FUNCTION ]
+VMM_FUNCTION=$SCRIPT_DIR/functions
+if [ ! -f  $VMM_FUNCTION ]
 then
-    echo "$ATS_NAME: Could not find functions file ($ATS_FUNCTION)"
+    echo "$VMM_NAME: Could not find functions file ($VMM_FUNCTION)"
     # exit 6 - means we couldn't find the functions file
     exit 6
 fi
-. $ATS_FUNCTION
+. $VMM_FUNCTION
 
 SCRIPT_IDX=0
 
@@ -125,7 +124,7 @@ exit_on_error "$RET" "Executing user supplied scripts ($script)"
 #
 #######################################
 auto_debug "Stopping client $CLIENT_NAME"
-$ATS_CLIENT --stop-client $CLIENT_NAME
+$VMM_CLIENT --stop-client $CLIENT_NAME
 auto_debug "  stopping client returned: $?"
 
 exit $RET

@@ -1,6 +1,6 @@
 #
 #                                                                   
-#                   VMM
+#                   Testing Machine
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -22,12 +22,14 @@
 #
 
 CONF_READ=false
-DEFAULT_LOG_DEBUG_DIR=/tmp/ats/
+DEFAULT_LOG_DEBUG_DIR=/tmp/testing-machine/vmm/
 DEFAULT_LOG_FORMAT=txt
 INIT_DONE=0
 
 DEBUG=true
 
+
+PERSONAL_ETC_DIR=${HOME}/.testingmachine/
 
 #DEBUG=true
 
@@ -38,7 +40,7 @@ ERROR_STRINGS[3]="could not start client"
 ERROR_STRINGS[4]="could not stop client"
 ERROR_STRINGS[5]="error when executing a command"
 ERROR_STRINGS[6]="could not find functions file"
-ERROR_STRINGS[7]="could not find atsvm-functions file"
+ERROR_STRINGS[7]="could not find vmm-functions file"
 LAST_ERROR=6
 
 DATE=$(date +%Y-%m-%d)
@@ -58,13 +60,13 @@ read_functions()
 
 find_read_conf()
 {
-    # don't call init_ats
+    # don't call init_vmm
 
-    ATS_CONF=$1
+    VMM_CONF=$1
 
-    if [ -f $ATS_CONF ]
+    if [ -f $VMM_CONF ]
     then
-	. $ATS_CONF
+	. $VMM_CONF
 	CONF_READ=true
     fi
 }
@@ -72,7 +74,7 @@ find_read_conf()
 
 
 
-init_ats()
+init_vmm()
 {
     if [ $INIT_DONE -ne 0 ]
     then
@@ -81,15 +83,16 @@ init_ats()
 
     if [ "$ETC_DIRS" = "" ]
     then
-	ETC_DIRS="/etc/ats $ATS_DIR/etc/ ${HOME}/.ats/"
+	ETC_DIRS="/etc/testingmachine $VMM_DIR/etc/ ${PERSONAL_ETC_DIR}"
     fi
  
     for d in $ETC_DIRS
     do
-	find_read_conf $d/ats.conf
+	find_read_conf $d/vmm.conf
     done
 
-    read_functions ats-client-functions
+    read_functions vmm-client-functions
+    read_functions generate-conf
 
     if [ "$LOG_FORMAT" = "" ]
     then
@@ -122,6 +125,21 @@ init_ats()
 	echo "Could not find file: $SCRIPT_DIR/loggers/debug-logger"
     fi
 
+    # Set up Android stuff
+    if [ "$ANDROID" = "" ]
+    then   	 
+	ANDROID=$(which android)
+    fi
+
+    if [ "$ANDROID_ADT_PATH" != "" ] && [ "$ANDROID" != "" ]
+    then   	 
+	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../../
+    fi
+
+    if [ "$ANDROID_AVD_DIR" = "" ]
+    then
+	ANDROID_AVD_DIR=${HOME}/.android/avd/
+    fi
 
 
     INIT_DONE=1
@@ -168,4 +186,4 @@ countdowner()
 }
 
 
-init_ats
+init_vmm

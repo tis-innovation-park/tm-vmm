@@ -1,6 +1,6 @@
 #
 #                                                                   
-#                   VVM
+#                   Testing Machine
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -21,8 +21,13 @@
 # MA  02110-1301, USA.                                              
 #
 
-BINS=bin/ats-client bin/ats-auto
-SCRIPTS=scripts/ats-client-functions scripts/functions 
+TM_VMM=bin/tm-vmm
+TM_VMM_AUTO=bin/tm-vmm-auto
+
+TM_VERSION=__MAKEFILE_TM_VERSION__
+
+BINS=${TM_VMM} ${TM_VMM_AUTO}
+SCRIPTS=scripts/vmm-client-functions scripts/vmm-client-android-specific scripts/functions scripts/generate-conf
 LOGGERS=scripts/loggers/debug-logger scripts/loggers/txt-logger 
 EXAMPLES=examples/searduino.sh
 
@@ -34,24 +39,29 @@ SHARE_DIR=__SHARE_DIR__
 BIN_DIR=__BIN_DIR__
 
 
-
+DIST_DIR_TMP=testing-machine-$(TM_VERSION)
 
 #
 # 
 #
 
-$(BINS): bin/ats-client.tmpl  bin/ats-auto.tmpl Makefile
+
+
+all: $(BINS) 
+
+
+$(BINS): ${TM_VMM}.tmpl  ${TM_VMM_AUTO}.tmpl Makefile
 	@echo "*** Creating scripts ***"
-	if [ -f bin/ats-client ] ; then mv bin/ats-client bin/ats-client.keep ; fi
-	if [ -f bin/ats-auto ]   ; then mv bin/ats-auto   bin/ats-auto.keep   ; fi
-	cat bin/ats-client.tmpl | sed "s,__ATS_DIR__,$(INSTALL_DIR),g" > bin/ats-client
-	cat bin/ats-auto.tmpl   | sed "s,__ATS_DIR__,$(INSTALL_DIR),g" > bin/ats-auto
-	chmod a+x bin/ats-client
-	chmod a+x bin/ats-auto
+	if [ -f ${TM_VMM} ] ; then mv ${TM_VMM} ${TM_VMM}.keep ; fi
+	if [ -f ${TM_VMM_AUTO} ]   ; then mv ${TM_VMM_AUTO} ${TM_VMM_AUTO}.keep   ; fi
+	cat ${TM_VMM}.tmpl   | sed -e "s,__VMM_DIR__,$(INSTALL_DIR),g" -e "s,__TM_VERSION__,$(TM_VERSION),g" > ${TM_VMM}
+	cat ${TM_VMM_AUTO}   | sed -e "s,__VMM_DIR__,$(INSTALL_DIR),g" -e "s,__TM_VERSION__,$(TM_VERSION),g" > ${TM_VMM_AUTO}
+	chmod a+x ${TM_VMM}
+	chmod a+x ${TM_VMM_AUTO}
 
 $(EXAMPLES): examples/searduino.tmpl
 	@echo "*** Creating examples ***"
-	cat examples/searduino.tmpl | sed "s,__ATS_DIR__,$(INSTALL_DIR),g" > examples/searduino.sh
+	cat examples/searduino.tmpl | sed "s,__VMM_DIR__,$(INSTALL_DIR),g" > examples/searduino.sh
 	chmod a+x examples/searduino.sh
 
 install: $(BINS) $(SCRIPTS) $(EXAMPLES) 
@@ -69,6 +79,22 @@ install: $(BINS) $(SCRIPTS) $(EXAMPLES)
 check:
 	test/install-and-test-auto.sh
 
+
+dist:
+	rm -fr tmp/$(DIST_DIR_TMP)
+	mkdir -p  tmp/$(DIST_DIR_TMP)/doc
+
+	make clean
+	cd doc && make clean all
+
+	cp -r doc/      tmp/$(DIST_DIR_TMP)/
+	cp -r bin/      tmp/$(DIST_DIR_TMP)/
+	cp -r examples/ tmp/$(DIST_DIR_TMP)/
+	cp -r scripts/  tmp/$(DIST_DIR_TMP)/
+
+	cp configure Makefile.tmpl README.md    tmp/$(DIST_DIR_TMP)/
+
+	cd tmp && tar cvfz $(DIST_DIR_TMP).tar.gz $(DIST_DIR_TMP)/
 
 #
 # clean 
