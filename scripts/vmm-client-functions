@@ -899,7 +899,7 @@ find_vm_type()
 
     if [ $VBOX_FOUND -ne 0 ]
     then
-	export VM_TYPE="Android"
+	export VM_TYPE="VirtualBox"
     elif [ $ANDROID_FOUND -ne 0 ]
     then
 	export VM_TYPE="Android"
