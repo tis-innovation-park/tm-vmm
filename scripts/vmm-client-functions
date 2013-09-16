@@ -1515,7 +1515,7 @@ exec_client_command()
 	RET=$?
     elif [ "$VM_TYPE" = "Android" ]
     then
-	exec_client_command_android $ANDROID_PORT $COMMAND
+	exec_client_command_android $ANDROID_PORT "$COMMAND"
 	RET=$?
     else
 	echo "exec_client_command(): support for \"$VM_NAME\" not implemented yet!"

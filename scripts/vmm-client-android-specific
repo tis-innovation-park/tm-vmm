@@ -72,6 +72,16 @@ check_android_settings()
 
 exec_client_command_android()
 {
-    adb  -s emulator-$1 shell ls $2
+    if [ "$2" = "" ];
+    then
+	debug "Missing parameter(s) to exec_client_command_android(). Got \"$*\""
+	return 1
+    fi
+
+    PORT=$1
+    COMMAND="$2"
+
+    debug "Will execute on Android ($PORT):  $COMMAND"
+    adb  -s emulator-$PORT shell $COMMAND
     return $?
 }
