@@ -1110,17 +1110,17 @@ is_client_up()
     case $VM_TYPE in
 	"VirtualBox")
 	    is_vbox_up $1
-	    return $?
+	    RET=$?
 	    ;;
 
 	"Android")
 	    is_android_up $1
-	    return $?
+	    RET=$?
 	    ;;
 
 	"qemu")
 	    is_qemu_up $1
-	    return $?
+	    RET=$?
 	    ;;
 
 	*)
@@ -1129,7 +1129,7 @@ is_client_up()
 	    ;;
     esac
     
-
+    debug "is_client_up ($WANTED_VM, $VM_TYPE)  => $RET"
     return $RET
 }
 
