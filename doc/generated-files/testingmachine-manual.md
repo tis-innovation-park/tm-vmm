@@ -255,8 +255,6 @@ For more variables see section Configuration syntax below
 
   `ssh-copy-id 192.168.1.2`
 
-
-
 # Using Virtual Machine Manager
 
 Regardless of the underlying virtual machine you manage the machine in
@@ -403,13 +401,20 @@ settings or change some at your will.
 
 **Note:** *If you’re on a Ubuntu system you might have to add your user to the vboxusers group.*
 
+### Start Virtualbox
+
+In a terminal, type:
+`virtualbox`
+
+In the VM Virtualbox Manager window click "New"
+
 ### Name and operating system
 
 * Name:	    eGov testing machine
 * Type:	    Linux
 * Version:  Ubuntu (64 bit)
 
-![Name and os] (screenshots/name-and-operating-system.png "Name and operating system")
+![Name and os](screenshots/vbox-name-and-operating-system.png "Name and operating system")
 
 
 
@@ -417,33 +422,33 @@ settings or change some at your will.
 
 * 2048 MB
 
-![Memory size](screenshots/memory-size.png)
+![Memory size](screenshots/vbox-memory-size.png)
 
 
 ### Hard drive
 
 * Choose to create a virtual hard drive now
 
-![Hard drive](screenshots/hard-drive.png)
+![Hard drive](screenshots/vbox-hard-drive.png)
 
 ### Hard drive file type
 
 * Choose VDI 
 
-![Hard drive file type](screenshots/hard-drive-file-type.png)
+![Hard drive file type](screenshots/vbox-hard-drive-file-type.png)
 
 ### Storage on physical hard drive
 
 * Choose Dynamically allocated
 
-![Hard drive file type](screenshots/storage-on-physical-hard-disk.png)
+![Hard drive file type](screenshots/vbox-storage-on-physical-hard-disk.png)
 
 
 ### File location and size
 
 * 8 GB should be enough
 
-![File location and size](screenshots/file-location-and-size.png)
+![File location and size](screenshots/vbox-file-location-and-size.png)
 
 
 Your disk has now been created. Before starting it we need to do some additional settings.
@@ -471,7 +476,7 @@ The following settings should be applied to Adapter 1.
  the host computer. See http://www.virtualbox.org/manual/ Chapter 6
  for additional information on bridged networking.*
 
-![Network](screenshots/network-1.png)
+![Network](screenshots/vbox-network-1.png)
 
 
 
@@ -492,7 +497,7 @@ Add a new rule by clicking the + sign. Enter
 * **Guest IP**:
 * **Guest Port**: 22
 
-![Network](screenshots/network-port-forward.png)
+![Network](screenshots/vbox-network-port-forward.png)
 
 #### USB
 Make sure USB is enabled if you plan to use a smart card reader or another USB device 
@@ -514,12 +519,12 @@ Click Settings and choose storage.
 
 Add the downloaded iso image to the virtual machine as a CD-ROM by clicking the Empty icon (image missing) under Controller: IDE and then click on the disc icon right of the text CD/DVD Drive: . 
 
-![Storage](screenshots/storage-pre.png)
+![Storage](screenshots/vbox-storage-pre.png)
 
 
 Choose a virtual CD/DVD disk file ... and point out the downloaded iso image (e.g. ubuntu-12.10-desktop-amd64.iso).
 
-![Storage](screenshots/storage-post.png)
+![Storage](screenshots/vbox-storage-post.png)
 
 Click Start
 
@@ -588,6 +593,40 @@ Open up a user management tool by pressing the dasher (logo missing) and type us
 **Username**		      egov
 
 * Click on Enable password and type in a password.
+
+## Creating a Android Virtual Device machine 
+
+Basically you should follow the normal procedure, as described on the
+Android Developer pages manual: http://developer.android.com/tools/devices/index.html.
+
+We do, however, provide a guide below to make this easier. You can
+choose to use our settings or change some at your will.
+
+
+### Start Android Virtual Device Manager
+
+In a terminal, type:
+
+`android avd`
+
+In the Android Virtual Device Manager window click "New"
+
+
+### Create new Android Virtual Device (AVD)
+
+* Name:	    eGov-android-machine
+* Device:   Nexus 7
+* Target:   Android 4.2
+
+You can keep the default values for all other settings.
+
+![Create new Android Virtual Device](screenshots/android-create-new.png "Name and operating system")
+
+
+
+
+
+
 
 # Example use:
 
@@ -692,7 +731,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `--list-running-clients` - Lists all clients currently running
 
-`--check-client-ssh` - Checks if ssh is up on client
+ - Checks if ssh is up on client
 
 `--check-client-status` - Checks if clients is up and running
 

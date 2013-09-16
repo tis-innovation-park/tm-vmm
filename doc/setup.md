@@ -66,5 +66,3 @@ For more variables see section Configuration syntax below
 
   `ssh-copy-id 192.168.1.2`
 
-
-

@@ -48,7 +48,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `--list-running-clients` - Lists all clients currently running
 
-`--check-client-ssh` - Checks if ssh is up on client
+ - Checks if ssh is up on client
 
 `--check-client-status` - Checks if clients is up and running
 
