@@ -81,9 +81,13 @@ It is assumed that Debian-6.0 is a VirtualBox image.
 
 For more variables see section Configuration syntax below
 
-* Copy the public ssh key to the machine, e.g
+* Copy your public ssh key to the machine's root account, e.g
 
-  `ssh-copy-id 192.168.1.2`
+  `ssh-copy-id -p 2256 `
+
+
+
+
 
 ## Create an Android client
 
