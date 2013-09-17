@@ -113,6 +113,7 @@ usage()
     echo "--install-app"
     echo "--uninstall-app"
     echo "--print-client-settings"
+    echo "--get-client-os"
     echo ""
 
     exit 0
@@ -373,6 +374,14 @@ do
 	    CLIENT=$2
 	    shift
 	    print_client_settings $CLIENT
+	    ;;
+
+
+	"--get-client-os")
+	    CLIENT=$2
+	    shift
+	    get_guest_os_for_client $CLIENT
+	    echo $GUEST_OS
 	    ;;
 
 
