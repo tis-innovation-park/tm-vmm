@@ -110,6 +110,9 @@ usage()
     echo "--version"
     echo "--wait-for-client"
     echo "--unlock-screen"
+    echo "--install-app"
+    echo "--uninstall-app"
+    echo "--print-client-settings"
     echo ""
 
     exit 0
@@ -348,6 +351,30 @@ do
 	    shift
 	    unlock_screen $CLIENT
 	    ;;
+
+	"--install-app")
+	    CLIENT=$2
+	    APP=$3
+	    shift
+	    shift
+	    install_app $CLIENT $APP
+	    ;;
+
+	"--uninstall-app")
+	    CLIENT=$2
+	    APP=$3
+	    shift
+	    shift
+	    uninstall_app $CLIENT $APP
+	    ;;
+
+
+	"--print-client-settings")
+	    CLIENT=$2
+	    shift
+	    print_client_settings $CLIENT
+	    ;;
+
 
 	"--help")
 	    usage

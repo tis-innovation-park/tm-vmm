@@ -86,3 +86,19 @@ exec_client_command_android()
     return $?
 }
 
+exec_client_raw_android()
+{
+    if [ "$2" = "" ];
+    then
+	debug "Missing parameter(s) to exec_client_raw_android(). Got \"$*\""
+	return 1
+    fi
+
+    PORT=$1
+    COMMAND="$2"
+
+    debug "Will execute on Android ($PORT):  $COMMAND"
+    adb  -s emulator-$PORT $COMMAND
+    return $?
+}
+

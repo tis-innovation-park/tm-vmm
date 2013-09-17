@@ -1649,7 +1649,7 @@ get_android_specific_info()
 get_vm_specific_info()
 {
     MY_VM="$1"
-
+    RET=0
     if [ "$VM_TYPE" = "VirtualBox" ]
     then
 	get_vbox_specific_info
@@ -1660,7 +1660,8 @@ get_vm_specific_info()
     else
 	echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
     fi
-	
+    
+    return $RET
 }
 
 
@@ -1683,6 +1684,7 @@ get_info_for_client()
 	    . $CLI_CONF
 
 	    CLIENT_FOUND=true
+
 	    get_vm_specific_info $VM_NAME
 	    RET=$?
 	    
@@ -2045,4 +2047,134 @@ unlock_screen()
     esac
     
     return $RET
+}
+
+get_suffix_from_file()
+{
+    MY_FILE=$1
+    debug "get_suffix_from_file() MY_FILE: $MY_FILE"
+
+    MY_FILE_SHORT=$(basename "$MY_FILE")
+    debug "get_suffix_from_file() MY_FILE_SHORT: $MY_FILE_SHOR"
+
+    MY_FILE_PREFIX=${MY_FILE_SHORT%.*}
+    debug "get_suffix_from_file() MY_FILE_PREFIX: $MY_FILE_PREFIX"
+
+    MY_FILE_SUFFIX=${MY_FILE_SHORT##*.}
+    debug "get_suffix_from_file() MY_FILE_SUFFIX: $MY_FILE_SUFFIX"
+
+    echo $MY_FILE_SUFFIX
+    
+}
+
+android_install_app()
+{
+    CLIENT=$1
+    APP=$2
+    MODE=$3
+
+    get_info_for_client "$CLIENT"
+
+    exec_client_raw_android "$ANDROID_PORT" "$MODE $APP"
+}
+
+vbox_install_app()
+{
+    CLIENT=$1
+    APP=$2
+    MODE=$3
+
+    get_info_for_client "$CLIENT"
+
+    APP_SUF=$(get_suffix_from_file "$APP")
+
+    case $APP_SUF in
+	"deb")
+	    echo "VBOX install deb pkg: $APP"
+	    echo copy_to_host                $APP  $CLIENT "/tmp"
+	    echo exec_client_command_as_root $CLIENT "dpkg --install /tmp/$(basename $APP)"
+	    RET=1
+	    ;;
+	"rpm")
+	    echo "VBOX install rpm pkg: $APP"
+	    echo "VBOX install deb pkg: $APP"
+	    copy_to_host                $APP  $CLIENT "/tmp"
+	    exec_client_command_as_root $CLIENT "rpm --install /tmp/$(basename $APP)"
+	    RET=1
+	    ;;
+	*)
+	    echo "Don't know how to install $APP_SUF packages"
+	    RET=1
+	    ;;
+    esac
+
+}
+
+
+uninstall_app()
+{
+    install_app "$1" "$2" "uninstall"
+}
+
+install_app()
+{
+    CLIENT="$1"
+    APP="$2"
+    INSTALL_MODE=$3
+
+    if [ "$INSTALL_MODE" = "" ]
+    then
+	INSTALL_MODE="install"
+    fi
+
+
+    get_info_for_client "$1"
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    fi
+    RET=0
+    case $VM_TYPE in
+	"VirtualBox")
+	    echo "VBOX install app: $APP"
+	    vbox_install_app "$CLIENT" "$APP" "$INSTALL_MODE"
+	    RET=1
+	    ;;
+	"qemu")
+	    echo "QEMU install app: $APP"
+	    RET=1
+	    ;;
+	
+	"Android")
+	    echo "Android install app on $CLIENT  $APP"
+	    android_install_app "$CLIENT" "$APP" "$INSTALL_MODE"
+	    RET=$?
+	    ;;
+	
+	*)
+	    echo "Screenshots not implemented for $1"
+	    RET=1
+	    ;;
+    esac
+    
+    return $RET
+}
+
+
+print_client_settings()
+{
+    CLIENT=$1
+
+    get_info_for_client "$1"
+
+    if [ -f $CLI_CONF ]
+	then
+	cat $CLI_CONF
+    else
+	echo "Can't find configuration file for $CLIENT"
+    fi
+
+    
 }
