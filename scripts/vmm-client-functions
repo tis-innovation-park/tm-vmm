@@ -373,16 +373,29 @@ maximise_vbox()
     debug "Will try to maximise VirtualBox window"
     CTR=0
     WIN_ID=""
+
+    export WMCTRL=$(which wmctrl)
+
+    if [ "$WMCTRL" = "" ]
+    then   	
+	echo "Command wmctrl missing on host"
+	echo "Cannot maximise the window"
+	debug "Command wmctrl missing on host"
+	debug "Cannot maximise the window"
+	return 1
+    fi     
+
     while [ "$WIN_ID" = "" ]
     do
 	debug "Waiting for VirtualBox window to appear"
 	countdowner 5
-	WIN_ID=$(wmctrl -l | grep VirtualBox | grep -v Manager | grep $VM_NAME | awk ' { print $1}')
+	WIN_ID=$($WMCTRL -l | grep VirtualBox | grep -v Manager | grep $VM_NAME | awk ' { print $1}')
 	CTR=$(( $CTR + 1))
 	debug "     current id:$WIN_ID"
 	if [ $CTR -gt 10 ]
 	then
 	    debug "    We've been waiting long enough"
+	    RET=1
 	    break
 	fi
     done
@@ -391,10 +404,14 @@ maximise_vbox()
     then
 	debug "Maximising window: $WIN_ID"
 	sleep 2
-	wmctrl -i -r $WIN_ID -b add,maximized_vert,maximized_horz
+	$WMCTRL -i -r $WIN_ID -b add,maximized_vert,maximized_horz
+	RET=$?
     fi
-    
+
+    return $RET
 }
+
+
 
 start_vbox()
 {
@@ -2135,6 +2152,7 @@ vbox_install_app()
 get_guest_os_for_client_vbox()
 {
     CLIENT="$1"
+
     GUEST_OS_TMP=$(vboxmanage showvminfo "$CLIENT" | grep "Guest OS:" | awk ' {print $3}')
 
     echo $GUEST_OS_TMP
