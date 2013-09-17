@@ -12,7 +12,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `VM_STARTUP_TIMEOUT=10` - the time to wait for a virtual machine to start up before considering it to be 'dead'.
 
-`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately VVM will take down a machine with a `kill`.
+`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately VMM will take down a machine with a `kill`.
 
 `SSH=ssh` - the SSH program to use
 
@@ -40,17 +40,17 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `--list-clients` - lists all configured clients
 
-`--start-clients client` - starts client 
+`--start-client CLIENT` - starts client name CLIENT
 
 `--start-client-headless CLIENT_NAME` - Start client called CLIENT_NAME as headless (no screen)
 
-`--stop-clients client` - stops client
+`--stop-clients CLIENT` - stops client named CLIENT
 
 `--list-running-clients` - Lists all clients currently running
 
- - Checks if ssh is up on client
+`--check-client-ssh CLIENT` - Checks if ssh is up on CLIENT
 
-`--check-client-status` - Checks if clients is up and running
+`--check-client-status CLIENT` - Checks if clients is up and running
 
 `--client-exec CLIENT cmd` - Execeute cmd on client
 
@@ -73,19 +73,12 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `  --list-machines` - lists all machines known to VVM
 
-`  --start-machine client` - starts machine 
-
+`  --start-machine MACHINE` - starts machine named MACHINE
 
 ` --start-machine-headless VM_NAME` - Start machine called VM_NAME as headless (no screen)
 
-`  --stop-machine client`  - stops machine
+` --stop-machine MACHINE`  - stops machine named MACHINE
 
-`--check-machine`
-
-
-` --stop-client CLIENT_NAME` - Stop client called CLIENT_NAME
-
-
-` --stop-machine VM_NAME` - Stop machine called VM_NAME
+` --check-machine MACHINE` - checks status on machine named MACHINE
 
 
