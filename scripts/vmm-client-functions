@@ -577,7 +577,7 @@ check_android_proc()
     PROC_EXPR=$1
     RET=$(ps auxww | grep emulator | grep -c $PROC_EXPR )
 
-    debug "Number of qemu processes: $RET"
+    debug "Number of Android processes: $RET"
     
     return $RET
 }
@@ -662,7 +662,7 @@ stop_helper()
 
 	    check_android_proc $1
 	    RET=$?
-	    log "$RET" "Stop qemu" "$VM_NAME"
+	    log "$RET" "Stop Androd" "$VM_NAME"
 	    return $RET
 	    ;;
 
