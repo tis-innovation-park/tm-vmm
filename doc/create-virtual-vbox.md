@@ -145,7 +145,6 @@ To upgrade your system you need to:
 * Enter password
 
 
-
 #### Installing necessary tools in your virtual machine
 
 The following tools need to be installed on your virtual machine
@@ -163,6 +162,28 @@ sudo apt-get install openssh-server
 
 Log in to your virtual machine as the user you created during installation.
 
+
+
+##### Setting up a new user
+
+VMM puts no restrictions or requirements on the name of the user in
+your virtual machine. The user name “vmm” is given here as an
+example and will be used in all manual text below.
+
+Log in as the user you created during the Ubuntu installation.
+
+Open up a user management tool by pressing the dasher (logo missing) and type user accounts. 
+
+* Press the unlock symbol and type in the password of the first user you created. 
+
+* Press the + symbol. You will now see a new window, called Create new account, in which you should fill in:
+
+**Account Type**:	      Standard
+**Full name**:		      Virtual Machine Manager
+**Username**		      vmm
+
+* Click on Enable password and type in a password.
+
 ##### Setting up the root account
 
 * Permit root to login via the ssh server.
@@ -176,27 +197,24 @@ Log in to your virtual machine as the user you created during installation.
 
 `sudo /etc/init.d/ssh restart ` 
 
+* Add the ssh key of your host user to vmm account
+
+  `ssh-copy-id "-p 2256 vmm@localhost"`
+
+* Test your user acoount
+
+ `ssh -p 2256 vmm@localhost whoami`
+
 * Add the ssh key of your host user to the root account
 
+  `ssh -p 2256 vmm@localhost -t "sudo mkdir /root/.ssh && sudo cp /home/vmm/.ssh/authorized_keys /root/.ssh/"`
 
+* Test your root acoount
 
-TODO: what IP does the client/guest get??
+ `ssh -p 2256 root@localhost whoami`
 
-##### Setting up a new user
+We assume here that you're using port 2256 for ssh and that your user
+is called vmm. Change it accordingly if not. 
+**Note**: Make sure that your port (-p 2256) and host arguments (vmm@localhost) are enclosed between the same parenthesises.
 
-VMM puts no restrictions or requirements on the name of the user in your virtual machine. The user name “egov-tester” is given here as an example and will be used in all manual text below.
-
-Log in as the user you created during the Ubuntu installation.
-
-Open up a user management tool by pressing the dasher (logo missing) and type user accounts. 
-
-* Press the unlock symbol and type in the password of the first user you created. 
-
-* Press the + symbol. You will now see a new window, called Create new account, in which you should fill in:
-
-**Account Type**:	      Standard
-**Full name**:		E-goc tester
-**Username**		      egov
-
-* Click on Enable password and type in a password.
 
