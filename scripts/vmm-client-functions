@@ -291,7 +291,23 @@ start_vbox_headless()
     fi
     debug "start_vbox_headless()"
     debug "start_vbox_headless: vboxheadless -s  \"$VM_NAME\""
-    vboxheadless -s  "$VM_NAME" 2>/dev/null >/dev/null &
+    ERR_FILE=$$.vbm-err
+    rm -f $ERR_FILE
+    vboxheadless -s  "$VM_NAME"  2> $ERR_FILE  >/dev/null  &
+
+    sleep 5
+    ERROR_FOUND=$(grep -i -e "error" $ERR_FILE  | wc -l)
+
+    if [ "$ERROR_FOUND" != "0" ]
+    then   
+	debug "Could not start vbox (headless). Error message:"
+	debug "$(cat $ERR_FILE)"
+	rm -f $ERR_FILE
+	return 1
+    fi
+
+    rm -f $ERR_FILE
+
     return 0
 }
 
@@ -390,11 +406,23 @@ start_vbox()
 	debug "Could not find vbox image: $PROC_EXPR"
 	return 1
     fi
-    VBoxManage startvm "$VM_NAME"   2>/dev/null >/dev/null &
+    ERR_FILE=$$.vbm-out
+    rm -f $ERR_FILE
+    VBoxManage startvm "$VM_NAME"  2> $ERR_FILE  >/dev/null &
 
+    sleep 3
+    ERROR_FOUND=$(grep -e "error" $ERR_FILE  | grep -e "exit code" | wc -l)
+    if [ "$ERROR_FOUND" != "0" ]
+    then   
+	debug "Could not start vbox. Error message:"
+	debug "$(cat $ERR_FILE)"
+	rm -f $ERR_FILE
+	return 1
+    fi
 
-    sleep 2
+    rm -f $ERR_FILE
     maximise_vbox "$VM_NAME"
+    return 0
 }
 
 start_android()
@@ -585,7 +613,7 @@ check_android_proc()
 check_vbox_proc()
 {
     PROC_EXPR=$1
-    RET=$(ps auxww | grep -i virtualbox | grep -c $PROC_EXPR )
+    RET=$(ps -u hesa awww | grep -i virtualbox | grep -c $PROC_EXPR )
 
     debug "Number of vbox processes: $RET"
     
@@ -907,9 +935,19 @@ start_helper()
 	    if [ "$START_ARGS" = "headless"  ]
 	    then
 		start_vbox_headless $VM_NAME
+		RET=$?
 	    else
 		start_vbox $VM_NAME
+		RET=$?
 	    fi
+
+	    if [ $RET -ne 0 ]
+		then
+		debug "Failed to start: $VM_NAME"
+		echo "Failed to start: $VM_NAME"
+		return 1
+	    fi
+
 
 	    check_vbox_proc $VM_NAME
 	    RET=$?

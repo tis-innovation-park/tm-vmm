@@ -54,6 +54,16 @@ build_project()
     then
 
 
+    $ATS --client-exec    $MACHINE "rm -fr searduino"
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    $ATS --client-exec    $MACHINE "git clone git://git.savannah.nongnu.org/searduino.git"
+    if [ $? -ne 0 ] ; then return 1 ;  fi
+
+    $ATS --client-exec    $MACHINE "cd searduino && make -f Makefile.git"
+    
+    fi
+    
     $VMM --client-exec    $MACHINE "rm -fr searduino"
     if [ $? -ne 0 ] ; then return 1 ;  fi
 
@@ -74,6 +84,7 @@ build_project()
     if [ $? -ne 0 ] ; then return 1 ;  fi
 
     $VMM --client-exec    $MACHINE "$INST_DIR/bin/verify-install.sh"
+
     if [ $? -ne 0 ] ; then return 1 ;  fi
 }
 
