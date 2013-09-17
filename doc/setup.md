@@ -49,6 +49,10 @@ Example usage of the option.
 
     `tm-vmm --create-client-conf  Debian-6.0`
 
+    `tm-vmm --create-client-conf  Nexus-10`
+
+It is assumed that Debian-6.0 and Nexus-10 is the name either a VirtualBox or Android image.
+
 ## Example of a client configuration:
 
 
