@@ -1957,3 +1957,40 @@ client_copy_file()
 
     return $RET
 }
+
+
+unlock_screen()
+{
+    CLIENT=$1
+    get_info_for_client "$1"
+
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    fi
+    RET=0
+    case $VM_TYPE in
+	"VirtualBox")
+	    echo "VBOX unlock screen"
+	    RET=1
+	    ;;
+	"qemu")
+	    echo "QEMU unlock screen"
+	    RET=1
+	    ;;
+	
+	"Android")
+	    exec_client_command $CLIENT "input keyevent 82"
+	    RET=$?
+	    ;;
+	
+	*)
+	    echo "Screenshots not implemented for $1"
+	    RET=1
+	    ;;
+    esac
+    
+    return $RET
+}
