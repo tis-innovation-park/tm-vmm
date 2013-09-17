@@ -1153,29 +1153,43 @@ is_client_x11_up()
 {
     WANTED_VM=$1
 
-    exec_client_command $1 "DISPLAY=:0 xdpyinfo 2>/dev/null >/dev/null "
-    return $?
-
     CLIENT_FOUND=false
     WANTED_VM=$1
 
     get_info_for_client $1
-#    CLIENT_FOUND=$?
 
     if [ "$CLIENT_FOUND" = "false" ]
     then
 	echo "No client configuration found for: $1"
 	return 120
-    else
-	debug "Check if Client X11 is up"
-	$SSH $SSH_TEST_OPTIONS \
-            -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS DISPLAY=:0 xdpyinfo \
-            2>/dev/null >/dev/null  
-
-	RET=$?
-	debug "  Returning: $RET"
-	return $RET
     fi
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    debug "Check if Client X11 is up"
+	    exec_client_command $1 "DISPLAY=:0 xdpyinfo 2>/dev/null >/dev/null 2>/dev/null "
+	    RET=$?
+	    ;;
+	"qemu")
+	    echo "Can't check X11 on qemu"
+	    debug "Can't check X11 on qemu"
+	    RET=1
+	    ;;
+	"Android")
+	    echo "Can't check X11 on Android"
+	    debug "Can't check X11 on Android"
+	    RET=1
+	    ;;
+	*)
+	    debug "  Unknown vm type"
+	    echo "Failed finding vm type for $1"
+	    RET=1
+	    ;;
+    esac
+
+
+    debug "is_client_x11_up  Returning: $RET"
+    return $RET
 }
 
 #    Can be used with other VM's that require Internet access
