@@ -1,23 +1,24 @@
 ![](doc/pics/fscrs.png)
-# Testing Machine
 
-## About 
+# VMM - Virtual Machine Manager  
 
-Testingmachine is used to test eGovernment services.  The eGovernment
-services can vary from country to country but generally it grants
-citizens access to important documents and information. In most EU
-countries there are additional services like paying property tax that
-can be done online. Most governments in Europe are leaning in this
-direction in order to decrease administrative overhead.
+VMM is software that is part of the Testing Machine project.
 
+## About the Testing Machine project
 
+Testingmachine is primarily used to test eGovernment services.  The
+eGovernment services can vary from country to country but generally it
+grants citizens access to important documents and information. In most
+EU countries there are additional services like paying property tax
+that can be done online. Most governments in Europe are leaning in
+this direction in order to decrease administrative overhead.
 
 ## Reporting bugs
 
+Use the mailing list below to report bugs.
+
 Try to be as precise as possible when reporting bugs. The more
 information we get the bigger chance we have of fixing the problem.
-
-Use the mailing list below to report bugs.
 
 ## Getting involved
 
@@ -46,6 +47,18 @@ https://testingmachine.eu/
 
 Source code is located here:
 `https://github.com/tis-innovation-park/vmm`
+
+## Blog
+
+https://testingmachine.eu/blog
+
+## Social media
+
+### Twitter
+
+https://twitter.com/FSCRS
+
+
 
 ## Further reading
 Read about Testing Machine and Virtual Machine Manager in our manuals:
