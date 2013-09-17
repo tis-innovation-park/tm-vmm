@@ -907,9 +907,12 @@ find_vm_type()
 
     ANDROID_FOUND=$(list_android_machines  | grep -w $VM_NAME | wc -l)
 
+    debug "find_vm_type: VBOX_FOUND: $VBOX_FOUND"
+    debug "find_vm_type: ANDROID_FOUND: $ANDROID_FOUND"
+
     if [ $VBOX_FOUND -ne 0 ]
     then
-	export VM_TYPE="Android"
+	export VM_TYPE="VirtualBox"
     elif [ $ANDROID_FOUND -ne 0 ]
     then
 	export VM_TYPE="Android"
@@ -1946,8 +1949,9 @@ copy_to_host()
     fi
 
     case $VM_TYPE in
-	"VirtualBox")
-	    echo "copy vbox"
+	"VirtualBox")	
+	    debug "$SCP -r  $MY_SRC_LOC -P  $SSH_PORT $VM_USER@$VM_IP_ADDRESS:$MY_DST_LOC"
+	    $SCP -r  -P  $SSH_PORT $MY_SRC_LOC $VM_USER@$VM_IP_ADDRESS:$MY_DST_LOC
 	    ;;
     
 	"Android")
@@ -2088,45 +2092,127 @@ vbox_install_app()
 
     APP_SUF=$(get_suffix_from_file "$APP")
 
-    case $APP_SUF in
-	"deb")
-	    echo "VBOX install deb pkg: $APP"
-	    echo copy_to_host                $APP  $CLIENT "/tmp"
-	    echo exec_client_command_as_root $CLIENT "dpkg --install /tmp/$(basename $APP)"
+    if [ "$MODE" = "uninstall" ]
+    then
+	exec_client_command_as_root $CLIENT "dpkg --remove $APP"
+	RET=$?
+	
+    else
+
+	case $APP_SUF in
+	    "deb")
+		
+		copy_to_host                $APP  $CLIENT "/tmp"
+		RET=$?
+		if [ "$RET" != "0" ]; then return $RET; fi
+		
+		exec_client_command_as_root $CLIENT "dpkg --install /tmp/$(basename $APP)"
+		RET=$?
+		if [ "$RET" != "0" ]; then return $RET; fi
+		
+		exec_client_command_as_root $CLIENT "rm -f /tmp/$(basename $APP)"
+		RET=$?
+		
+		;;
+	    "rpm")
+		echo "VBOX install rpm pkg: $APP"
+		echo "VBOX install deb pkg: $APP"
+		copy_to_host                $APP  $CLIENT "/tmp"
+		exec_client_command_as_root $CLIENT "rpm --install /tmp/$(basename $APP)"
+		RET=1
+		;;
+	    *)
+		echo "Don't know how to install $APP_SUF packages"
+		RET=1
+		;;
+	esac
+    fi
+
+    return $RET
+}
+
+
+get_guest_os_for_client_vbox()
+{
+    CLIENT="$1"
+    GUEST_OS_TMP=$(vboxmanage showvminfo "$CLIENT" | grep "Guest OS:" | awk ' {print $3}')
+
+    echo $GUEST_OS_TMP
+    return 0
+}
+
+
+get_guest_os_for_client()
+{
+    CLIENT="$1"
+    get_info_for_client "$CLIENT"
+
+    export GUEST_OS=""
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    GUEST_OS=$(get_guest_os_for_client_vbox "$CLIENT")
+	    RET=$?
+	    ;;
+	"qemu")
+	    echo "QEMU get_guest_os_for_client()"
 	    RET=1
 	    ;;
-	"rpm")
-	    echo "VBOX install rpm pkg: $APP"
-	    echo "VBOX install deb pkg: $APP"
-	    copy_to_host                $APP  $CLIENT "/tmp"
-	    exec_client_command_as_root $CLIENT "rpm --install /tmp/$(basename $APP)"
+	
+	"Android")
+	    echo "Android get_guest_os_for_client()"
+	    RET=$?
+	    ;;
+	
+	*)
+	    echo "get_guest_os_for_client() not implemented for $VM_TYPE"
+	    RET=1
+	    ;;
+    esac
+    
+    return $RET
+} 
+
+
+vbox_uninstall_app()
+{
+    CLIENT=$1
+    APP=$2
+    MODE=$3
+
+    get_info_for_client "$CLIENT"
+
+    get_guest_os_for_client "$CLIENT"
+
+    
+    case $GUEST_OS in
+	"Ubuntu")
+	    exec_client_command_as_root $CLIENT "dpkg --remove $APP"
+	    RET=$?
+	    
+	    ;;
+	"Fedora")
+	    echo "Fedora uninstall not implemented"
+	    RET=1
+	    ;;
+	"RedHat")
+	    echo "RedHat uninstall not implemented"
 	    RET=1
 	    ;;
 	*)
-	    echo "Don't know how to install $APP_SUF packages"
+	    echo "Don't know how to uninstall packages on $GUEST_OS"
 	    RET=1
 	    ;;
     esac
 
+    return $RET
 }
 
 
 uninstall_app()
 {
-    install_app "$1" "$2" "uninstall"
-}
-
-install_app()
-{
     CLIENT="$1"
     APP="$2"
-    INSTALL_MODE=$3
-
-    if [ "$INSTALL_MODE" = "" ]
-    then
-	INSTALL_MODE="install"
-    fi
-
 
     get_info_for_client "$1"
 
@@ -2138,8 +2224,49 @@ install_app()
     RET=0
     case $VM_TYPE in
 	"VirtualBox")
+	    echo "VBOX uninstall app: $APP"
+	    vbox_uninstall_app "$CLIENT" "$APP" 
+	    RET=$?
+	    ;;
+	"qemu")
+	    echo "QEMU uninstall app: $APP"
+	    RET=1
+	    ;;
+	
+	"Android")
+	    echo "Android uninstall app on $CLIENT  $APP"
+	    android_install_app "$CLIENT" "$APP" "uninstall"
+	    RET=$?
+	    ;;
+	
+	*)
+	    echo "Screenshots not implemented for $1"
+	    RET=1
+	    ;;
+    esac
+    
+    return $RET
+}
+
+
+install_app()
+{
+    CLIENT="$1"
+    APP="$2"
+
+    get_info_for_client "$1"
+
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    fi
+    RET=0
+    case $VM_TYPE in
+	"VirtualBox")
 	    echo "VBOX install app: $APP"
-	    vbox_install_app "$CLIENT" "$APP" "$INSTALL_MODE"
+	    vbox_install_app "$CLIENT" "$APP" 
 	    RET=1
 	    ;;
 	"qemu")
@@ -2149,7 +2276,7 @@ install_app()
 	
 	"Android")
 	    echo "Android install app on $CLIENT  $APP"
-	    android_install_app "$CLIENT" "$APP" "$INSTALL_MODE"
+	    android_install_app "$CLIENT" "$APP" "install"
 	    RET=$?
 	    ;;
 	
