@@ -30,6 +30,7 @@ SHARE_DIR=__SHARE_DIR__
 BIN_DIR=__BIN_DIR__
 TM_VERSION=__TM_VERSION__
 
+TM_MANUALS_DIR=../../tm-manuals
 
 #
 # Sources for manuals
@@ -123,3 +124,30 @@ doc-stat: $(PDF_FILES)
 	echo "Sizes:"
 	@du -sb $(PDF_FILES)
 
+release-doc:
+
+	echo "* Preparing release of docs *"
+	@test -d $(TM_MANUALS_DIR)
+	@make clean 
+	@make all
+	@test -d generated-files
+
+	@echo "* Copy docs"
+	@echo "  ** Copying User guide"
+	@test -d                                    $(TM_MANUALS_DIR)/User-Guide/
+	@cp generated-files/testingmachine-manual.* $(TM_MANUALS_DIR)/User-Guide/
+	@cp -r pics screenshots                     $(TM_MANUALS_DIR)/User-Guide/
+
+	@echo "  ** Copying Developer manual"
+	@test -d                                    $(TM_MANUALS_DIR)/Developer-Guide/
+	@cp generated-files/tm-developer.*          $(TM_MANUALS_DIR)/Developer-Guide/
+	@cp -r pics screenshots                     $(TM_MANUALS_DIR)/Developer-Guide/
+
+	@echo "  ** Copying Developer manual"
+	@test -d                                    $(TM_MANUALS_DIR)/Quick-Guide/
+	@cp generated-files/tm-quick-guide.*        $(TM_MANUALS_DIR)/Quick-Guide/
+	@cp -r pics screenshots                     $(TM_MANUALS_DIR)/Quick-Guide/
+
+	@echo "* Managaing git"
+	cd $(TM_MANUALS_DIR)/ && git add *
+	cd $(TM_MANUALS_DIR)/ && git push
