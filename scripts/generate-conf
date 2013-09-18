@@ -59,7 +59,8 @@ echo_android_client_conf()
     fi
     echo "ANDROID_SYS=$ANDROID_SYS"
 
-    echo "TODO: handle  CPU: $CPU_ARCH $CPU_MODEL   in a proper way :)"
+    echo "#CPU_ARCH=$CPU_ARCH"
+    echo "#CPU_MODEL=$CPU_MODEL"
 }
 
 create_vbox_client_conf()
@@ -106,8 +107,7 @@ create_android_client_conf()
 
     echo "Creating $CONF_NAME"
 
-    echo_android_client_conf $VM_MACHINE 
-#> $CONF_NAME
+    echo_android_client_conf $VM_MACHINE > $CONF_NAME
 
 }
 

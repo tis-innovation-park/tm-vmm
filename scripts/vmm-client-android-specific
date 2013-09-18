@@ -8,10 +8,11 @@ get_avd_name_for_port()
 {
     AVD_PORT=$1
     expect -c "spawn telnet localhost $AVD_PORT; expect \"OK\" ; send \"avd name\n\" ; expect OK" \
+        2>/dev/null \
 	| grep -v -e "^OK"  -e Trying  -e Connected \
 	          -e "Android Console" -e "Escape character" \
 	          -e "spawn telnet"    -e "avd name" \
-	| sed 's,[\n\r]*,,g'
+	| sed 's,[\n\r]*,,g' 
 }
 
 #
@@ -67,3 +68,37 @@ check_android_settings()
 
     return 0
 }
+
+
+exec_client_command_android()
+{
+    if [ "$2" = "" ];
+    then
+	debug "Missing parameter(s) to exec_client_command_android(). Got \"$*\""
+	return 1
+    fi
+
+    PORT=$1
+    COMMAND="$2"
+
+    debug "Will execute on Android ($PORT):  $COMMAND"
+    adb  -s emulator-$PORT shell $COMMAND
+    return $?
+}
+
+exec_client_raw_android()
+{
+    if [ "$2" = "" ];
+    then
+	debug "Missing parameter(s) to exec_client_raw_android(). Got \"$*\""
+	return 1
+    fi
+
+    PORT=$1
+    COMMAND="$2"
+
+    debug "Will execute on Android ($PORT):  $COMMAND"
+    adb  -s emulator-$PORT $COMMAND
+    return $?
+}
+

@@ -22,7 +22,7 @@
 # MA  02110-1301, USA.                                              
 #
 
-export BASE_TM_VERSION=0.11
+export BASE_TM_VERSION=0.12
 export DEFAULT_INSTALL_DIR=/usr/local
 export DEFAULT_BIN_DIR=bin
 export DEFAULT_SHARE_DIR=share/testingmachine

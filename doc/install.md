@@ -18,6 +18,8 @@
 
 * Virtualbox
 
+* Android
+
 * qemu
 
 We're looking into supporting: vmware, 

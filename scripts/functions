@@ -133,7 +133,7 @@ init_vmm()
 
     if [ "$ANDROID_ADT_PATH" != "" ] && [ "$ANDROID" != "" ]
     then   	 
-	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../../
+	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../
     fi
 
     if [ "$ANDROID_AVD_DIR" = "" ]
