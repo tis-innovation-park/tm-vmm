@@ -738,6 +738,11 @@ pause_helper()
 #sleep 10 ; VBoxManage controlvm Ubuntu-12.04 pause ; sleep 600 ; VBoxManage controlvm Ubuntu-12.04 resume ; ssh -p 9022  root@localhost ntpdate-debian	    kill_vbox $1
 	    ;;
 
+	"Android")
+            echo "Can't pause Android yet!"
+	    return 1
+	    ;;
+
 	"qemu")
             echo "Can't pause qemus yet!"
 	    return 1
