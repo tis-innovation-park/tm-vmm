@@ -1,1 +1,2 @@
-
+* Fixed a bug in vmm-client-functions not to make VBox clients be mistaken for
+  Androids (jonkri)
