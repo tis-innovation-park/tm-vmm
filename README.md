@@ -58,9 +58,12 @@ https://testingmachine.eu/blog
 
 https://twitter.com/FSCRS
 
+## Releases
 
+https://github.com/tis-innovation-park/tm-releases
 
 ## Further reading
+
 Read about Testing Machine and Virtual Machine Manager in our manuals:
 
 https://github.com/tis-innovation-park/tm-manuals
