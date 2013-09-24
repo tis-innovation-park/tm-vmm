@@ -1259,6 +1259,18 @@ is_client_x11_up()
 
 is_client_online()
 {
+    CLIENT_FOUND=false
+
+    get_info_for_client $1
+#    CLIENT_FOUND=$?
+    RET=1
+
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+	return 120
+    fi
+
     echo "Check if Client is online"
     debug "   ssh:     $SSH"
     debug "   options: $SSH_TEST_OPTIONS"
