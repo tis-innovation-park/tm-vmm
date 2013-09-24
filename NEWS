@@ -1,2 +1,2 @@
-* Fixed a bug in vmm-client-functions not to make VBox clients be mistaken for
-  Androids (jonkri)
+* VBox clients are no longer mistaken for Androids (jonkri)
+* $SSH now has a default value (jonkri)
