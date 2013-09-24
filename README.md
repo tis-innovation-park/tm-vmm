@@ -1,8 +1,9 @@
 ![](doc/pics/fscrs.png)
 
-# VMM - Virtual Machine Manager  
+# VMM - Virtual Machine Manager
 
-VMM is software that is part of the Testing Machine project.
+VMM is software that is part of the [Testing
+Machine](https://testingmachine.eu/) project.
 
 ## About the Testing Machine project
 
@@ -15,7 +16,8 @@ this direction in order to decrease administrative overhead.
 
 ## Reporting bugs
 
-Use the mailing list below to report bugs.
+Bugs can be reported to either the mailing-list or the [issues
+page](https://github.com/tis-innovation-park/vmm/issues?state=open).
 
 Try to be as precise as possible when reporting bugs. The more
 information we get the bigger chance we have of fixing the problem.
@@ -24,29 +26,26 @@ information we get the bigger chance we have of fixing the problem.
 
 *How to join:* clone the repo, try it out -- join the mailing list :)
 
-For more information read the developer guidelines.
+For more information read the [developer
+guidelines](https://github.com/tis-innovation-park/tm-manuals/blob/master/Developer-Guide/tm-developer.md).
 
 ## Mailing list
 
 We have one mailing list for the project:
-`  community@testingmachine.eu  `
+`community@testingmachine.eu`
 
 Join this list here:
-`https://lists.testingmachine.eu/cgi-bin/mailman/listinfo/community`
+[https://lists.testingmachine.eu/cgi-bin/mailman/listinfo/community](https://lists.testingmachine.eu/cgi-bin/mailman/listinfo/community)
 
 If you send emails to this list as a non subscriber chances are it
 will get lost. 
-
-If you want to report a bug:
-* use a github account and add an issue
-* subscribe to the mailing and send the report to the list
 
 ## Home page
 
 https://testingmachine.eu/
 
 Source code is located here:
-`https://github.com/tis-innovation-park/vmm`
+https://github.com/tis-innovation-park/vmm
 
 ## Blog
 
