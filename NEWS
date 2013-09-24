@@ -1,2 +1,3 @@
 * VBox clients are no longer mistaken for Androids (jonkri)
 * $SSH now has a default value (jonkri)
+* --check-client-online no longer faults with "Bad port '@'" (jonkri)
