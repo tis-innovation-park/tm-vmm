@@ -23,7 +23,7 @@
 
 echo_vbox_client_conf()
 {
-    VM_MACHINE=$1
+    VM_MACHINE="$1"
 
     echo VM_NAME=\"$VM_MACHINE\"
     echo VM_TYPE=\"VirtualBox\"
@@ -65,9 +65,10 @@ echo_android_client_conf()
 
 create_vbox_client_conf()
 {
-    VM_MACHINE=$1
+    VM_MACHINE="$1"
+    VM_MACHINE_NOBLANKS="${1/ /_}"
 
-    CONF_NAME=${PERSONAL_ETC_DIR}/clients/$VM_MACHINE.conf
+    CONF_NAME=${PERSONAL_ETC_DIR}/clients/$VM_MACHINE_NOBLANKS.conf
 
     if [ -f $CONF_NAME ]
 	then
@@ -83,15 +84,16 @@ create_vbox_client_conf()
 
     echo "Creating $CONF_NAME"
 
-    echo_vbox_client_conf $VM_MACHINE > $CONF_NAME
+    echo_vbox_client_conf "$VM_MACHINE" > $CONF_NAME
 
 }
 
 create_android_client_conf()
 {
-    VM_MACHINE=$1
+    VM_MACHINE="$1"
+    VM_MACHINE_NOBLANKS="${1/ /_}"
 
-    CONF_NAME=${PERSONAL_ETC_DIR}/clients/$VM_MACHINE.conf
+    CONF_NAME=${PERSONAL_ETC_DIR}/clients/$VM_MACHINE_NOBLANKS.conf
 
     if [ -f $CONF_NAME ]
 	then
@@ -114,7 +116,7 @@ create_android_client_conf()
 
 create_client_conf()
 {
-    VM_MACHINE=$1
+    VM_MACHINE="$1"
 
     find_vm_type $VM_MACHINE
 
@@ -123,7 +125,7 @@ create_client_conf()
 	echo "Couldn't find type for machine \"$VM_MACHINE\""
     elif [ "$VM_TYPE" = "VirtualBox" ]
     then
-	create_vbox_client_conf $VM_MACHINE
+	create_vbox_client_conf "$VM_MACHINE"
     elif [ "$VM_TYPE" = "Android" ]
     then
 	create_android_client_conf $VM_MACHINE

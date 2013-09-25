@@ -37,7 +37,9 @@ fi
 list_vbox_machines()
 {
     debug "Listing vbox machines"
-    VB_NAMES=$(vboxmanage list vms | awk ' { printf "%s\n", $1}' | sed 's,\",,g')
+    VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
+    SAVED_FS=$IFS
+    export IFS=";"
     for VB_NAME in $VB_NAMES
     do
 	FOUND=false
@@ -65,6 +67,7 @@ list_vbox_machines()
 	    echo "   no virtualbox machines found"
 	fi
     done
+    IFS=$SAVED_IFS
 }
 
 
@@ -149,9 +152,11 @@ list_clients()
 list_running_vbox()
 {
     echo "  VirtualBox"
-    VB_NAME=$(vboxmanage list runningvms | awk ' { printf "%s", $1}' | sed 's,\",,g')
+    VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
     if [ "$VB_NAME" != "" ]
     then
+        SAVED_FS=$IFS
+    	export IFS=";"
 	for i in $VB_NAME
 	do
 	    FOUND=0
@@ -172,6 +177,7 @@ list_running_vbox()
     else
 	echo "   no virtualbox machines currently running"
     fi
+    IFS=$SAVED_IFS
 }
 
 list_running_vbox_machines()
@@ -180,6 +186,8 @@ list_running_vbox_machines()
     VB_NAME=$(vboxmanage list runningvms | awk ' { printf "%s", $1}' | sed 's,\",,g')
     if [ "$VB_NAME" != "" ]
     then
+        SAVED_FS=$IFS
+    	export IFS=";"
 	for i in $VB_NAME
 	do
 	    echo "  |--$i  "
@@ -198,6 +206,7 @@ list_running_vbox_machines()
 	    done
 	    if [ $FOUND -eq 0 ] ; then echo "    * avd is not in use"; fi
 	done
+	IFS=$SAVED_IFS
     else
 	echo "   no virtualbox machines currently running"
     fi
@@ -962,7 +971,7 @@ find_vm_type()
 {
     VM_NAME=$1
     
-    VBOX_FOUND=$(vboxmanage list vms | awk ' { print $1 } ' | sed 's,\",,g' | grep -w $VM_NAME | wc -l)
+    VBOX_FOUND=$(vboxmanage list vms | awk ' BEGIN { FS="\""}  { print $2 } ' | sed 's,\",,g' | grep -w $VM_NAME | wc -l)
 
     ANDROID_FOUND=$(list_android_machines  | grep -w $VM_NAME | wc -l)
 
@@ -1152,7 +1161,7 @@ is_vbox_up()
 
     debug "    is_vbox_up? "
 
-    CNT=$(vboxmanage list runningvms | awk ' { print $1 } ' | sed 's,\",,g' | grep $WANTED_VM | wc -l)
+    CNT=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""}  { print $2 } ' | sed 's,\",,g' | grep $WANTED_VM | wc -l)
     
     debug "    is_vbox_up: $CNT"
 
