@@ -76,9 +76,9 @@ create_vbox_client_conf()
 	return 1
     fi
 
-    if [ ! -d ${PERSONAL_ETC_DIR} ]
+    if [ ! -d ${PERSONAL_ETC_DIR}/clients ]
     then
-	mkdir -p ${PERSONAL_ETC_DIR}
+	mkdir -p ${PERSONAL_ETC_DIR}/clients
     fi
 
     echo "Creating $CONF_NAME"
@@ -100,9 +100,9 @@ create_android_client_conf()
 	return 1
     fi
 
-    if [ ! -d ${PERSONAL_ETC_DIR} ]
+    if [ ! -d ${PERSONAL_ETC_DIR}/clients ]
     then
-	mkdir -p ${PERSONAL_ETC_DIR}
+	mkdir -p ${PERSONAL_ETC_DIR}/clients
     fi
 
     echo "Creating $CONF_NAME"

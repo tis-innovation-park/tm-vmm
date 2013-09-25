@@ -40,6 +40,10 @@ get_avd_port_for_name()
 
 get_connected_avds() 
 {
+    check_android_settings hard
+    RET=$?
+    if [ $RET -ne 0 ] ; then return $RET; fi
+
     $ADB devices | grep -v "List of devices attached" | \
 	grep -v "^[ \t]*$"   | \
 	awk ' { print $1 } ' | \
@@ -51,9 +55,9 @@ get_connected_avds_ports()
     get_connected_avds | sed -e "s,[ \t]*emulator\-,,g" 
 }
 
-check_android_settings()
-{
 
+setup_android()
+{
     # Set up Android path stuff
     if [ "$ANDROID_ADT_PATH" != "" ] && [ "$ANDROID" != "" ]
     then   	 
@@ -75,31 +79,44 @@ check_android_settings()
     then   	 
 	ADB=$ANDROID_ADT_PATH/sdk/platform-tools/adb2
     fi
+}
 
-##  
+check_android_settings()
+{
+    CHECK_MODE=$1
 
     if [ "$ANDROID" = "" ] || [ ! -x $ANDROID ]
     then   	 
-	echo "no android command found"
+	if [ "$CHECK_MODE" = "true" ] ; then
+	    echo "no android command found"
+	fi
+	debug "no android command found"
 	return 1
     fi
 
 
     if [ "$ADB" = "" ] || [ ! -x $ADB ]
     then   	 
-	echo "no adb command found"
+	if [ "$CHECK_MODE" = "true" ] ; then
+	    echo "no android command found"
+	fi
+	debug "no adb command found"
 	return 1
     fi
 
 
     if [ "$ANDROID_ADT_PATH" = "" ]
     then   	 
-	echo "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
+	if [ "$CHECK_MODE" = "true" ] ; then
+	    echo "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
+	fi
+	debug "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
 	return 1
     fi
 
     return 0
 }
+
 
 
 exec_client_command_android()
@@ -112,6 +129,10 @@ exec_client_command_android()
 
     PORT=$1
     COMMAND="$2"
+
+    check_android_settings hard
+    RET=$?
+    if [ $RET -ne 0 ] ; then return $RET; fi
 
     debug "Will execute on Android ($PORT):  $COMMAND"
     $ADB  -s emulator-$PORT shell $COMMAND
@@ -128,6 +149,10 @@ exec_client_raw_android()
 
     PORT=$1
     COMMAND="$2"
+
+    check_android_settings hard
+    RET=$?
+    if [ $RET -ne 0 ] ; then return $RET; fi
 
     debug "Will execute on Android ($PORT):  $COMMAND"
     $ADB  -s emulator-$PORT $COMMAND

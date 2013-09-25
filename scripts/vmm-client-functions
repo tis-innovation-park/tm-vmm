@@ -70,7 +70,7 @@ list_vbox_machines()
 
 list_android_machines()
 {
-    check_android_settings
+    check_android_settings hard
     RET=$?
     if [ $RET -ne 0 ] ; then return $RET; fi
 
@@ -447,14 +447,37 @@ start_android()
     export PROC_EXPR=$1
     debug "Start android: $VM_NAME"
 
-    $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR  -netspeed full -netdelay none &
+    check_android_settings hard
+    if [ "$?" != "0" ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	return 1
+    fi 
 
+    if [ ! -x $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	echo "Could not find $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS"
+	return 1
+    fi
+
+    $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR  -netspeed full -netdelay none &
 }
 
 start_android_headless()
 {
     export PROC_EXPR=$1
     debug "Start android in headless mode: $VM_NAME"
+
+    check_android_settings hard
+    if [ "$?" != "0" ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	return 1
+    fi 
+
+    if [ ! -x $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	echo "Could not find $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS"
+	return 1
+    fi
 
     $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR  -netspeed full -netdelay none -no-window &
 }
@@ -586,10 +609,24 @@ stop_android()
     VB_NAME=$1
     debug "Stopping Android $VM_NAME"
 
+    check_android_settings hard
+    if [ "$?" != "0" ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	return 1
+    fi 
+
+    if [ ! -x $ADB ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	echo "Could not find adb"
+	return 1
+    fi
+
+
+
     if [ "$VB_NAME" != "" ]
     then
 	debug "Killing Android $VB_NAME"
-	adb  -s emulator-$ANDROID_PORT emu kill  >/dev/null 2>/dev/null
+	$ADB  -s emulator-$ANDROID_PORT emu kill  >/dev/null 2>/dev/null
 	
 	wait_for_state down 20 $VB_NAME
 
@@ -1134,6 +1171,20 @@ is_android_up()
 {
     export WANTED_VM=$1
 
+
+    check_android_settings hard
+    if [ "$?" != "0" ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	return 1
+    fi 
+
+    if [ ! -x $ADB ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	echo "Could not find adb"
+	return 1
+    fi
+
+
     debug "    get_info_for_client $1"
     get_info_for_client "$1"
 
@@ -1144,7 +1195,7 @@ is_android_up()
     fi
 
     debug "    is_android_up? adb  -s emulator-$ANDROID_PORT shell ls"
-    adb  -s emulator-$ANDROID_PORT shell ls >/dev/null 2>/dev/null
+    $ADB  -s emulator-$ANDROID_PORT shell ls >/dev/null 2>/dev/null
     RET=$?
     
     debug "    is_android_up: $CNT"
@@ -1792,9 +1843,21 @@ vbox_snapshot()
 
 android_snapshot()
 {
+    check_android_settings hard
+    if [ "$?" != "0" ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	return 1
+    fi 
+
+    if [ ! -x $ADB ] ; then
+	echo "Android commands doesn't seem to be set up correctly."
+	echo "Could not find adb"
+	return 1
+    fi
+
 
     # COmmand line fron http://blog.shvetsov.com/2013/02/grab-android-screenshot-to-computer-via.html
-    adb  -s emulator-$1 shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > $2
+    $ADB  -s emulator-$1 shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > $2
 }
 
 rename_screenshot_name()
@@ -1953,9 +2016,21 @@ copy_from_host()
 	    ;;
     
 	"Android")
+
+	    check_android_settings hard
+	    if [ "$?" != "0" ] ; then
+		echo "Android commands doesn't seem to be set up correctly."
+		return 1
+	    fi 
+	    
+	    if [ ! -x $ADB ] ; then
+		echo "Android commands doesn't seem to be set up correctly."
+		echo "Could not find adb"
+		return 1
+	    fi
 	    debug "copy android"
 	    debug "     adb  -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC"
-	    adb  -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC
+	    $ADB  -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC
 	    ;;
 	*)
 	    echo "copy not supported"
@@ -1989,9 +2064,21 @@ copy_to_host()
 	    ;;
     
 	"Android")
+
+	    check_android_settings hard
+	    if [ "$?" != "0" ] ; then
+		echo "Android commands doesn't seem to be set up correctly."
+		return 1
+	    fi 
+
+	    if [ ! -x $ADB ] ; then
+		echo "Android commands doesn't seem to be set up correctly."
+		echo "Could not find adb"
+		return 1
+	    fi
 	    debug "copy android"
 	    debug "     adb  -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC"
-	    adb  -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC
+	    $ADB  -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC
 	    ;;
 	*)
 	    echo "copy not supported"
