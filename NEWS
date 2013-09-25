@@ -1,2 +1,7 @@
-* Fixed a bug in vmm-client-functions not to make VBox clients be mistaken for
-  Androids (jonkri)
+NEWS in coming 0.13
+
+  Bugfixes:
+
+  * Fixed a bug in vmm-client-functions not to make VBox clients be mistaken for
+    Androids (jonkri)
+
