@@ -8,7 +8,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 ### Variables 
 
-`LOG_FILE_DIR=/tmp/vmm/log` - sets the log file base directory to /tmp/vmm/log. This means that all logs can be found here.
+`LOG_FILE_DIR=/tmp/tm-vmm/log` - sets the log file base directory to /tmp/vmm/log. This means that all logs can be found here.
 
 `VM_STARTUP_TIMEOUT=10` - the time to wait for a virtual machine to start up before considering it to be 'dead'.
 
@@ -31,6 +31,12 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 `SSH_PORT=22` - the port where the SSH server is running on the client
 
 `SSH_SHUTDOWN_COMMAND="shutdown -h now"` - VVM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
+
+`ANDROID_ADT_PATH=/opt/adt-bundle-linux-x86_64-20130219` - Path to Android SDK installation. VMM will use this to find the commands adb and android. 
+
+`ANDROID=~/example/bin/android` - Specify the android command. This overrides the android command as found using the environment variable ANDROID_ADT_PATH.
+
+`ADB=~/example/bin/adb` - Specify the adb command. This overrides the android command as found using the environment variable ANDROID_ADT_PATH.
 
 
 # tm-vmm Command line options

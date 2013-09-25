@@ -125,22 +125,8 @@ init_vmm()
 	echo "Could not find file: $SCRIPT_DIR/loggers/debug-logger"
     fi
 
-    # Set up Android stuff
-    if [ "$ANDROID" = "" ]
-    then   	 
-	ANDROID=$(which android)
-    fi
-
-    if [ "$ANDROID_ADT_PATH" != "" ] && [ "$ANDROID" != "" ]
-    then   	 
-	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../
-    fi
-
-    if [ "$ANDROID_AVD_DIR" = "" ]
-    then
-	ANDROID_AVD_DIR=${HOME}/.android/avd/
-    fi
-
+    check_android_settings
+    
 
     INIT_DONE=1
 }

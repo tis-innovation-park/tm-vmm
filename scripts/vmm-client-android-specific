@@ -40,7 +40,7 @@ get_avd_port_for_name()
 
 get_connected_avds() 
 {
-    adb devices | grep -v "List of devices attached" | \
+    $ADB devices | grep -v "List of devices attached" | \
 	grep -v "^[ \t]*$"   | \
 	awk ' { print $1 } ' | \
 	sed  -e "s,[\n\r]*,,g"
@@ -53,9 +53,41 @@ get_connected_avds_ports()
 
 check_android_settings()
 {
+
+    # Set up Android path stuff
+    if [ "$ANDROID_ADT_PATH" != "" ] && [ "$ANDROID" != "" ]
+    then   	 
+	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../
+    fi
+
+    if [ "$ANDROID_AVD_DIR" = "" ]
+    then
+	ANDROID_AVD_DIR=${HOME}/.android/avd/
+    fi
+
+
+    # Set up Android command stuff
     if [ "$ANDROID" = "" ]
     then   	 
+	ANDROID=$ANDROID_ADT_PATH/sdk/tools/android
+    fi
+    if [ "$ADB" = "" ]
+    then   	 
+	ADB=$ANDROID_ADT_PATH/sdk/platform-tools/adb2
+    fi
+
+##  
+
+    if [ "$ANDROID" = "" ] || [ ! -x $ANDROID ]
+    then   	 
 	echo "no android command found"
+	return 1
+    fi
+
+
+    if [ "$ADB" = "" ] || [ ! -x $ADB ]
+    then   	 
+	echo "no adb command found"
 	return 1
     fi
 
@@ -82,7 +114,7 @@ exec_client_command_android()
     COMMAND="$2"
 
     debug "Will execute on Android ($PORT):  $COMMAND"
-    adb  -s emulator-$PORT shell $COMMAND
+    $ADB  -s emulator-$PORT shell $COMMAND
     return $?
 }
 
@@ -98,7 +130,7 @@ exec_client_raw_android()
     COMMAND="$2"
 
     debug "Will execute on Android ($PORT):  $COMMAND"
-    adb  -s emulator-$PORT $COMMAND
+    $ADB  -s emulator-$PORT $COMMAND
     return $?
 }
 

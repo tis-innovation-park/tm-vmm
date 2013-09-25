@@ -929,7 +929,7 @@ find_vm_type()
 
     ANDROID_FOUND=$(list_android_machines  | grep -w $VM_NAME | wc -l)
 
-    debug "find_vm_type: VBOX_FOUND: $VBOX_FOUND"
+    debug "find_vm_type: VBOX_FOUND:    $VBOX_FOUND"
     debug "find_vm_type: ANDROID_FOUND: $ANDROID_FOUND"
 
     if [ $VBOX_FOUND -ne 0 ]
