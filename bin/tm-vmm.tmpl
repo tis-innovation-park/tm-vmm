@@ -165,13 +165,6 @@ do
 	    shift
 	    ;;
 	
-	"--start-client-headless")
-	    VCLIENT=$2
-	    start_machine  $VCLIENT headless
-	    RET=$?
-	    shift
-	    ;;
-	
 	"--check-client-ssh")
 	    VCLIENT=$2
 	    check_client_ssh  $VCLIENT
@@ -218,15 +211,6 @@ do
 	    VCLIENT=$2
 	    COMMAND="$3"
 	    exec_client_command $VCLIENT "$COMMAND"
-	    RET=$?
-	    shift
-	    shift
-	    ;;
-
-	"--client-exec")
-	    VCLIENT=$2
-	    COMMAND="$3"
-	    exec_client_command $VCLIENT "$COMMAND" 
 	    RET=$?
 	    shift
 	    shift

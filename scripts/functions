@@ -24,6 +24,7 @@
 CONF_READ=false
 DEFAULT_LOG_DEBUG_DIR=/tmp/testing-machine/vmm/
 DEFAULT_LOG_FORMAT=txt
+DEFAULT_SSH=ssh
 INIT_DONE=0
 
 DEBUG=true
@@ -79,6 +80,11 @@ init_vmm()
     if [ $INIT_DONE -ne 0 ]
     then
 	return
+    fi
+
+    if [ "$SSH" = "" ]
+    then
+        SSH="$DEFAULT_SSH"
     fi
 
     if [ "$ETC_DIRS" = "" ]
