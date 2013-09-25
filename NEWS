@@ -9,7 +9,12 @@ NEWS in coming 0.13
   * Fixed a bug in vmm-client-functions not to make VBox clients be mistaken for
     Androids (jonkri)
 
-  * Github issue #21 "Android errors are suppressed"
+  * Github issue #21 "Android errors are suppressed" (hesa)
+
+  * Github issue #13 "create-client-conf function not working" (hesa)
+
+
+
 
 
 
