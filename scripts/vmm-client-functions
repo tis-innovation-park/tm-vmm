@@ -1087,6 +1087,7 @@ start_machine()
 {
     CLIENT_FOUND=false
     WANTED_VM=$1
+    START_ARGS="$2"
 
     get_info_for_machine $1
 
@@ -1095,7 +1096,7 @@ start_machine()
 	echo "No client configuration found for machine: $1"
 	return 111
     else
-	start_helper "$WANTED_VM" $VM_TYPE $CLI_CONF
+	start_helper "$WANTED_VM" $VM_TYPE $CLI_CONF $START_ARGS
     fi
 }
 
