@@ -152,12 +152,12 @@ list_clients()
 list_running_vbox()
 {
     echo "  VirtualBox"
-    VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
-    if [ "$VB_NAME" != "" ]
+    VB_NAMES=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
+    if [ "$VB_NAMES" != "" ]
     then
         SAVED_FS=$IFS
     	export IFS=";"
-	for i in $VB_NAME
+	for i in $VB_NAMES
 	do
 	    FOUND=0
 	    for dir in  $(echo $ETC_DIRS | sed 's, ,;,'g)
@@ -216,6 +216,7 @@ list_running_android()
 {
     echo "  Android"
     VB_NAME=$(get_connected_avds_ports)
+    export IFS=" "
     if [ "$VB_NAME" != "" ]
     then
 	for i in $VB_NAME
