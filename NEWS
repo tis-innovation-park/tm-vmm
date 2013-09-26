@@ -1,8 +1,16 @@
 NEWS in coming 0.13
 
+  New options:
+
+  --check-machine-status - checks the statuf of a machine (hesa) 
+
+
+  Fixes:
   * VBox clients are no longer mistaken for Androids (jonkri)
   * $SSH now has a default value (jonkri)
   * --check-client-online no longer faults with "Bad port '@'" (jonkri)
+  * --check-client-status now has an android implementation (hesa)
+  
 
   Bugfixes:
 
@@ -16,3 +24,4 @@ NEWS in coming 0.13
   * Github issue #18 "Virtual machine names can not have spaces in them" (hesa)
 
   * Fixed a bug which prohibited starting headless machines
+
