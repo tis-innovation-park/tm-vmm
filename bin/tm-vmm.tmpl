@@ -93,6 +93,7 @@ usage()
     echo "--resume-client CLIENT_NAME"
     echo "--check-client-ssh"
     echo "--check-client-status"
+    echo "--check-machine-status"
     echo "--check-machine"
     echo "--client-exec"
     echo "--client-exec-fail"
@@ -186,6 +187,14 @@ do
 	    shift
 	    ;;
 	
+	"--check-machine-status")
+	    VCLIENT="$2"
+	    check_machine_status  "$VCLIENT"
+	    RET=$?
+	    shift
+	    ;;
+	
+	    
 	"--check-machine")
 	    VCLIENT=$2
 	    check_machine  $VCLIENT

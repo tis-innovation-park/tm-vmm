@@ -77,7 +77,7 @@ setup_android()
     fi
     if [ "$ADB" = "" ]
     then   	 
-	ADB=$ANDROID_ADT_PATH/sdk/platform-tools/adb2
+	ADB=$ANDROID_ADT_PATH/sdk/platform-tools/adb
     fi
 }
 
@@ -85,9 +85,11 @@ check_android_settings()
 {
     CHECK_MODE=$1
 
+    setup_android
+
     if [ "$ANDROID" = "" ] || [ ! -x $ANDROID ]
     then   	 
-	if [ "$CHECK_MODE" = "true" ] ; then
+	if [ "$CHECK_MODE" = "hard" ] ; then
 	    echo "no android command found"
 	fi
 	debug "no android command found"
@@ -97,8 +99,8 @@ check_android_settings()
 
     if [ "$ADB" = "" ] || [ ! -x $ADB ]
     then   	 
-	if [ "$CHECK_MODE" = "true" ] ; then
-	    echo "no android command found"
+	if [ "$CHECK_MODE" = "hard" ] ; then
+	    echo "no adb command found"
 	fi
 	debug "no adb command found"
 	return 1
@@ -107,7 +109,7 @@ check_android_settings()
 
     if [ "$ANDROID_ADT_PATH" = "" ]
     then   	 
-	if [ "$CHECK_MODE" = "true" ] ; then
+	if [ "$CHECK_MODE" = "hard" ] ; then
 	    echo "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
 	fi
 	debug "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"

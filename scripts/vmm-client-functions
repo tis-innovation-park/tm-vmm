@@ -160,7 +160,7 @@ list_running_vbox()
 	for i in $VB_NAME
 	do
 	    FOUND=0
-	    for dir in  $ETC_DIRS
+	    for dir in  $(echo $ETC_DIRS | sed 's, ,;,'g)
 	    do
 		if [ -d $dir ]
 		then
@@ -172,7 +172,7 @@ list_running_vbox()
 		    done
 		fi
 	    done
-	    if [ $FOUND -eq 0 ] ; then echo "    * avd is not in use"; fi
+	    if [ $FOUND -eq 0 ] ; then echo "    * vbox is not in use"; fi
 	done
     else
 	echo "   no virtualbox machines currently running"
@@ -192,7 +192,7 @@ list_running_vbox_machines()
 	do
 	    echo "  |--$i  "
 	    FOUND=0
-	    for dir in  $ETC_DIRS
+	    for dir in  $(echo $ETC_DIRS | sed 's, ,;,'g)
 	    do
 		if [ -d $dir ]
 		then
@@ -204,7 +204,7 @@ list_running_vbox_machines()
 		    done
 		fi
 	    done
-	    if [ $FOUND -eq 0 ] ; then echo "    * avd is not in use"; fi
+	    if [ $FOUND -eq 0 ] ; then echo "    * vbox is not in use"; fi
 	done
 	IFS=$SAVED_IFS
     else
@@ -1550,6 +1550,14 @@ check_status_helper()
 	    debug "  status: $RET"
 	    return $RET
 	    ;;
+	"Android")
+	    debug "  check status with android"
+	    check_client_android "$WANTED_VM" 
+#> /dev/null
+	    RET=$?
+	    debug "  status: $RET"
+	    return $RET
+	    ;;
 	"qemu")
 	    debug "  check status with qemu"
 	    send_to_qemu "$WANTED_VM" "info status" > /dev/null
@@ -1587,6 +1595,35 @@ check_client_ssh()
 	debug "  status: $RET"
 	return $RET
 	return $?
+    fi
+}
+
+check_client_status()
+{
+    CLIENT_FOUND=false
+    WANTED_VM="$1"
+
+    debug "Checking status of $1"
+
+    get_info_for_client $1
+#    CLIENT_FOUND=$?
+
+    if [ "$CLIENT_FOUND" = "false" ]
+    then
+	echo "No client configuration found for: $1"
+	return 120
+    else
+	echo -n "Client \"$WANTED_VM\" status: "
+	check_status_helper "$WANTED_VM" "$VM_TYPE" "$CLI_CONF"
+	RET=$?
+	if [ "$RET" = "0" ]
+	then
+	    echo "running"
+	    return 0
+	fi
+	echo "not running"
+
+	return $RET
     fi
 }
 
@@ -1699,22 +1736,124 @@ exec_client_command_as_root()
     fi
 }
 
-check_machine()
+
+check_machine_vbox()
 {
-    CLIENT_FOUND=false
+    WANTED_VM=$1
+    RET=1
+    debug "Trying to find $WANTED_VM among vbox machines to check for status"
+    VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
+    SAVED_FS=$IFS
+    export IFS=";"
+    for VB_NAME in $VB_NAMES
+    do
+	FOUND=false
+	if [ "$VB_NAME" = "$WANTED_VM" ]
+	    then
+	    FOUND=true
+	    MACHINE_FOUND=true
+	    is_vbox_up $WANTED_VM
+	    RET=$?
+	fi
+    done
+    IFS=$SAVED_IFS
+}
+
+check_client_android()
+{
+    AVD_NAME="$1"
+    export IFS=";"
+    for dir in  $(echo $ETC_DIRS | sed 's, ,;,'g)
+    do
+#	echo "    dir: $dir"  
+	if [ -d $dir ]
+	then
+	    for vb in $(find $dir/clients -name $AVD_NAME.conf  )
+	    do
+#		echo "FONND: $vb"
+		AVD_MACHINE=$(grep VM_NAME $vb | sed -e 's,VM_NAME=,,g' -e 's,\",,g')
+		check_machine_android $AVD_MACHINE
+		RET=$?
+		break 
+	    done
+	fi
+    done
+    export IFS=""
+    return $RET
+}
+
+
+check_machine_android()
+{
     WANTED_VM=$1
 
-    get_info_for_machine $1
+    check_android_settings hard
+    RET=$?
+    if [ $RET -ne 0 ] ; then return $RET; fi
 
-    if [ "$CLIENT_FOUND" = "false" ]
-	then
-	echo "No client configuration found for machine: $1"
-	return 111
-    else
-	echo -n "Machine "
-	check_helper $VM_NAME $VM_TYPE $CLI_CONF
-    fi
+    debug "Trying to find $WANTED_VM among android avds to check for status"
+    VB_NAMES=$($ANDROID list avd | grep Name | sed -e 's,[ \t]*Name: ,,g'  | tr  '\n' ' ')
+
+#    SAVED_FS=$IFS
+    export IFS=" "
+    for VB_NAME in $VB_NAMES
+    do
+	FOUND=false
+	if [ "$VB_NAME" = "$WANTED_VM" ]
+	    then
+	    FOUND=true
+	    MACHINE_FOUND=true
+	    AP=$(get_avd_port_for_name $WANTED_VM)
+	    # Hard to get good info out of adb about avd status
+	    #   check files in root - if not 0 then ok  ... ehum
+	    LS_LEN=$(exec_client_command_android $AP ls  2>/dev/null | wc -l)
+	    if [ $LS_LEN -gt 0 ]
+		then
+		RET=0
+	    else
+		RET=1
+	    fi
+	fi
+    done
+
+    return $RET
 }
+
+check_machine_status()
+{
+    MACHINE_FOUND=false
+    WANTED_VM=$1
+
+    check_machine_vbox $WANTED_VM
+    RET=$?
+    if [ "$MACHINE_FOUND" != "false" ];
+	then
+	echo -n "Machine \"$WANTED_VM\" status: "
+	if [ "$RET" != "0" ]
+	then
+	    echo "not running"
+	else
+	    echo "running"
+	fi
+	return 0
+    fi
+
+    check_machine_android $WANTED_VM
+    RET=$?
+    if [ "$MACHINE_FOUND" != "false" ];
+	then
+	echo -n "Machine \"$WANTED_VM\" status: "
+	if [ "$RET" != "0" ]
+	then
+	    echo "not running"
+	else
+	    echo "running"
+	fi
+	return 0
+    fi
+
+}
+
 
 get_vbox_specific_info()
 {
