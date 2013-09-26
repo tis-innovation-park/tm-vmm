@@ -75,6 +75,9 @@ usage()
     echo "  --start-client-headless CLIENT_NAME"
     echo "    Start client called CLIENT_NAME as headless (no screen)"
     echo ""
+    echo "  --start-machine VM_NAME"
+    echo "    Start machine called VM_NAME"
+    echo ""
     echo "  --start-machine-headless VM_NAME"
     echo "    Start machine called VM_NAME as headless (no screen)"
     echo ""
@@ -166,6 +169,13 @@ do
 	    shift
 	    ;;
 	
+	"--start-machine-headless")
+	    VCLIENT=$2
+	    start_machine  $VCLIENT headless
+	    RET=$?
+	    shift
+	    ;;
+
 	"--check-client-ssh")
 	    VCLIENT=$2
 	    check_client_ssh  $VCLIENT
