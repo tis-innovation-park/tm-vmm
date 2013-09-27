@@ -533,42 +533,42 @@ kill_vbox()
 
 stop_vbox()
 {
-    VB_NAME=$1
-    debug "Stopping vbox $VM_NAME"
+    VM_NAME=$1
+    debug "Stopping vbox $VB_NAME"
 
-
-    if [ "$VB_NAME" != "" ]
+    if [ "$VM_NAME" != "" ]
     then
 
 
                 #
                 #  Press ACPI powerbutton off
                 #
-	is_client_up $VM_NAME
+	is_vbox_up $VM_NAME
 	RET=$?
-	if [ "$RET" = "0" ]
+	if [ "$RET" != "0" ]
 	then
 	    return
 	fi
 
 	debug "  sending  acpipowerbutton off to $VB_NAME"
-	VBoxManage controlvm $VB_NAME acpipowerbutton off 2>/dev/null
-	wait_until_down $VB_NAME
-	
+	VBoxManage controlvm $VM_NAME acpipowerbutton off 2>/dev/null
+	wait_until_down $VM_NAME
 	
                 #
                 #  Do a "hard" poweroff
                 #
-	is_client_up $VM_NAME
+	is_vbox_up $VM_NAME
 	RET=$?
-	if [ "$RET" = "0" ]
+	if [ "$RET" != "0" ]
 	then
+	    debug "this happens"
 	    return
 	fi
+        debug "then this happens"
 
-	debug "  sending  poweroff to $VB_NAME"
-	VBoxManage controlvm $VB_NAME poweroff 2>/dev/null
-	wait_until_down $VB_NAME
+	debug "  sending  poweroff to $VM_NAME"
+	VBoxManage controlvm $VM_NAME poweroff 2>/dev/null
+	wait_until_down $VM_NAME
     fi
 }
 
@@ -692,37 +692,40 @@ stop_helper()
 
 
     debug "stop_helper: $VM_NAME"
-    debug "Reading client conf $CLI_CONF"
-    .  $CLI_CONF
 
-    is_client_ssh_up
-    RET=$?
-    if [ "$RET" != "0" ]
+    if [ "$CLI_CONF" != "" ]
     then
-	debug "Host $1 ssh seems down, no use stopping it via ssh. Continuing with closing the vm"
-    fi
-
-    if [ "$VM_SUPERUSER" != "" ] && [ "$SSH_SHUTDOWN_COMMAND" != "" ] 
-    then
+	debug "Reading client conf $CLI_CONF"
+	. $CLI_CONF
 	is_client_ssh_up
 	RET=$?
-	if [ "$RET" = "0" ]
-	then
-	    debug "Super user account available"
-	    debug "  trying to stop via ssh"
-	    $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND
-	    RET=$?
-	fi
-	
 	if [ "$RET" != "0" ]
 	then
-	    debug "Failed stopping client with ssh"
-	    debug "   Command: $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND"
-	else
-	    wait_until_down $WANTED_VM
+	    debug "Host $1 ssh seems down, no use stopping it via ssh. Continuing with closing the vm"
+	fi
+
+	if [ "$VM_SUPERUSER" != "" ] && [ "$SSH_SHUTDOWN_COMMAND" != "" ] 
+	then
+	    is_client_ssh_up
+	    RET=$?
+	    if [ "$RET" = "0" ]
+	    then
+		debug "Super user account available"
+		debug "  trying to stop via ssh"
+		$SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND
+		RET=$?
+	    fi
+	    
+	    if [ "$RET" != "0" ]
+	    then
+		debug "Failed stopping client with ssh"
+		debug "   Command: $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND"
+	    else
+		wait_until_down $WANTED_VM
+	    fi
 	fi
     fi
-    
+   
     debug "Stop $1 using virtual machine ($VM_TYPE)"
 
     case $VM_TYPE in
@@ -730,7 +733,6 @@ stop_helper()
 	    debug "Stoping vbox $1"
 	    stop_vbox $1
 	    kill_vbox $1
-
 
 	    check_vbox_proc $1
 	    RET=$?
@@ -773,8 +775,12 @@ pause_helper()
     CLI_CONF=$3
 
     debug "pause_helper: $VM_NAME"
-    debug "Reading client conf $CLI_CONF"
-    .  $CLI_CONF
+
+    if [ "$CLI_CONF" != "" ]
+    then
+	debug "Reading client conf $CLI_CONF"
+	. $CLI_CONF
+    fi
 
     debug "Pause $1 using virtual machine ($VM_TYPE)"
 
@@ -809,8 +815,12 @@ resume_helper()
     CLI_CONF=$3
 
     debug "resume_helper: $VM_NAME"
-    debug "Reading client conf $CLI_CONF"
-    .  $CLI_CONF
+
+    if [ "$CLI_CONF" != "" ]
+    then
+	debug "Reading client conf $CLI_CONF"
+	. $CLI_CONF
+    fi
 
     debug "Resume $1 using virtual machine ($VM_TYPE)"
 
@@ -845,7 +855,7 @@ stop_machine()
 
     if [ "$CLIENT_FOUND" = "false" ]
 	then
-	echo "No client configuration found for machine: $1"
+	echo "No machine found: $1"
 	return 111
     else
 	debug "stop_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
@@ -891,7 +901,7 @@ pause_machine()
 
     if [ "$CLIENT_FOUND" = "false" ]
 	then
-	echo "No client configuration found for machine: $1"
+	echo "No machine found: $1"
 	return 111
     else
 	debug "pause_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
@@ -935,7 +945,7 @@ resume_machine()
 
     if [ "$CLIENT_FOUND" = "false" ]
 	then
-	echo "No client configuration found for machine: $1"
+	echo "No machine found: $1"
 	return 111
     else
 	debug "resume_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
@@ -998,8 +1008,11 @@ start_helper()
     CLI_CONF=$3
     START_ARGS=$4
 
-    debug "Reading client conf $CLI_CONF"
-    .  $CLI_CONF
+    if [ "$CLI_CONF" != "" ]
+    then
+	debug "Reading client conf $CLI_CONF"
+	. $CLI_CONF
+    fi
 
     case $VM_TYPE in
 	"VirtualBox")
@@ -1094,7 +1107,7 @@ start_machine()
 
     if [ "$CLIENT_FOUND" = "false" ]
 	then
-	echo "No client configuration found for machine: $1"
+	echo "No machine found: $1"
 	return 111
     else
 	start_helper "$WANTED_VM" $VM_TYPE $CLI_CONF $START_ARGS
@@ -1942,38 +1955,38 @@ get_info_for_client()
 
 get_info_for_machine()
 {
-    CLIENT_FOUND=false
-    WANTED_VM=$1
-
     debug "Trying to get info for machine: $1"
 
-    for d in $ETC_DIRS
-    do
-	debug "  dir:  $d"
-	for i in $(find $d/clients -name "*.conf" 2>/dev/null)
-	do
-	    debug "     f:  $i"
-	    
-	    export VM_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
-	    debug "        wanted: $WANTED_VM "
-	    debug "        found:  $VM_NAME"
-	    if [ "$VM_NAME" = "$WANTED_VM" ]
-	    then
-		CLI_CONF=$i
-		VM_TYPE=$(grep VM_TYPE $i | sed -e 's,VM_TYPE=,,g' -e 's,\",,g' )
-		CLIENT_FOUND=true
-		get_vm_specific_info
-	    fi
-	done
-	if [ "$CLIENT_FOUND" = "true" ]
-	then
-	    debug "  got info for $1: $VM_NAME, $VM_TYPE, $CLI_CONF"
-	    return 0
-	fi
-    done
+    CLIENT_FOUND=false
+    if [ 0 -eq $(vboxmanage list vms | awk ' { printf "%s\n", $1 }' | grep "\"$1\"" | wc -l) ]
+    then
+	# TODO: Implement support for Android machines (not clients) here.
 
-    debug "  got no info for $1"
-    return 1
+	# if [ 0 -eq $($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep TODO | wc -l) ]
+	# then
+	    echo "The machine $1 can not be found."
+	    debug "  got no info for $1"
+	    return 1
+	# else
+	    # VM_NAME=$1
+	    # VM_TYPE="Android"
+	    # WANTED_VM=$1
+	    # CLIENT_FOUND="true"
+	    
+	    # return 0
+	# fi
+    else
+	VM_NAME=$1
+	VM_TYPE="VirtualBox"
+	WANTED_VM=$1
+	CLIENT_FOUND="true"
+	return 0
+    fi
+
+    # check_android_settings hard
+    # RET=$?
+    # if [ $RET -ne 0 ] ; then return $RET; fi
+
 }
 
 
