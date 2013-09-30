@@ -1962,19 +1962,19 @@ get_info_for_machine()
     then
 	# TODO: Implement support for Android machines (not clients) here.
 
-	# if [ 0 -eq $($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep TODO | wc -l) ]
-	# then
+	if [ 0 -eq $($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep "$1" | wc -l) ]
+	then
 	    echo "The machine $1 can not be found."
 	    debug "  got no info for $1"
 	    return 1
-	# else
-	    # VM_NAME=$1
-	    # VM_TYPE="Android"
-	    # WANTED_VM=$1
-	    # CLIENT_FOUND="true"
+	else
+	    VM_NAME=$1
+	    VM_TYPE="Android"
+	    WANTED_VM=$1
+	    CLIENT_FOUND="true"
 	    
-	    # return 0
-	# fi
+	    return 0
+	fi
     else
 	VM_NAME=$1
 	VM_TYPE="VirtualBox"

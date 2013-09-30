@@ -25,6 +25,7 @@ CONF_READ=false
 DEFAULT_LOG_DEBUG_DIR=/tmp/testing-machine/vmm/
 DEFAULT_LOG_FORMAT=txt
 DEFAULT_SSH=ssh
+DEFAULT_ANDROID_SYS="emulator64-arm"
 INIT_DONE=0
 
 DEBUG=true
@@ -85,6 +86,11 @@ init_vmm()
     if [ "$SSH" = "" ]
     then
         SSH="$DEFAULT_SSH"
+    fi
+
+    if [ "$ANDROID_SYS" = "" ]
+    then
+        ANDROID_SYS="$DEFAULT_ANDROID_SYS"
     fi
 
     if [ "$ETC_DIRS" = "" ]
