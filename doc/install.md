@@ -44,9 +44,10 @@ We're looking into supporting: vmware,
 
   `cd vvm`
 
-* Configure the software
+* Configure the software (you can use --prefix=<installationdir> to
+  specify a non-default installation directory)
 
-  `./configure --prefix <installationdir>`
+  `./configure`
 
 * Build the software
 
@@ -56,12 +57,7 @@ We're looking into supporting: vmware,
 
   `sudo make install`
 
-* Verify the installation
+* Verify the installation (you might need to prepend the path to tm-vmm, if the
+  installation directory is not in your $PATH)
 
-  `<installationdir>/bin/tm-vmm --list-clients`
-
-
-
-
-
-
+  `tm-vmm --list-clients`

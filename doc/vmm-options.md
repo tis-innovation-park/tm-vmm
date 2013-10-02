@@ -46,45 +46,45 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `--list-clients` - lists all configured clients
 
-`--start-client CLIENT` - starts client name CLIENT
+`--start-client CLIENT_NAME` - starts client name CLIENT_NAME
 
 `--start-client-headless CLIENT_NAME` - Start client called CLIENT_NAME as headless (no screen)
 
-`--stop-clients CLIENT` - stops client named CLIENT
+`--stop-clients CLIENT_NAME` - stops client named CLIENT_NAME
 
 `--list-running-clients` - Lists all clients currently running
 
-`--check-client-ssh CLIENT` - Checks if ssh is up on CLIENT
+`--check-client-ssh CLIENT_NAME` - Checks if ssh is up on CLIENT_NAME
 
-`--check-client-status CLIENT` - Checks if clients is up and running
+`--check-client-status CLIENT_NAME` - Checks if clients is up and running
 
-`--client-exec CLIENT cmd` - Execeute cmd on client
+`--client-exec CLIENT_NAME cmd` - Execeute cmd on client
 
 `--client-exec-as-root` - Execeute cmd on client as root
 
-`--client-x11 CLIENT` - Checks if X11 is up and running on CLIENT
+`--client-x11 CLIENT_NAME` - Checks if X11 is up and running on CLIENT_NAME
 
-`--client-screenshot CLIENT` - Take a screenshot on CLIENT (not 100% ready)
+`--client-screenshot CLIENT_NAME` - Take a screenshot on CLIENT_NAME (not 100% ready)
 
-`--print-client CLIENT` - Print the configuration for CLIENT
+`--print-client CLIENT_NAME` - Print the configuration for CLIENT_NAME
 
-`--wait-for-ssh CLIENT` - Wait until ssh is up and running on CLIENT
+`--wait-for-ssh CLIENT_NAME` - Wait until ssh is up and running on CLIENT_NAME
 
-`--open-ssh CLIENT` - Open an interactive shell (using ssh) on CLIENT
+`--open-ssh CLIENT_NAME` - Open an interactive shell (using ssh) on CLIENT_NAME
 
-`--check-client-online CLIENT` - Check if CLIENT can ping the outside world
+`--check-client-online CLIENT_NAME` - Check if CLIENT_NAME can ping the outside world
 
 
 ## Machine options
 
 `  --list-machines` - lists all machines known to VVM
 
-`  --start-machine MACHINE` - starts machine named MACHINE
+`  --start-machine MACHINE_NAME` - starts machine named MACHINE
 
-` --start-machine-headless VM_NAME` - Start machine called VM_NAME as headless (no screen)
+` --start-machine-headless MACHINE_NAME` - Start machine called VM_NAME as headless (no screen)
 
-` --stop-machine MACHINE`  - stops machine named MACHINE
+` --stop-machine MACHINE_NAME`  - stops machine named MACHINE
 
-` --check-machine MACHINE` - checks status on machine named MACHINE
+` --check-machine MACHINE_NAME` - checks status on machine named MACHINE
 
 

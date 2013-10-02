@@ -5,6 +5,8 @@ NEWS in coming 0.13
   * --machine-* switches are no longer coupled with client configurations (hesa,
     jonkri)
 
+  * Improved documentation (hesa, jonkri)
+
   New options:
 
   --check-machine-status - checks the status of a machine (hesa) 

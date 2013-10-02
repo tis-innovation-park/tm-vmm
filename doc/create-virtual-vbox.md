@@ -56,8 +56,9 @@ In the VM Virtualbox Manager window click "New"
 
 ![File location and size](screenshots/vbox-file-location-and-size.png)
 
-
 Your disk has now been created. Before starting it we need to do some additional settings.
+
+![Network](screenshots/vbox-network-1.png)
 
 ### Network
 
@@ -82,10 +83,6 @@ The following settings should be applied to Adapter 1.
  the host computer. See http://www.virtualbox.org/manual/ Chapter 6
  for additional information on bridged networking.*
 
-![Network](screenshots/vbox-network-1.png)
-
-
-
 ##### Allowing SSH logins to your virtual machine
 
 Open up the VirtualBox Manager
@@ -106,8 +103,10 @@ Add a new rule by clicking the + sign. Enter
 ![Network](screenshots/vbox-network-port-forward.png)
 
 #### USB
-Make sure USB is enabled if you plan to use a smart card reader or another USB device 
 
+Make sure USB is enabled if you plan to use a smart card reader or another USB device.
+
+You might encounter an error saying "Failed to access the USB subsystem". In that case, you probably need to add yourself to the vboxusers group. On Ubuntu, this can done like this: <code>sudo adduser \`whoami\` vboxusers</code>.
 
 To use a smart card reader in your virtual machine you have to do the following:
 
@@ -144,6 +143,9 @@ To upgrade your system you need to:
 * Click install now
 * Enter password
 
+_Note:_ If the Software Updater icon is not available in the sidebar, you can press the "Win/Super" key and type "Software Updater" to start it.
+
+Ubuntu might require a restart when the update process is finished.
 
 #### Installing necessary tools in your virtual machine
 
