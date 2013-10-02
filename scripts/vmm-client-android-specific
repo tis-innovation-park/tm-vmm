@@ -31,7 +31,6 @@ get_avd_port_for_name()
 #	echo -n "   "
 	if [ "$AVD_FOUND" = "$AVD_NAME" ]
 	then
-#	    echo " ==========> $i"
 	    echo $i
 	fi
     done
@@ -60,9 +59,9 @@ setup_android()
 {
     # Set up Android path stuff
     if [ "$ANDROID_ADT_PATH" != "" ] && [ "$ANDROID" != "" ]
-    then   	 
+    then
 	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../
-    fi
+   fi
 
     if [ "$ANDROID_AVD_DIR" = "" ]
     then
@@ -86,7 +85,6 @@ check_android_settings()
     CHECK_MODE=$1
 
     setup_android
-
     if [ "$ANDROID" = "" ] || [ ! -x $ANDROID ]
     then   	 
 	if [ "$CHECK_MODE" = "hard" ] ; then
