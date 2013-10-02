@@ -1,12 +1,14 @@
 # Installation 
 
-##  Software requirement
+##  Software requirements
  
 * ssh (client)
 
 * at least one virtualization software (see list of supported softwares below)
 
 * bash
+
+* expect (command-line utility needed for the Android-specific functionality)
 
 ### Additional requirements for VMM developers
 
