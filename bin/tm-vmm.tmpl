@@ -176,6 +176,18 @@ do
 	    shift
 	    ;;
 
+	"--pause-machine")
+	    pause_machine $2
+	    shift
+	    shift
+            ;;
+
+	"--resume-machine")
+	    resume_machine $2
+	    shift
+            shift
+	    ;;
+
 	"--check-client-ssh")
 	    VCLIENT=$2
 	    check_client_ssh  $VCLIENT
