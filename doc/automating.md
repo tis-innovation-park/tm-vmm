@@ -1,4 +1,4 @@
-# Launching tests using VMM
+# Launching tests using vmm
 
 ## Using crontab
 

@@ -1,0 +1,153 @@
+#
+#                                                                   
+#                   Testing Machine
+#                      
+#   Copyright (C) 2012, 2013 TIS Innovation Park
+#                                                                   
+# This program is free software; you can redistribute it and/or     
+# modify it under the terms of the GNU General Public License       
+# as published by the Free Software Foundation; either version 3    
+# of the License, or any later version.                             
+#                                                                   
+#                                                                   
+# This program is distributed in the hope that it will be useful,   
+# but WITHOUT ANY WARRANTY; without even the implied warranty of    
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     
+# GNU General Public License for more details.                      
+#                                                                   
+# You should have received a copy of the GNU General Public License 
+# along with this program; if not, write to the Free Software       
+# Foundation, Inc., 51 Franklin Street, Boston,            
+# MA  02110-1301, USA.                                              
+#
+
+
+#
+# directory setup
+#
+INSTALL_DIR=/usr/local
+SHARE_DIR=/usr/local/share/testingmachine
+BIN_DIR=/usr/local/bin
+TM_VERSION=__TM_VERSION__
+
+TM_MANUALS_DIR=../../tm-manuals
+
+#
+# Sources for manuals
+#
+MD_SRC=egov-overview.md install.md setup.md egov-overview.md install.md setup.md using.md create-virtual.md examples.md contact.md devel.md  egov-detailed.md testingmachine-manual.md selenium.md  misc-tools.md automating.md vmm-options.md tm-quick-guide.md tm-features.md tm-developer.md tm-developer-intro.md tm-communication.md faq.md create-virtual-vbox.md create-virtual-android.md 
+
+#
+# Generated docs
+#
+GEN_DIR=generated-files/
+TESTINGMACHINE_MD=$(GEN_DIR)/testingmachine-manual.md
+QUICK_GUIDE_MD=$(GEN_DIR)/tm-quick-guide.md
+DEVEL_GUIDE_MD=$(GEN_DIR)/tm-developer.md
+FAQ_MD=$(GEN_DIR)/tm-faq.md
+
+GEN_SRC= $(DEVEL_MD) $(TESTINGMACHINE_MD) $(QUICK_GUIDE_MD) $(DEVEL_GUIDE_MD) $(FAQ_MD)
+PDF_FILES=$(GEN_SRC:.md=.pdf)
+HTML_FILES=$(GEN_SRC:.md=.html)
+MANUALS=$(PDF_FILES) $(HTML_FILES)
+
+all: $(PDF_FILES) $(HTML_FILES)
+
+#
+# Rules for pdf and html generation
+#
+%.pdf:%.md
+	pandoc  -N -o $@ $<
+# --section-divs  --chapters
+
+%.html:%.md
+	pandoc -s -S --toc -o $@ $<
+
+
+$(QUICK_GUIDE_MD): $(MD_SRC)
+	-mkdir -p $(GEN_DIR)
+	cp  tm-quick-guide.md       $@ 
+	cat  tm-about.md         >> $@ 
+	cat  tm-features.md      >> $@ 
+	cat  tm-quick-instructions.md          >> $@ 
+	cat  tm-communication.md >> $@ 
+	cat  using.md            >> $@ 
+
+$(DEVEL_GUIDE_MD): $(MD_SRC)
+	-mkdir -p $(GEN_DIR)
+	cp   tm-developer-intro.md  $@ 
+	cat  tm-about.md         >> $@ 
+	cat  tm-communication.md >> $@ 
+	cat  tm-developer.md     >> $@
+
+
+$(FAQ_MD): $(MD_SRC)
+	-mkdir -p $(GEN_DIR)
+	cp   faq.md $@
+
+$(TESTINGMACHINE_MD): $(MD_SRC)
+	-mkdir -p $(GEN_DIR)
+	cp   testingmachine-manual.md $@
+	cat  tm-about.md       >> $@ 
+	cat  egov-overview.md  >> $@ 
+	cat  tm-features.md    >> $@ 
+	cat  install.md        >> $@ 
+	cat  setup.md          >> $@ 
+	cat  using.md          >> $@ 
+	cat  selenium.md       >> $@ 
+	cat  misc-tools.md     >> $@ 
+	cat  automating.md     >> $@ 
+	cat  egov-detailed.md  >> $@ 
+	cat  create-virtual.md >> $@
+	cat  create-virtual-vbox.md >> $@
+	cat  create-virtual-android.md >> $@
+	cat  examples.md       >> $@
+	cat  tm-communication.md >> $@ 
+#	cat  contact.md        >> $@
+	cat  vmm-options.md    >> $@
+
+
+pdf: $(PDF_FILES)
+
+$(PDF_FILES): $(GEN_SRC)
+$(HTML_FILES): $(GEN_SRC)
+
+clean:
+	@-rm -fr $(PDF_FILES)  $(GEN_DIR)
+
+install: $(MANUALS)
+	-mkdir -p $(SHARE_DIR)/doc/
+	cp $(MANUALS) $(SHARE_DIR)/doc/
+
+doc-stat: $(PDF_FILES)
+	$(foreach i,$(PDF_FILES), pdfinfo $i ;) 
+	echo "Sizes:"
+	@du -sb $(PDF_FILES)
+
+release-doc:
+
+	echo "* Preparing release of docs *"
+	@test -d $(TM_MANUALS_DIR)
+	@make clean 
+	@make all
+	@test -d generated-files
+
+	@echo "* Copy docs"
+	@echo "  ** Copying User guide"
+	@test -d                                    $(TM_MANUALS_DIR)/User-Guide/
+	@cp generated-files/testingmachine-manual.* $(TM_MANUALS_DIR)/User-Guide/
+	@cp -r pics screenshots                     $(TM_MANUALS_DIR)/User-Guide/
+
+	@echo "  ** Copying Developer manual"
+	@test -d                                    $(TM_MANUALS_DIR)/Developer-Guide/
+	@cp generated-files/tm-developer.*          $(TM_MANUALS_DIR)/Developer-Guide/
+	@cp -r pics screenshots                     $(TM_MANUALS_DIR)/Developer-Guide/
+
+	@echo "  ** Copying Developer manual"
+	@test -d                                    $(TM_MANUALS_DIR)/Quick-Guide/
+	@cp generated-files/tm-quick-guide.*        $(TM_MANUALS_DIR)/Quick-Guide/
+	@cp -r pics screenshots                     $(TM_MANUALS_DIR)/Quick-Guide/
+
+	@echo "* Managaing git"
+	cd $(TM_MANUALS_DIR)/ && git add *
+	cd $(TM_MANUALS_DIR)/ && git push

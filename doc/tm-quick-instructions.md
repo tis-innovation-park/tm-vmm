@@ -6,9 +6,9 @@
 
 ## Building and installing Virtual Machine Manager
 
-* Go to the vvm directory
+* Go to the vmm directory
 
-  `cd vvm`
+  `cd vmm`
 
 * Configure the software (you can use --prefix=<installationdir> to
   specify a non-default installation directory)

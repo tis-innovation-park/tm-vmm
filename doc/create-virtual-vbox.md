@@ -168,7 +168,7 @@ Log in to your virtual machine as the user you created during installation.
 
 ##### Setting up a new user
 
-VMM puts no restrictions or requirements on the name of the user in
+vmm puts no restrictions or requirements on the name of the user in
 your virtual machine. The user name “vmm” is given here as an
 example and will be used in all manual text below.
 

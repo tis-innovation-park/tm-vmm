@@ -1,4 +1,4 @@
-# Testing Machine VMM configuration
+# Testing Machine vmm configuration
 
 ## Configuration file syntax
 
@@ -12,7 +12,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `VM_STARTUP_TIMEOUT=10` - the time to wait for a virtual machine to start up before considering it to be 'dead'.
 
-`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately VMM will take down a machine with a `kill`.
+`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately vmm will take down a machine with a `kill`.
 
 `SSH=ssh` - the SSH program to use
 
@@ -30,9 +30,9 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `SSH_PORT=22` - the port where the SSH server is running on the client
 
-`SSH_SHUTDOWN_COMMAND="shutdown -h now"` - VVM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
+`SSH_SHUTDOWN_COMMAND="shutdown -h now"` - vmm will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
 
-`ANDROID_ADT_PATH=/opt/adt-bundle-linux-x86_64-20130219` - Path to Android SDK installation. VMM will use this to find the commands adb and android. 
+`ANDROID_ADT_PATH=/opt/adt-bundle-linux-x86_64-20130219` - Path to Android SDK installation. vmm will use this to find the commands adb and android. 
 
 `ANDROID=~/example/bin/android` - Specify the android command. This overrides the android command as found using the environment variable ANDROID_ADT_PATH.
 
@@ -101,7 +101,7 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 ## Machine options
 
-`  --list-machines` - lists all machines known to VVM
+`  --list-machines` - lists all machines known to vmm
 
 `  --start-machine MACHINE_NAME` - starts machine named MACHINE
 
