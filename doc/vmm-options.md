@@ -74,6 +74,30 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `--check-client-online CLIENT_NAME` - Check if CLIENT_NAME can ping the outside world
 
+`--pause-client CLIENT_NAME` - Pauses the running client
+
+`--resume-client CLIENT_NAME` - Resume the paused client
+
+`--client-exec-fail CLIENT_NAME CMD` - Executes a command on the client and turns it off upon failure
+
+`--create-client-conf CLIENT_NAME` - Creates client configuration
+
+`--snapshot-client CLIENT_NAME` - Takes a screen shot on the client (not implemented for VirtualBox)
+
+`--client-copy-file SRC DST` - Copies a file from a client to a host or from a host to a client; a host resource could be "~/myhostfile", and a client resource could be "[CLIENT_NAME]:~/myclientfile"
+
+`--is-client-up CLIENT_NAME` - Checks whether a client is running
+
+`--unlock-screen CLIENT_NAME` - Unlocks the screen of the virtual machine
+
+`--install-app CLIENT_NAME PACKAGE` - Installs application on virtual machine (APK, DEB or RPM); APK files are not yet transferred to client
+
+`--uninstall-app CLIENT_NAME APP_NAME` - Uninstalls application on virtual machine (APK, DEB or RPM)
+
+`--print-client-settings CLIENT_NAME` - Prints the path to the client's configuration
+
+`--get-client-os CLIENT_NAME` - Displays the operating system of the client
+
 
 ## Machine options
 
@@ -87,4 +111,13 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 ` --check-machine MACHINE_NAME` - checks status on machine named MACHINE
 
+`--list-running-machines` - Lists all machines currently running
 
+`--pause-machine VM_NAME` - Pauses the running virtual machine
+
+`--resume-machine VM_NAME` - Resume the paused virtual machine
+
+
+## Other
+
+`--import-appliance APPLIANCE` - Imports an OVA file into VirtualBox (OVF, Open Virtualization Format, is a cross-platform standard for packaging ready-made virtual machines that can be imported to virtualizers, while OVA is the name of a tar archive file with the OVF directory inside)
