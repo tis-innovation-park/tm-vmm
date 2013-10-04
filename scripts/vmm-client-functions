@@ -1251,6 +1251,12 @@ is_client_up()
 	"VirtualBox")
 	    is_vbox_up $1
 	    RET=$?
+	    if [ $RET = 0 ]
+	    then
+		echo "$WANTED_VM is running."
+	    else
+		echo "Somthing wrong here."
+	    fi
 	    ;;
 
 	"Android")
@@ -2159,7 +2165,7 @@ import_appliance()
 
 }
 
-copy_from_host()
+copy_from_client()
 {
     MY_SRC_HOST=$1
     MY_SRC_LOC=$2
@@ -2176,6 +2182,7 @@ copy_from_host()
     case $VM_TYPE in
 	"VirtualBox")
 	    echo "copy vbox"
+	    $SCP -r -P $SSH_PORT $VM_USER@$VM_IP_ADDRESS:$MY_SRC_LOC $MY_DST_LOC
 	    ;;
     
 	"Android")
@@ -2206,14 +2213,13 @@ copy_from_host()
 } 
 
 
-copy_to_host()
+copy_to_client()
 {
     MY_SRC_LOC=$1
     MY_DST_HOST=$2
     MY_DST_LOC=$3
-
     get_info_for_client $MY_DST_HOST
-    
+
     if [ "$CLIENT_FOUND" = "false" ]
     then
 	echo "No client configuration found or client is not running: $1"
@@ -2223,7 +2229,7 @@ copy_to_host()
     case $VM_TYPE in
 	"VirtualBox")	
 	    debug "$SCP -r  $MY_SRC_LOC -P  $SSH_PORT $VM_USER@$VM_IP_ADDRESS:$MY_DST_LOC"
-	    $SCP -r  -P  $SSH_PORT $MY_SRC_LOC $VM_USER@$VM_IP_ADDRESS:$MY_DST_LOC
+	    $SCP -r -P $SSH_PORT $MY_SRC_LOC $VM_USER@$VM_IP_ADDRESS:$MY_DST_LOC
 	    ;;
     
 	"Android")
@@ -2283,13 +2289,13 @@ client_copy_file()
 	echo "Currently tm-vmm does not support copying from one client to another"
     elif [ "$SRC_HOST" != "" ]
     then
-	debug copy_from_host $SRC_HOST $SRC_LOC  $DST_LOC
-	copy_from_host $SRC_HOST $SRC_LOC  $DST_LOC
+	debug copy_from_client $SRC_HOST $SRC_LOC  $DST_LOC
+	copy_from_client $SRC_HOST $SRC_LOC  $DST_LOC
 	RET=$?
     elif [ "$DST_HOST" != "" ]
     then
-	debug copy_to_host   $SRC_LOC  $DST_HOST $DST_LOC
-	copy_to_host         $SRC_LOC  $DST_HOST $DST_LOC
+	debug copy_to_client   $SRC_LOC  $DST_HOST $DST_LOC
+	copy_to_client         $SRC_LOC  $DST_HOST $DST_LOC
 	RET=$?
     else
 	echo "uh oh"
@@ -2386,7 +2392,7 @@ vbox_install_app()
 	case $APP_SUF in
 	    "deb")
 		
-		copy_to_host                $APP  $CLIENT "/tmp"
+		copy_to_client                $APP  $CLIENT "/tmp"
 		RET=$?
 		if [ "$RET" != "0" ]; then return $RET; fi
 		
@@ -2401,7 +2407,7 @@ vbox_install_app()
 	    "rpm")
 		echo "VBOX install rpm pkg: $APP"
 		echo "VBOX install deb pkg: $APP"
-		copy_to_host                $APP  $CLIENT "/tmp"
+		copy_to_client                $APP  $CLIENT "/tmp"
 		exec_client_command_as_root $CLIENT "rpm --install /tmp/$(basename $APP)"
 		RET=1
 		;;
