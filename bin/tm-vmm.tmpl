@@ -97,7 +97,6 @@ usage()
     echo "--check-client-ssh"
     echo "--check-client-status"
     echo "--check-machine-status"
-    echo "--check-machine"
     echo "--client-exec"
     echo "--client-exec-fail"
     echo "--client-exec-as-root"
@@ -217,13 +216,6 @@ do
 	    ;;
 	
 	    
-	"--check-machine")
-	    VCLIENT=$2
-	    check_machine  $VCLIENT
-	    RET=$?
-	    shift
-	    ;;
-	
 	"--stop-client")
 	    VCLIENT=$2
 	    stop_client  $VCLIENT
