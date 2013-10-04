@@ -63,6 +63,8 @@ Example usage of the option.
 
 It is assumed that Debian-6.0 is a VirtualBox image.
 
+__Note:__ `--create-client-conf` will set the default value for the guest username to \`whoami\`. If your virtual machine uses some other username, you should modify the client configuration after running this command.
+
 ### Example of a client configuration:
 
 `   VM_NAME=Debian6.0`
@@ -118,6 +120,8 @@ Example usage of the option.
     `tm-vmm --create-client-conf  Nexus-10`
 
 It is assumed that Debian-6.0 and Nexus-10 is the name either a VirtualBox or Android image.
+
+__Note:__ `--create-client-conf` will set the default value for the guest username to \`whoami\`. If your virtual machine uses some other username, you should modify the client configuration after running this command.
 
 ### Example of a client configuration:
 
