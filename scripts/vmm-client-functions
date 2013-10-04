@@ -1780,6 +1780,7 @@ check_machine_vbox()
 	fi
     done
     IFS=$SAVED_IFS
+    return $RET
 }
 
 check_client_android()
@@ -2246,7 +2247,7 @@ copy_to_client()
 		return 1
 	    fi
 	    debug "copy android"
-	    debug "     adb  -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC"
+	    debug "     adb -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC"
 	    $ADB  -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC
 	    ;;
 	*)
