@@ -123,7 +123,7 @@ usage()
     echo "    Checks if X11 is up and running on the client called CLIENT_NAME"
     echo ""
     echo "  --client-screenshot CLIENT_NAME"
-    echo "    Takes a screenshot on the client called CLIENT_NAME"
+    echo "    Takes a screenshot on the client called CLIENT_NAME (not implemented for VirtualBox)"
     echo ""
     echo "  --print-client CLIENT_NAME"
     echo "    Prints the configuration for the client called CLIENT_NAME"
@@ -139,9 +139,6 @@ usage()
     echo ""
     echo "  --create-client-conf CLIENT_NAME"
     echo "    Creates the configuration for the client called CLIENT_NAME automatically"
-    echo ""
-    echo "  --snapshot-client CLIENT_NAME"
-    echo "    Takes a screen shot on the client called CLIENT_NAME (not implemented for VirtualBox)"
     echo ""
     echo "  --client-copy-file SRC DST"
     echo "    Copies a file from a client to a host or from a host to a client; a host resource could be '~/myhostfile', and a client resource could be '[CLIENT_NAME]:~/myclientfile'"
@@ -382,11 +379,6 @@ do
 	"--create-client-conf")
 	    create_client_conf "$2"
 	    shift
-	    shift
-	    ;;
-
-	"--snapshot-client")
-	    client_screenshot $2
 	    shift
 	    ;;
 
