@@ -44,80 +44,84 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 ## Client options
 
-`--list-clients` - lists all configured clients
+`--list-clients` - Lists all configured clients
 
-`--start-client CLIENT_NAME` - starts client name CLIENT_NAME
+`--start-client CLIENT_NAME` - Starts the client called CLIENT_NAME
 
-`--start-client-headless CLIENT_NAME` - Start client called CLIENT_NAME as headless (no screen)
+`--start-client-headless CLIENT_NAME` - Starts the client called CLIENT_NAME as headless (no screen)
 
-`--stop-clients CLIENT_NAME` - stops client named CLIENT_NAME
+`--stop-clients CLIENT_NAME` - Stops the client called CLIENT_NAME
 
 `--list-running-clients` - Lists all clients currently running
 
-`--check-client-ssh CLIENT_NAME` - Checks if ssh is up on CLIENT_NAME
+`--check-client-ssh CLIENT_NAME` - Checks if ssh is up on the client called CLIENT_NAME
 
-`--check-client-status CLIENT_NAME` - Checks if clients is up and running
+`--check-client-status CLIENT_NAME` - Checks if the client called CLIENT_NAME is up and running
 
-`--client-exec CLIENT_NAME cmd` - Execeute cmd on client
+`--client-exec CLIENT_NAME COMMAND` - Execeutes the COMMAND on the client called CLIENT_NAME
 
-`--client-exec-as-root` - Execeute cmd on client as root
+`--client-exec-as-root CLIENT_NAME COMMAND` - Execeutes the COMMAND on the client called CLIENT_NAME as root
 
-`--client-x11 CLIENT_NAME` - Checks if X11 is up and running on CLIENT_NAME
+`--client-x11 CLIENT_NAME` - Checks if X11 is up and running on the client called CLIENT_NAME
 
-`--client-screenshot CLIENT_NAME` - Take a screenshot on CLIENT_NAME (not 100% ready)
+`--client-screenshot CLIENT_NAME` - Takes a screenshot on the client called CLIENT_NAME (not 100% ready)
 
-`--print-client CLIENT_NAME` - Print the configuration for CLIENT_NAME
+`--print-client CLIENT_NAME` - Prints the configuration for the client called CLIENT_NAME
 
-`--wait-for-ssh CLIENT_NAME` - Wait until ssh is up and running on CLIENT_NAME
+`--wait-for-ssh CLIENT_NAME TIMEOUT<optional>` - Waits until ssh is up and running on the client called CLIENT_NAME (Default TIMEOUT value is 120 if it is not set by the user)
 
-`--open-ssh CLIENT_NAME` - Open an interactive shell (using ssh) on CLIENT_NAME
+`--wait-for-client CLIENT_NAME TIMEOUT<optional>` - (Needs updating) (Default TIMEOUT value is 120 if it is not set by the user)
 
-`--check-client-online CLIENT_NAME` - Check if CLIENT_NAME can ping the outside world
+`--open-ssh CLIENT_NAME TIMEOUT<optional>` - Opens an interactive shell (using ssh) on the client called CLIENT_NAME (Default TIMEOUT value is 120 if it is not set by the user)
+
+`--check-client-online CLIENT_NAME` - Checks if the client called CLIENT_NAME can ping the outside world
 
 `--pause-client CLIENT_NAME` - Pauses the running client
 
-`--resume-client CLIENT_NAME` - Resume the paused client
+`--resume-client CLIENT_NAME` - Resumes the paused client
 
-`--client-exec-fail CLIENT_NAME CMD` - Executes a command on the client and turns it off upon failure
+`--client-exec-fail CLIENT_NAME COMMAND` - Executes the COMMAND on the client called CLIENT_NAME and turns it off upon failure
 
-`--create-client-conf CLIENT_NAME` - Creates client configuration
+`--create-client-conf CLIENT_NAME` - Creates the configuration for the client called CLIENT_NAME automatically
 
-`--snapshot-client CLIENT_NAME` - Takes a screen shot on the client (not implemented for VirtualBox)
+`--snapshot-client CLIENT_NAME` - Takes a screen shot on the client called CLIENT_NAME (not implemented for VirtualBox)
 
 `--client-copy-file SRC DST` - Copies a file from a client to a host or from a host to a client; a host resource could be "~/myhostfile", and a client resource could be "[CLIENT_NAME]:~/myclientfile"
 
-`--is-client-up CLIENT_NAME` - Checks whether a client is running
+`--is-client-up CLIENT_NAME` - Checks whether the client called CLIENT_NAME is running
 
-`--unlock-screen CLIENT_NAME` - Unlocks the screen of the virtual machine
+`--unlock-screen CLIENT_NAME` - Unlocks the screen of the virtual machine (Android only for now)
 
-`--install-app CLIENT_NAME PACKAGE` - Installs application on virtual machine (APK, DEB or RPM); APK files are not yet transferred to client
+`--install-app CLIENT_NAME PACKAGE` - Installs application PACKAGE on the client called CLIENT_NAME (APK, DEB or RPM); APK files are not yet transferred to the client
 
-`--uninstall-app CLIENT_NAME APP_NAME` - Uninstalls application on virtual machine (APK, DEB or RPM)
+`--uninstall-app CLIENT_NAME APP_NAME` - Uninstalls application APP_NAME on the client called CLIENT_NAME (APK, DEB or RPM)
 
 `--print-client-settings CLIENT_NAME` - Prints the path to the client's configuration
 
-`--get-client-os CLIENT_NAME` - Displays the operating system of the client
+`--get-client-os CLIENT_NAME` - Displays the operating system of the client called CLIENT_NAME
 
 
 ## Machine options
 
-`  --list-machines` - lists all machines known to vmm
+`  --list-machines` - Lists all machines known to vmm
 
-`  --start-machine MACHINE_NAME` - starts machine named MACHINE
+`  --start-machine MACHINE_NAME` - Starts machine named MACHINE
 
-` --start-machine-headless MACHINE_NAME` - Start machine called VM_NAME as headless (no screen)
+` --start-machine-headless MACHINE_NAME` - Starts machine called VM_NAME as headless (no screen)
 
-` --stop-machine MACHINE_NAME`  - stops machine named MACHINE
+` --stop-machine MACHINE_NAME`  - Stops machine named MACHINE
 
-` --check-machine MACHINE_NAME` - checks status on machine named MACHINE
+` --check-machine-status MACHINE_NAME` - Checks status on the machine called MACHINE_NAME
 
 `--list-running-machines` - Lists all machines currently running
 
-`--pause-machine VM_NAME` - Pauses the running virtual machine
+`--pause-machine MACHINE_NAME` - Pauses the running virtual machine
 
-`--resume-machine VM_NAME` - Resume the paused virtual machine
+`--resume-machine MACHINE_NAME` - Resumes the paused virtual machine
 
 
 ## Other
+
+`--version` - Checks the current version of the tm-vmm
 
 `--import-appliance APPLIANCE` - Imports an OVA file into VirtualBox (OVF, Open Virtualization Format, is a cross-platform standard for packaging ready-made virtual machines that can be imported to virtualizers, while OVA is the name of a tar archive file with the OVF directory inside)
