@@ -1255,7 +1255,7 @@ is_client_up()
 	    then
 		echo "$WANTED_VM is running."
 	    else
-		echo "Somthing wrong here."
+		echo "$WANTED_VM is not running."
 	    fi
 	    ;;
 
@@ -1410,12 +1410,12 @@ wait_for_state()
 	    if [ "$RET" = "0" ]
 	    then
 		BREAK=true
-	    fi
-	else
-	    if [ "$RET" != "0" ]
+	    elif [ "$RET" != "0" ]
 	    then
-		BREAK=true
+		BREAK=false
 	    fi
+#	elif [ "$EXPECTED_STATE" = "down" ] ? future use ?
+#	then
 	fi
 
 	debug "   Should we break? $BREAK  "
@@ -1467,18 +1467,18 @@ wait_for_ssh()
 
 	is_client_ssh_up
 	RET=$?
-
 	if [ "$EXPECTED_STATE" = "up" ]
 	then
 	    if [ "$RET" = "0" ]
 	    then
 		BREAK=true
-	    fi
-	else
-	    if [ "$RET" != "0" ]
+	    
+	    elif [ "$RET" != "0" ]
 	    then
-		BREAK=true
+		BREAK=false
 	    fi
+	# elif [ "$EXPECTED_STATE" = "down" ] ? in future ?
+	# then
 	fi
 
 	debug "   Should we break? $BREAK  "
