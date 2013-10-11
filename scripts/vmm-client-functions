@@ -38,7 +38,7 @@ list_vbox_machines()
 {
     debug "Listing vbox machines"
     VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
-    SAVED_FS=$IFS
+    SAVED_IFS=$IFS
     export IFS=";"
     for VB_NAME in $VB_NAMES
     do
@@ -155,7 +155,7 @@ list_running_vbox()
     VB_NAMES=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
     if [ "$VB_NAMES" != "" ]
     then
-        SAVED_FS=$IFS
+        SAVED_IFS=$IFS
     	export IFS=";"
 	for i in $VB_NAMES
 	do
@@ -186,15 +186,15 @@ list_running_vbox_machines()
     VB_NAME=$(vboxmanage list runningvms | awk ' { printf "%s", $1}' | sed 's,\",,g')
     if [ "$VB_NAME" != "" ]
     then
-        SAVED_FS=$IFS
+        SAVED_IFS=$IFS
     	export IFS=";"
 	for i in $VB_NAME
 	do
 	    echo "  |--$i  "
 	    FOUND=0
-	    for dir in  $(echo $ETC_DIRS | sed 's, ,;,'g)
+	    for dir in $(echo $ETC_DIRS | sed 's, ,;,'g)
 	    do
-		if [ -d $dir ]
+		if [ -d $dir/clients ]
 		then
 		    for vb in $(find $dir/clients -name *.conf | xargs grep -l $i )
 		    do
@@ -206,7 +206,7 @@ list_running_vbox_machines()
 	    done
 	    if [ $FOUND -eq 0 ] ; then echo "    * vbox is not in use"; fi
 	done
-	IFS=$SAVED_IFS
+        IFS=$SAVED_IFS
     else
 	echo "   no virtualbox machines currently running"
     fi
@@ -237,42 +237,42 @@ list_running_android()
 	    done
 	done
     else
-	echo "   no virtualbox machines currently running"
+	echo "   no android emulators currently running"
     fi
 }
 
 list_running_android_machines()
 {
-    echo "  Android"
+    echo " Android"
     VB_NAME=$(get_connected_avds_ports)
     if [ "$VB_NAME" != "" ]
     then
-	for i in $VB_NAME
-	do
+        for i in $VB_NAME
+        do
 	    AVD_NAME=$(get_avd_name_for_port $i)
-	    echo "  |-- $AVD_NAME  (using port $i)"
+	    echo " |-- $AVD_NAME (using port $i)"
 
 	    FOUND=0
-	    for dir in  $ETC_DIRS
+	    for dir in $(echo $ETC_DIRS)
 	    do
-		if [ -d $dir ]
-		then
+	        if [ -d $dir/clients ]
+	        then
 		    for vb in $(find $dir/clients -name *.conf | xargs grep -l $AVD_NAME )
 		    do
-			VB_SHORT_NAME=$(basename $vb)
-			echo "    |--$VB_SHORT_NAME  [$vb] (client)"  
-			FOUND=1
-		done
-		fi
+		        VB_SHORT_NAME=$(basename $vb)
+		        echo " |--$VB_SHORT_NAME [$vb] (client)"
+		        FOUND=1
+		    done
+	        fi
 	    done
-	    if [ $FOUND -eq 0 ] ; 
-	    then 
-		echo "    * avd is not registered as Testingmachine machine" ; 
-		echo "    * to create a configuration file, try: --create-client-conf $AVD_NAME" ; 
+	    if [ $FOUND -eq 0 ] ;
+	    then
+	        echo " * avd is not registered as Testingmachine machine" ;
+	        echo " * to create a configuration file, try: --create-client-conf $AVD_NAME" ;
 	    fi
-	done
+        done
     else
-	echo "   no virtualbox machines currently running"
+        echo " no virtualbox machines currently running"
     fi
 }
 
@@ -287,7 +287,9 @@ list_running_clients()
 list_running_machines()
 {
     echo "Running machines:"
+echo "dir_vmm=$dir"
     list_running_vbox_machines 
+echo "dir_vmm=$dir"
     list_running_android_machines
 }
 
@@ -1766,7 +1768,7 @@ check_machine_vbox()
     RET=1
     debug "Trying to find $WANTED_VM among vbox machines to check for status"
     VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
-    SAVED_FS=$IFS
+    SAVED_IFS=$IFS
     export IFS=";"
     for VB_NAME in $VB_NAMES
     do
@@ -1818,7 +1820,7 @@ check_machine_android()
     debug "Trying to find $WANTED_VM among android avds to check for status"
     VB_NAMES=$($ANDROID list avd | grep Name | sed -e 's,[ \t]*Name: ,,g'  | tr  '\n' ' ')
 
-#    SAVED_FS=$IFS
+    SAVED_IFS=$IFS
     export IFS=" "
     for VB_NAME in $VB_NAMES
     do
@@ -1839,6 +1841,8 @@ check_machine_android()
 	    fi
 	fi
     done
+
+    IFS=$SAVED_IFS
 
     return $RET
 }
@@ -2201,7 +2205,7 @@ copy_from_client()
 	    fi
 	    debug "copy android"
 	    debug "     adb  -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC"
-	    $ADB  -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC
+	    $ADB -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC
 	    ;;
 	*)
 	    echo "copy not supported"
@@ -2248,7 +2252,7 @@ copy_to_client()
 	    fi
 	    debug "copy android"
 	    debug "     adb -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC"
-	    $ADB  -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC
+	    $ADB -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC
 	    ;;
 	*)
 	    echo "copy not supported"
@@ -2350,7 +2354,7 @@ get_suffix_from_file()
     debug "get_suffix_from_file() MY_FILE: $MY_FILE"
 
     MY_FILE_SHORT=$(basename "$MY_FILE")
-    debug "get_suffix_from_file() MY_FILE_SHORT: $MY_FILE_SHOR"
+    debug "get_suffix_from_file() MY_FILE_SHORT: $MY_FILE_SHORT"
 
     MY_FILE_PREFIX=${MY_FILE_SHORT%.*}
     debug "get_suffix_from_file() MY_FILE_PREFIX: $MY_FILE_PREFIX"
@@ -2369,7 +2373,7 @@ android_install_app()
     MODE=$3
 
     get_info_for_client "$CLIENT"
-
+echo "port=$ANDROID_PORT"
     exec_client_raw_android "$ANDROID_PORT" "$MODE $APP"
 }
 
@@ -2392,31 +2396,51 @@ vbox_install_app()
 
 	case $APP_SUF in
 	    "deb")
-		
+		echo "VBOX is trying to install deb pkg: $APP"		
 		copy_to_client                $APP  $CLIENT "/tmp"
 		RET=$?
-		if [ "$RET" != "0" ]; then return $RET; fi
+		if [ "$RET" != "0" ]; then
+		    echo "Installation failed: copy deb pkg to client failed."
+		    return $RET
+                fi
 		
 		exec_client_command_as_root $CLIENT "dpkg --install /tmp/$(basename $APP)"
 		RET=$?
-		if [ "$RET" != "0" ]; then return $RET; fi
+		if [ "$RET" != "0" ]; then
+		    echo "Installation failed: dpkg --install app failed."
+		    return $RET
+                fi
 		
 		exec_client_command_as_root $CLIENT "rm -f /tmp/$(basename $APP)"
 		RET=$?
-		
+
 		;;
 	    "rpm")
-		echo "VBOX install rpm pkg: $APP"
-		echo "VBOX install deb pkg: $APP"
+		echo "VBOX is trying to install rpm pkg: $APP"
 		copy_to_client                $APP  $CLIENT "/tmp"
+		RET=$?
+		if [ "$RET" != "0" ]; then
+		    echo "Installation failed: copy rmp pkge to client failed."
+		    return $RET
+                fi
+
 		exec_client_command_as_root $CLIENT "rpm --install /tmp/$(basename $APP)"
-		RET=1
+		RET=$?
+		if [ "$RET" != "0" ]; then
+		    echo "Installation failed: rpm --install app failed."
+		    return $RET
+                fi
 		;;
 	    *)
 		echo "Don't know how to install $APP_SUF packages"
 		RET=1
 		;;
 	esac
+    fi
+
+    if [ "$RET" = "0" ]
+    then
+        echo "Installation succeeded!"
     fi
 
     return $RET
