@@ -225,9 +225,9 @@ list_running_android()
 	    FOUND=0
 	    for dir in  $ETC_DIRS
 	    do
-		if [ -d $dir ]
+		if [ -d ${dir}/clients ]
 		then
-		    for vb in $(find $dir/clients -name *.conf | xargs grep -l $AVD_NAME )
+		    for vb in $(find ${dir}/clients -name *.conf | xargs grep -l $AVD_NAME )
 		    do
 			VB_SHORT_NAME=$(basename $vb | sed 's,\.conf,,g')
 			echo "  |--$VB_SHORT_NAME  [$vb] (machine: $(get_avd_name_for_port $i))"  
@@ -255,9 +255,9 @@ list_running_android_machines()
 	    FOUND=0
 	    for dir in $(echo $ETC_DIRS)
 	    do
-	        if [ -d $dir/clients ]
+	        if [ -d ${dir}/clients ]
 	        then
-		    for vb in $(find $dir/clients -name *.conf | xargs grep -l $AVD_NAME )
+		    for vb in $(find ${dir}/clients -name *.conf | xargs grep -l $AVD_NAME )
 		    do
 		        VB_SHORT_NAME=$(basename $vb)
 		        echo " |--$VB_SHORT_NAME [$vb] (client)"
@@ -439,6 +439,7 @@ start_vbox()
 
     sleep 3
     ERROR_FOUND=$(grep -e "error" $ERR_FILE  | grep -e "exit code" | wc -l)
+
     if [ "$ERROR_FOUND" != "0" ]
     then   
 	debug "Could not start vbox. Error message:"
@@ -523,7 +524,7 @@ kill_android()
 kill_vbox()
 {
     VB_NAME=$1
-    VB_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
+    # VB_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
     if [ "$VB_NAME" != "" ]
     then
 	kill_vb_proc "$VB_NAME"
@@ -550,7 +551,7 @@ stop_vbox()
 	    return
 	fi
 
-	debug "  sending  acpipowerbutton off to $VB_NAME"
+	debug "  sending  acpipowerbutton off to $VM_NAME"
 	VBoxManage controlvm $VM_NAME acpipowerbutton off 2>/dev/null
 	wait_until_down $VM_NAME
 	
@@ -679,7 +680,7 @@ check_android_proc()
 check_vbox_proc()
 {
     PROC_EXPR=$1
-    RET=$(ps -u hesa awww | grep -i virtualbox | grep -c $PROC_EXPR )
+    RET=$(ps -u `whoami` awww | grep -i virtualbox | grep -c $PROC_EXPR )
 
     debug "Number of vbox processes: $RET"
     
@@ -697,27 +698,23 @@ stop_helper()
 
     if [ "$CLI_CONF" != "" ]
     then
-	debug "Reading client conf $CLI_CONF"
-	. $CLI_CONF
-	is_client_ssh_up
-	RET=$?
-	if [ "$RET" != "0" ]
-	then
-	    debug "Host $1 ssh seems down, no use stopping it via ssh. Continuing with closing the vm"
-	fi
+        # `get_info_for_client' has already sourced the configuration file. The
+        # code below will override the SSH port when the port is set to `auto'.
+        # Because of this, I have commented it out.
+        # # debug "Reading client conf $CLI_CONF"
+        # # . $CLI_CONF
+        is_client_ssh_up
+        RET=$?
+    fi
 
+    if [ "$RET" = "0" ]
+    then
 	if [ "$VM_SUPERUSER" != "" ] && [ "$SSH_SHUTDOWN_COMMAND" != "" ] 
 	then
-	    is_client_ssh_up
+	    debug "Super user account available"
+	    debug "  trying to stop via ssh"
+	    $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND
 	    RET=$?
-	    if [ "$RET" = "0" ]
-	    then
-		debug "Super user account available"
-		debug "  trying to stop via ssh"
-		$SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND
-		RET=$?
-	    fi
-	    
 	    if [ "$RET" != "0" ]
 	    then
 		debug "Failed stopping client with ssh"
@@ -725,48 +722,51 @@ stop_helper()
 	    else
 		wait_until_down $WANTED_VM
 	    fi
+	else
+	    debug "Missing credentials to stop via ssh and super user"
 	fi
+    else
+	debug "Host $1 ssh seems down, or the vm is not registered as a client"
+	debug "Stop $1 using virtual machine ($VM_TYPE)"
+
+	case $VM_TYPE in
+	    "VirtualBox")
+		debug "Stopping vbox $1"
+	        stop_vbox $1
+		kill_vbox $1
+		check_vbox_proc $1
+
+		RET=$?
+		log "$RET" "Stop VirtualBox" "$VM_NAME"
+		return $RET
+		;;
+
+	    "qemu")
+		debug "Stoping qemu $WANTED_VM"
+		stop_qemu "$WANTED_VM"
+
+		check_qemu_proc $1
+		RET=$?
+		log "$RET" "Stop qemu" "$VM_NAME"
+		return $RET
+		;;
+
+	    "Android")
+		debug "Stoping Android $WANTED_VM"
+		stop_android "$WANTED_VM"
+
+		check_android_proc $1
+		RET=$?
+		log "$RET" "Stop Androd" "$VM_NAME"
+		return $RET
+		;;
+
+	    *)
+		echo "Failed finding vm type for $1"
+		exit 123
+		;;
+	esac
     fi
-   
-    debug "Stop $1 using virtual machine ($VM_TYPE)"
-
-    case $VM_TYPE in
-	"VirtualBox")
-	    debug "Stoping vbox $1"
-	    stop_vbox $1
-	    kill_vbox $1
-
-	    check_vbox_proc $1
-	    RET=$?
-	    log "$RET" "Stop VirtualBox" "$VM_NAME"
-	    return $RET
-	    ;;
-
-	"qemu")
-	    debug "Stoping qemu $WANTED_VM"
-	    stop_qemu "$WANTED_VM"
-
-	    check_qemu_proc $1
-	    RET=$?
-	    log "$RET" "Stop qemu" "$VM_NAME"
-	    return $RET
-	    ;;
-
-	"Android")
-	    debug "Stoping Android $WANTED_VM"
-	    stop_android "$WANTED_VM"
-
-	    check_android_proc $1
-	    RET=$?
-	    log "$RET" "Stop Androd" "$VM_NAME"
-	    return $RET
-	    ;;
-
-	*)
-	    echo "Failed finding vm type for $1"
-	    exit 123
-	    ;;
-    esac
 }
 
 
@@ -1113,6 +1113,7 @@ start_machine()
 	return 111
     else
 	start_helper "$WANTED_VM" $VM_TYPE $CLI_CONF $START_ARGS
+	return $?
     fi
 }
 
@@ -1132,12 +1133,12 @@ start_client()
     if [ "$CLIENT_FOUND" = "false" ]
     then
 	echo "No client configuration found for: $1"
+	return 1
     else
         debug "start_client: calling 	start_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF, $START_ARGS)"
 	start_helper "$WANTED_VM" "$VM_TYPE" "$CLI_CONF" "$START_ARGS"
+	return $?
     fi
-
-    return 
 }
 
 start_client_wait_for_ssh()
@@ -1506,11 +1507,21 @@ wait_for_ssh()
 
 wait_until_up()
 {
+    # Set timeout in case it's not set. Move to defaults?
+    if [ "$VM_STARTUP_TIMEOUT" = "" ]
+    then
+	VM_STARTUP_TIMEOUT="10"
+    fi
     wait_for_state up $VM_STARTUP_TIMEOUT $1
 }
 
 wait_until_down()
 {
+    # Set timeout in case it's not set. Move to defaults?
+    if [ "$VM_STOP_TIMEOUT" = "" ]
+    then
+	VM_STOP_TIMEOUT="20"
+    fi
     wait_for_state down $VM_STOP_TIMEOUT $1
 }
 
@@ -1929,7 +1940,6 @@ get_info_for_client()
 {
     debug "Trying to get info for client: $1"
     CLIENT_FOUND=false
-
     for d in $ETC_DIRS
     do
 	TMP_CLIENTS=$(find $d/clients -name "$1.conf" 2>/dev/null)
