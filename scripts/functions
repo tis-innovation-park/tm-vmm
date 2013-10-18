@@ -23,6 +23,7 @@
 
 CONF_READ=false
 DEFAULT_LOG_DEBUG_DIR=/tmp/testing-machine/vmm/
+DEFAULT_LOG_FILE_DIR=/tmp/testing-machine/vmm/
 DEFAULT_LOG_FORMAT=txt
 DEFAULT_SSH=ssh
 DEFAULT_SCP=scp
@@ -121,6 +122,12 @@ init_vmm()
     then
 	LOG_DEBUG_DIR=$DEFAULT_LOG_DEBUG_DIR
     fi
+
+    if [ "$LOG_FILE_DIR" = "" ]
+    then
+	LOG_FILE_DIR="$DEFAULT_LOG_FILE_DIR"
+    fi
+
     if [ ! -d $LOG_DEBUG_DIR ]
     then
 	mkdir -p $LOG_DEBUG_DIR
