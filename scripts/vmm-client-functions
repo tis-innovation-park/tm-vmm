@@ -1406,17 +1406,24 @@ wait_for_state()
 	is_client_up $VB_NAME
 	RET=$?
 
+	# Break waiting when the client is up.
 	if [ "$EXPECTED_STATE" = "up" ]
 	then
 	    if [ "$RET" = "0" ]
 	    then
 		BREAK=true
-	    elif [ "$RET" != "0" ]
-	    then
+	    else
 		BREAK=false
 	    fi
-#	elif [ "$EXPECTED_STATE" = "down" ] ? future use ?
-#	then
+	# Break waiting when the client is down.
+	elif [ "$EXPECTED_STATE" = "down" ]
+	then
+	    if [ "$RET" = "0" ]
+	    then
+		BREAK=false
+	    else
+		BREAK=true
+	    fi
 	fi
 
 	debug "   Should we break? $BREAK  "
