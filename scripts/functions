@@ -28,6 +28,8 @@ DEFAULT_LOG_FORMAT=txt
 DEFAULT_SSH=ssh
 DEFAULT_SCP=scp
 DEFAULT_ANDROID_SYS="emulator64-arm"
+DEFAULT_VM_STARTUP_TIMEOUT="10"
+DEFAULT_VM_STOP_TIMEOUT="20"
 INIT_DONE=0
 
 DEBUG=true
@@ -103,6 +105,16 @@ init_vmm()
     if [ "$ETC_DIRS" = "" ]
     then
 	ETC_DIRS="/etc/testingmachine $VMM_DIR/etc/ ${PERSONAL_ETC_DIR}"
+    fi
+
+    if [ "$VM_STARTUP_TIMEOUT" = "" ]
+    then
+        VM_STARTUP_TIMEOUT=$DEFAULT_VM_STARTUP_TIMEOUT
+    fi
+
+    if [ "$VM_STOP_TIMEOUT" = "" ]
+    then
+	VM_STOP_TIMEOUT=$DEFAULT_VM_STOP_TIMEOUT
     fi
  
     for d in $ETC_DIRS
