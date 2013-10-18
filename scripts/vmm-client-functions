@@ -426,6 +426,7 @@ maximise_vbox()
 start_vbox()
 {
     export PROC_EXPR=$1
+
     debug "Start vbox: $VM_NAME"
 
     if [ $(vboxmanage list vms | grep -c "$PROC_EXPR" | wc -l) -eq 0 ]
@@ -436,10 +437,8 @@ start_vbox()
     ERR_FILE=$$.vbm-out
     rm -f $ERR_FILE
     VBoxManage startvm "$VM_NAME"  2> $ERR_FILE  >/dev/null &
-
     sleep 3
     ERROR_FOUND=$(grep -e "error" $ERR_FILE  | grep -e "exit code" | wc -l)
-
     if [ "$ERROR_FOUND" != "0" ]
     then   
 	debug "Could not start vbox. Error message:"
@@ -447,7 +446,6 @@ start_vbox()
 	rm -f $ERR_FILE
 	return 1
     fi
-
     rm -f $ERR_FILE
     maximise_vbox "$VM_NAME"
     return 0
@@ -1367,9 +1365,15 @@ is_client_online()
         > /dev/null
 
     RET=$?
-    debug "  Returning: $RET\n"
+    debug "  Returning: $RET"
+    if [ "$RET" = "0" ]
+    then
     ## printf probably a little silly here
-    printf "  Google can be reached...\n"
+	printf "  Google can be reached...\n"
+    else
+	printf "  Google can NOT be reached...\n"
+    fi
+
     return $RET
 
 }
@@ -1807,12 +1811,10 @@ check_client_android()
     export IFS=";"
     for dir in  $(echo $ETC_DIRS | sed 's, ,;,'g)
     do
-#	echo "    dir: $dir"  
-	if [ -d $dir ]
+	if [ -d ${dir}/clients ]
 	then
-	    for vb in $(find $dir/clients -name $AVD_NAME.conf  )
+	    for vb in $(find ${dir}/clients -name $AVD_NAME.conf  )
 	    do
-#		echo "FONND: $vb"
 		AVD_MACHINE=$(grep VM_NAME $vb | sed -e 's,VM_NAME=,,g' -e 's,\",,g')
 		check_machine_android $AVD_MACHINE
 		RET=$?
