@@ -1,8 +1,8 @@
 ![](doc/pics/fscrs.png)
 
-# VMM - Virtual Machine Manager
+# vmm - Virtual Machine Manager
 
-VMM is software that is part of the [Testing
+vmm is software that is part of the [Testing
 Machine](https://testingmachine.eu/) project.
 
 ## About the Testing Machine project

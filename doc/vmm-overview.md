@@ -1,4 +1,4 @@
-The Testing Machine's Virtual Machine Manager (tm-vvm) is a bunch of
+The Testing Machine's Virtual Machine Manager (tm-vmm) is a bunch of
 wrapper scripts on top of existing Virtualization softwares. tm-vmm
 makes it easier to start and stop such machines and execute program
 (typically to perform tests) on these virtual machines.

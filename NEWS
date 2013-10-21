@@ -6,12 +6,29 @@ NEWS in coming 0.13
   Removed tm-vmm options:
     --check-machine - replaced by --check-machine-status
 
+  New features:
+
+  * --machine-* switches are no longer coupled with client configurations (hesa,
+    jonkri)
+
+  * Improved documentation (hesa, jonkri)
+
+  New options:
+
+  --check-machine-status - checks the status of a machine (hesa) 
+
 
   Fixes:
+
   * VBox clients are no longer mistaken for Androids (jonkri)
+
   * $SSH now has a default value (jonkri)
+
   * --check-client-online no longer faults with "Bad port '@'" (jonkri)
+
   * --check-client-status now has an android implementation (hesa)
+
+  * --*-machine options now works for VirtualBox devices (jonkri)
   
 
   Bugfixes:
@@ -25,5 +42,7 @@ NEWS in coming 0.13
 
   * Github issue #18 "Virtual machine names can not have spaces in them" (hesa)
 
-  * Fixed a bug which prohibited starting headless machines
+  * Fixed a bug which prohibited starting headless machines (jonkri)
 
+  * `--pause-machine' and `--resume-machine' now interpreted by the command-line
+    argument parser (jonkri)

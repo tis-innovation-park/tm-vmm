@@ -16,11 +16,11 @@ For a list of variables, see section Configuration syntax below.
 
 ## Creating a machine
 
-To create a machine vvm relies on the virtualization software. So if
+To create a machine vmm relies on the virtualization software. So if
 you want to manage a Virtualbox machine you (at least for now) create
 it with Virtualbox. For information about how to do this, read the
-chapter "Creating a Virtualbox machine" or "Creating a Android Virtual
-Device".
+chapter "Creating a Virtualbox machine" or "Creating an Android
+Virtual Device".
 
 
 ## Preparing for creating a client
@@ -47,7 +47,7 @@ You can create client configuration in two different ways:
 
 * Manually create a configuration file for the client (bound to a virtual machine):
 
-      [CLIENT NAME].conf
+      [CLIENT_NAME].conf
 
     * Set the variables as you find suitable for your project.
 
@@ -62,6 +62,8 @@ Example usage of the option.
     `tm-vmm --create-client-conf  Debian-6.0`
 
 It is assumed that Debian-6.0 is a VirtualBox image.
+
+__Note:__ `--create-client-conf` will set the default value for the guest username to \`whoami\`. If your virtual machine uses some other username, you should modify the client configuration after running this command.
 
 ### Example of a client configuration:
 
@@ -85,11 +87,10 @@ For more variables see section Configuration syntax below
 
   `ssh-copy-id -p 2256 `
 
-
-
-
-
 ## Create an Android client
+
+
+
 
 In the example below we will assume it is called Nexus-10
 
@@ -104,7 +105,7 @@ You can create client configuration in two different ways:
 
 * Manually create a configuration file for the client (bound to a virtual machine):
 
-      [CLIENT NAME].conf
+      [CLIENT_NAME].conf
 
     * Set the variables as you find suitable for your project.
 
@@ -119,6 +120,8 @@ Example usage of the option.
     `tm-vmm --create-client-conf  Nexus-10`
 
 It is assumed that Debian-6.0 and Nexus-10 is the name either a VirtualBox or Android image.
+
+__Note:__ `--create-client-conf` will set the default value for the guest username to \`whoami\`. If your virtual machine uses some other username, you should modify the client configuration after running this command.
 
 ### Example of a client configuration:
 

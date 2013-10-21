@@ -23,8 +23,13 @@
 
 CONF_READ=false
 DEFAULT_LOG_DEBUG_DIR=/tmp/testing-machine/vmm/
+DEFAULT_LOG_FILE_DIR=/tmp/testing-machine/vmm/
 DEFAULT_LOG_FORMAT=txt
 DEFAULT_SSH=ssh
+DEFAULT_SCP=scp
+DEFAULT_ANDROID_SYS="emulator64-arm"
+DEFAULT_VM_STARTUP_TIMEOUT="10"
+DEFAULT_VM_STOP_TIMEOUT="20"
 INIT_DONE=0
 
 DEBUG=true
@@ -87,9 +92,29 @@ init_vmm()
         SSH="$DEFAULT_SSH"
     fi
 
+    if [ "$SCP" = "" ]
+    then
+        SCP="$DEFAULT_SCP"
+    fi
+
+    if [ "$ANDROID_SYS" = "" ]
+    then
+        ANDROID_SYS="$DEFAULT_ANDROID_SYS"
+    fi
+
     if [ "$ETC_DIRS" = "" ]
     then
 	ETC_DIRS="/etc/testingmachine $VMM_DIR/etc/ ${PERSONAL_ETC_DIR}"
+    fi
+
+    if [ "$VM_STARTUP_TIMEOUT" = "" ]
+    then
+        VM_STARTUP_TIMEOUT=$DEFAULT_VM_STARTUP_TIMEOUT
+    fi
+
+    if [ "$VM_STOP_TIMEOUT" = "" ]
+    then
+	VM_STOP_TIMEOUT=$DEFAULT_VM_STOP_TIMEOUT
     fi
  
     for d in $ETC_DIRS
@@ -109,6 +134,12 @@ init_vmm()
     then
 	LOG_DEBUG_DIR=$DEFAULT_LOG_DEBUG_DIR
     fi
+
+    if [ "$LOG_FILE_DIR" = "" ]
+    then
+	LOG_FILE_DIR="$DEFAULT_LOG_FILE_DIR"
+    fi
+
     if [ ! -d $LOG_DEBUG_DIR ]
     then
 	mkdir -p $LOG_DEBUG_DIR

@@ -9,6 +9,9 @@ we will setup a Nexus 7 device.
 
 ### Start Android Virtual Device Manager
 
+First, you need to make sure that the ANDROID and ANDROID_ADT_PATH environment
+variables are set, so that vmm can find the Android application utilities.
+
 In a terminal, type:
 
 `android avd`

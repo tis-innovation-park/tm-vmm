@@ -9,7 +9,7 @@ of the manual.
 
 ### Starting with guest operating system visible
 
-`tm-vmm --start-client <CLIENTNAME>`
+`tm-vmm --start-client <CLIENT_NAME>`
 
 Example:
 
@@ -17,7 +17,7 @@ Example:
 
 ### Starting without showing guest operating system (headless)
 
-`tm-vmm --start-client-headless <CLIENTNAME>`
+`tm-vmm --start-client-headless <CLIENT_NAME>`
 
 Example:
 
@@ -25,7 +25,7 @@ Example:
 
 ## Checking status
 
-`tm-vmm --check-client-status <CLIENTNAME>`
+`tm-vmm --check-client-status <CLIENT_NAME>`
 
 Example:
 
@@ -33,7 +33,7 @@ Example:
 
 ## Stopping
 
-`tm-vmm --stop-client <CLIENTNAME>`
+`tm-vmm --stop-client <CLIENT_NAME>`
 
 Example:
 
