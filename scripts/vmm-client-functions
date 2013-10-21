@@ -301,7 +301,7 @@ start_vbox_headless()
     fi
     debug "start_vbox_headless()"
     debug "start_vbox_headless: vboxheadless -s  \"$VM_NAME\""
-    ERR_FILE=$$.vbm-err
+    ERR_FILE=/tmp/$$.vbm-err
     rm -f $ERR_FILE
     vboxheadless -s  "$VM_NAME"  2> $ERR_FILE  >/dev/null  &
 
@@ -434,7 +434,7 @@ start_vbox()
 	debug "Could not find vbox image: $PROC_EXPR"
 	return 1
     fi
-    ERR_FILE=$$.vbm-out
+    ERR_FILE=/tmp/$$.vbm-out
     rm -f $ERR_FILE
     VBoxManage startvm "$VM_NAME"  2> $ERR_FILE  >/dev/null &
     sleep 3
