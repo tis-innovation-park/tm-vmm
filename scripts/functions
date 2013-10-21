@@ -22,8 +22,18 @@
 #
 
 CONF_READ=false
-DEFAULT_LOG_DEBUG_DIR=/tmp/testing-machine/vmm/
-DEFAULT_LOG_FILE_DIR=/tmp/testing-machine/vmm/
+
+#
+# General TMP dir
+#
+TM_TMP_DIR=/tmp/testing-machine/
+TM_TMP_FILE_DIR=$TM_TMP_DIR/tmp-files/$(whoami)/
+
+#
+# Log and Debug dir
+#
+DEFAULT_LOG_DEBUG_DIR=$TM_TMP_DIR/vmm/
+DEFAULT_LOG_FILE_DIR=$TM_TMP_DIR/vmm/
 DEFAULT_LOG_FORMAT=txt
 DEFAULT_SSH=ssh
 DEFAULT_SCP=scp
