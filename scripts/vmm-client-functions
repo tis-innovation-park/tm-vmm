@@ -40,33 +40,28 @@ list_vbox_machines()
     VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
     SAVED_IFS=$IFS
     export IFS=";"
-    for VB_NAME in $VB_NAMES
-    do
-	FOUND=false
-	if [ "$VB_NAME" != "" ]
-	then
-	    SUB_CLIENTS=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
-	    echo  "  |--$VB_NAME  "
-	    if [ "$SUB_CLIENTS" != "" ]
-	    then
-		for vb in $SUB_CLIENTS
-		do
-#		echo " ---- $VB_NAME"
-		    VB_SHORT_NAME=$(basename $vb)
-		    echo "     |--$VB_SHORT_NAME (client)"  
-		    FOUND=true
-		done
-#	    if [ "$FOUND" = "false" ]
-#	    then
-#		echo "      not in use"
-#	    fi
-#	    else
-#		echo ""
+
+    if [ "$VB_NAMES" != "" ]
+    then
+	for VB_NAME in $VB_NAMES
+	do
+ 	    if [ "$VB_NAME" != "" ]
+ 	    then
+		IFS=$SAVED_IFS
+		echo  "  |--$VB_NAME  "
+		CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+ 		if [ "$CONF_CLIENT" != "" ]
+ 		then
+ 	    	    VB_SHORT_NAME=$(basename $CONF_CLIENT)
+ 	    	    echo "     |--$VB_SHORT_NAME (client)"
+		else
+	    	    echo "     |--no conf file yet"
+		fi
 	    fi
-	else
-	    echo "   no virtualbox machines found"
-	fi
-    done
+	done
+    else
+ 	echo "     no virtualbox machines found"
+    fi
     IFS=$SAVED_IFS
 }
 
@@ -80,29 +75,21 @@ list_android_machines()
     debug "Listing android machines"
 #    VB_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
     VB_NAMES=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g')
+
     for VB_NAME_LONG in $VB_NAMES
     do
 	VB_NAME=$(basename $VB_NAME_LONG)
-	FOUND=false
 	if [ "$VB_NAME" != "" ]
+
 	then
 	    echo  "  |--$VB_NAME  "
-	    SUB_CLIENTS=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
-
-#	    echo "SUB_CLIENTS: $SUB_CLIENTS"
-	    if [ "$SUB_CLIENTS" != "" ]
+	    CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+	    if [ "$CONF_CLIENT" != "" ]
 	    then
-		for vb in $SUB_CLIENTS
-		do
-#		echo " ---- $VB_NAME"
-		    VB_SHORT_NAME=$(basename $vb)
-		    echo "     |--$VB_SHORT_NAME  (client)"  
-		    FOUND=true
-		done
-#	    if [ "$FOUND" = "false" ]
-#	    then
-#		echo "      not in use"
-#	    fi
+	        VB_SHORT_NAME=$(basename $CONF_CLIENT)
+		echo "     |--$VB_SHORT_NAME  (client)"
+	    else
+		echo "     |--no conf file yet"
 	    fi
 	else
 	    echo "   no android machines found"
@@ -153,126 +140,49 @@ list_running_vbox()
 {
     echo "  VirtualBox"
     VB_NAMES=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
+    SAVED_IFS=$IFS
+    export IFS=";"
+
     if [ "$VB_NAMES" != "" ]
     then
-        SAVED_IFS=$IFS
-    	export IFS=";"
-	for i in $VB_NAMES
+	for VB_NAME in $VB_NAMES
 	do
-	    FOUND=0
-	    for dir in  $(echo $ETC_DIRS | sed 's, ,;,'g)
-	    do
-		if [ -d ${dir}/clients ]
+	    if [ "$VB_NAME" != "" ]
+	    then
+		IFS=$SAVED_IFS
+		CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+		if [ "CONF_CLIENT" != "" ]
 		then
-		    for vb in $(find ${dir}/clients -name *.conf | xargs grep -l $i )
-		    do
-			VB_SHORT_NAME=$(basename $vb | sed 's,\.conf,,g')
-			echo "  |--$VB_SHORT_NAME  [$vb] (machine: $i )"  
-			FOUND=1
-		    done
+		    VB_SHORT_NAME=$(basename $CONF_CLIENT | sed 's,\.conf,,g')
+ 		    echo "    |--$VB_SHORT_NAME  [$CONF_CLIENT] (machine: $VB_NAME )"
 		fi
-	    done
-	    if [ $FOUND -eq 0 ] ; then echo "    * vbox is not in use"; fi
+	    fi
 	done
     else
-	echo "   no virtualbox machines currently running"
+	echo "    no virtualbox machines currently running"
     fi
     IFS=$SAVED_IFS
-}
-
-list_running_vbox_machines()
-{
-    echo "  VirtualBox"
-    VB_NAME=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""} { printf "%s;", $2}' | sed 's,\",,g')
-    if [ "$VB_NAME" != "" ]
-    then
-        SAVED_IFS=$IFS
-    	export IFS=";"
-	for i in $VB_NAME
-	do
-	    echo "  |--$i  "
-	    FOUND=0
-	    for dir in $(echo $ETC_DIRS | sed 's, ,;,'g)
-	    do
-		if [ -d ${dir}/clients ]
-		then
-		    for vb in $(find ${dir}/clients -name *.conf | xargs grep -l $i )
-		    do
-			VB_SHORT_NAME=$(basename $vb)
-			echo "    |--$VB_SHORT_NAME  [$vb] (client)"  
-			FOUND=1
-		    done
-		fi
-	    done
-	    if [ $FOUND -eq 0 ] ; then echo "    * vbox is not in use"; fi
-	done
-        IFS=$SAVED_IFS
-    else
-	echo "   no virtualbox machines currently running"
-    fi
 }
 
 list_running_android()
 {
     echo "  Android"
-    VB_NAME=$(get_connected_avds_ports)
-    export IFS=" "
-    if [ "$VB_NAME" != "" ]
+    AVD_PORTS=$(get_connected_avds_ports)
+
+    if [ "$AVD_PORTS" != "" ]
     then
-	for i in $VB_NAME
+	for AVD_PORT in $AVD_PORTS
 	do
-	    AVD_NAME=$(get_avd_name_for_port $i)
-	    FOUND=0
-	    for dir in  $ETC_DIRS
-	    do
-		if [ -d ${dir}/clients ]
-		then
-		    for vb in $(find ${dir}/clients -name *.conf | xargs grep -l $AVD_NAME )
-		    do
-			VB_SHORT_NAME=$(basename $vb | sed 's,\.conf,,g')
-			echo "  |--$VB_SHORT_NAME  [$vb] (machine: $(get_avd_name_for_port $i))"  
-			FOUND=1
-		done
-		fi
-	    done
+	    AVD_NAME=$(get_avd_name_for_port $AVD_PORT)
+	    CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $AVD_NAME)
+	    if [ "$CONF_CLIENT" != "" ]
+	    then
+		VB_SHORT_NAME=$(basename $AVD_NAME | sed 's,\.conf,,g')
+		echo "    |--$VB_SHORT_NAME  [$CONF_CLIENT] (machine: $AVD_NAME)"
+	    fi
 	done
     else
-	echo "   no android emulators currently running"
-    fi
-}
-
-list_running_android_machines()
-{
-    echo "  Android"
-    VB_NAME=$(get_connected_avds_ports)
-    if [ "$VB_NAME" != "" ]
-    then
-        for i in $VB_NAME
-        do
-	    AVD_NAME=$(get_avd_name_for_port $i)
-	    echo " |-- $AVD_NAME (using port $i)"
-
-	    FOUND=0
-	    for dir in $(echo $ETC_DIRS)
-	    do
-	        if [ -d ${dir}/clients ]
-	        then
-		    for vb in $(find ${dir}/clients -name *.conf | xargs grep -l $AVD_NAME )
-		    do
-		        VB_SHORT_NAME=$(basename $vb)
-		        echo " |--$VB_SHORT_NAME [$vb] (client)"
-		        FOUND=1
-		    done
-	        fi
-	    done
-	    if [ $FOUND -eq 0 ] ;
-	    then
-	        echo " * avd is not registered as Testingmachine machine" ;
-	        echo " * to create a configuration file, try: --create-client-conf $AVD_NAME" ;
-	    fi
-        done
-    else
-        echo "   no android emulator currently running"
+	echo "    no android emulators currently running"
     fi
 }
 
@@ -282,15 +192,6 @@ list_running_clients()
     list_running_vbox 
     list_running_android
 }
-
-
-list_running_machines()
-{
-    echo "Running machines:"
-    list_running_vbox_machines 
-    list_running_android_machines
-}
-
 
 start_vbox_headless()
 {
@@ -844,29 +745,6 @@ resume_helper()
     esac
 }
 
-stop_machine()
-{
-    CLIENT_FOUND=false
-    WANTED_VM=$1
-
-    debug "stop_machine $*"
-
-    get_info_for_machine $1
-
-    if [ "$CLIENT_FOUND" = "false" ]
-	then
-	echo "No machine found: $1"
-	return 111
-    else
-	debug "stop_helper ($WANTED_VM, $VM_TYPE)"
-	stop_helper $WANTED_VM $VM_TYPE
-	return $?
-    fi
-
-    return 1
-}
-
-
 
 stop_client()
 {
@@ -889,31 +767,6 @@ stop_client()
     return 1
 }
 
-
-pause_machine()
-{
-    CLIENT_FOUND=false
-    WANTED_VM=$1
-
-    debug "pause_machine $*"
-
-    get_info_for_machine $1
-
-    if [ "$CLIENT_FOUND" = "false" ]
-	then
-	echo "No machine found: $1"
-	return 111
-    else
-	debug "pause_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
-	pause_helper $WANTED_VM $VM_TYPE $CLI_CONF
-	return $?
-    fi
-
-    return 1
-}
-
-
-
 pause_client()
 {
     CLIENT_FOUND=false
@@ -933,29 +786,6 @@ pause_client()
 
     return 1
 }
-
-resume_machine()
-{
-    CLIENT_FOUND=false
-    WANTED_VM=$1
-
-    debug "resume_machine $*"
-
-    get_info_for_machine $1
-
-    if [ "$CLIENT_FOUND" = "false" ]
-	then
-	echo "No machine found: $1"
-	return 111
-    else
-	debug "resume_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
-	resume_helper $WANTED_VM $VM_TYPE $CLI_CONF
-	return $?
-    fi
-
-    return 1
-}
-
 
 
 resume_client()
@@ -977,6 +807,7 @@ resume_client()
 
     return 1
 }
+
 
 find_vm_type()
 {
@@ -1095,26 +926,6 @@ start_helper()
 
 
 }
-
-
-start_machine()
-{
-    CLIENT_FOUND=false
-    WANTED_VM=$1
-    START_ARGS="$2"
-
-    get_info_for_machine $1
-
-    if [ "$CLIENT_FOUND" = "false" ]
-	then
-	echo "No machine found: $1"
-	return 111
-    else
-	start_helper "$WANTED_VM" $VM_TYPE $CLI_CONF $START_ARGS
-	return $?
-    fi
-}
-
 
 start_client()
 {
@@ -1353,18 +1164,38 @@ is_client_online()
 	return 120
     fi
 
-    echo "Check if Client is online"
-    debug "   ssh:     $SSH"
-    debug "   options: $SSH_TEST_OPTIONS"
-    debug "   port:    -p $SSH_PORT"
-    debug "   user     $VM_USER@$VM_IP_ADDRESS"
-    debug "   command: ping -c1 www.google.com"
+    if [ "$VM_TYPE" = "$VirtualBox" ]
+    then
+	echo "Check if Vbox client is online"
+	debug "   ssh:     $SSH"
+	debug "   options: $SSH_TEST_OPTIONS"
+	debug "   port:    -p $SSH_PORT"
+	debug "   user     $VM_USER@$VM_IP_ADDRESS"
+	debug "   command: ping -c1 www.google.com"
 
-    $SSH $SSH_TEST_OPTIONS \
-        -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS ping -c1 www.google.com \
-        > /dev/null
+	$SSH $SSH_TEST_OPTIONS \
+            -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS ping -c1 www.google.com \
+            > /dev/null
 
-    RET=$?
+	RET=$?
+    fi
+
+    if [ "$VM_TYPE" = "Android" ]
+    then
+
+	ANDROID_PORT=$(get_avd_port_for_name $1)
+	echo "Check if Android client is online"
+
+	debug "   client:  $1"
+	debug "   adb:     $ADB"
+	debug "   port:    $ANDROID_PORT"
+	debug "   command: ping -c1 www.google.com"
+
+	$ADB -s emulator-$ANDROID_PORT shell ping -c1 www.google.com > /dev/null
+
+	RET=$?
+    fi
+
     debug "  Returning: $RET"
     if [ "$RET" = "0" ]
     then
@@ -1782,29 +1613,6 @@ exec_client_command_as_root()
 }
 
 
-check_machine_vbox()
-{
-    WANTED_VM=$1
-    RET=1
-    debug "Trying to find $WANTED_VM among vbox machines to check for status"
-    VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
-    SAVED_IFS=$IFS
-    export IFS=";"
-    for VB_NAME in $VB_NAMES
-    do
-	FOUND=false
-	if [ "$VB_NAME" = "$WANTED_VM" ]
-	    then
-	    FOUND=true
-	    MACHINE_FOUND=true
-	    is_vbox_up $WANTED_VM
-	    RET=$?
-	fi
-    done
-    IFS=$SAVED_IFS
-    return $RET
-}
-
 check_client_android()
 {
     AVD_NAME="$1"
@@ -1865,41 +1673,6 @@ check_machine_android()
     return $RET
 }
 
-check_machine_status()
-{
-    MACHINE_FOUND=false
-    WANTED_VM=$1
-
-    check_machine_vbox $WANTED_VM
-    RET=$?
-    if [ "$MACHINE_FOUND" != "false" ];
-	then
-	echo -n "Machine \"$WANTED_VM\" status: "
-	if [ "$RET" != "0" ]
-	then
-	    echo "not running"
-	else
-	    echo "running"
-	fi
-	return 0
-    fi
-
-    check_machine_android $WANTED_VM
-    RET=$?
-    if [ "$MACHINE_FOUND" != "false" ];
-	then
-	echo -n "Machine \"$WANTED_VM\" status: "
-	if [ "$RET" != "0" ]
-	then
-	    echo "not running"
-	else
-	    echo "running"
-	fi
-	return 0
-    fi
-
-}
-
 
 get_vbox_specific_info()
 {
@@ -1929,14 +1702,15 @@ get_android_specific_info()
 get_vm_specific_info()
 {
     MY_VM="$1"
-    RET=0
+    RET=1
     if [ "$VM_TYPE" = "VirtualBox" ]
     then
 	get_vbox_specific_info
+	RET=$?
     elif [ "$VM_TYPE" = "Android" ]
     then
-	
 	get_android_specific_info $MY_VM
+	RET=$?
     else
 	echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
     fi
@@ -2390,7 +2164,7 @@ android_install_app()
     MODE=$3
 
     get_info_for_client "$CLIENT"
-echo "port=$ANDROID_PORT"
+
     exec_client_raw_android "$ANDROID_PORT" "$MODE $APP"
 }
 
@@ -2474,6 +2248,18 @@ get_guest_os_for_client_vbox()
     return 0
 }
 
+get_guest_os_for_client_android()
+{
+    GUEST_OS_TMP="Android"
+
+    echo "$GUEST_OS_TMP"
+    echo "  Version: $($ADB -s emulator-$1 shell getprop ro.build.version.release)"
+    # TODO: Some problem going on here - will fix later.
+    # echo "  Kernel version: $(adb -s emulator-$1 shell cat /proc/version)"
+    # echo "  Build number: $($ADB -s emulator-$1 shell getprop ro.build.description)"
+
+    return 0
+}
 
 get_guest_os_for_client()
 {
@@ -2493,7 +2279,7 @@ get_guest_os_for_client()
 	    ;;
 	
 	"Android")
-	    echo "Android get_guest_os_for_client()"
+	    GUEST_OS=$(get_guest_os_for_client_android "$ANDROID_PORT")
 	    RET=$?
 	    ;;
 	

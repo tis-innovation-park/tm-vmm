@@ -74,26 +74,11 @@ usage()
     echo "  --start-client-headless CLIENT_NAME"
     echo "    Starts client called CLIENT_NAME as headless (no screen)"
     echo ""
-    echo "  --start-machine MACHINE_NAME"
-    echo "    Starts machine called MACHINE_NAME"
-    echo ""
-    echo "  --start-machine-headless MACHINE_NAME"
-    echo "    Starts machine called MACHINE_NAME as headless (no screen)"
-    echo ""
     echo "  --stop-client CLIENT_NAME"
     echo "    Stops client called CLIENT_NAME"
     echo ""
-    echo "  --stop-machine MACHINE_NAME"
-    echo "    Stops machine called MACHINE_NAME"
-    echo ""
     echo "  --import-appliance APPLIANCE OVA_FILE"
     echo "    Imports the appliance"
-    echo ""
-    echo "  --pause-machine MACHINE_NAME"
-    echo "    Pauses the running machine called MACHINE_NAME"
-    echo ""
-    echo "  --resume-machine MACHINE_NAME"
-    echo "    Resumes the paused machine called MACHINE_NAME"
     echo ""
     echo "  --pause-client CLIENT_NAME"
     echo "    Pauses the running client called CLIENT_NAME"
@@ -106,9 +91,6 @@ usage()
     echo ""
     echo "  --check-client-status CLIENT_NAME"
     echo "    Checks if the client called CLIENT_NAME is up and running"
-    echo ""
-    echo "  --check-machine-status MACHINE_NAME"
-    echo "    Checks status on the machine called MACHINE_NAME"
     echo ""
     echo "  --client-exec CLIENT_NAME COMMAND"
     echo "    Execeutes the COMMAND on the client called CLIENT_NAME"
@@ -185,16 +167,10 @@ do
 	    list_running_clients
 	    RET=$?
 	    ;;
-	
-	"--list-running-machines")
-	    LIST_RUNNING=true
-	    list_running_machines
-	    RET=$?
-	    ;;
-	
+
 	"--list-machines")
-	    list_machines
-	    ;;
+            list_machines
+            ;;
 	
 	"--start-client")
 	    VCLIENT=$2
@@ -210,32 +186,6 @@ do
 	    shift
 	    ;;
 	
-	"--start-machine")
-	    VCLIENT=$2
-	    start_machine $VCLIENT
-	    RET=$?
-	    shift
-	    ;;
-	
-	"--start-machine-headless")
-	    VCLIENT=$2
-	    start_machine  $VCLIENT headless
-	    RET=$?
-	    shift
-	    ;;
-
-	"--pause-machine")
-	    pause_machine $2
-	    shift
-	    shift
-            ;;
-
-	"--resume-machine")
-	    resume_machine $2
-	    shift
-            shift
-	    ;;
-
 	"--check-client-ssh")
 	    VCLIENT=$2
 	    check_client_ssh  $VCLIENT
@@ -257,24 +207,9 @@ do
 	    shift
 	    ;;
 	
-	"--check-machine-status")
-	    VCLIENT="$2"
-	    check_machine_status  "$VCLIENT"
-	    RET=$?
-	    shift
-	    ;;
-	
-	    
 	"--stop-client")
 	    VCLIENT=$2
 	    stop_client  $VCLIENT
-	    RET=$?
-	    shift
-	    ;;
-	
-	"--stop-machine")
-	    VCLIENT=$2
-	    stop_machine  $VCLIENT
 	    RET=$?
 	    shift
 	    ;;
