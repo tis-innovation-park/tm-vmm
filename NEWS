@@ -1,5 +1,11 @@
 NEWS in coming 0.13
 
+  New tm-vmm options:
+    --check-machine-status - checks the statuf of a machine (hesa) 
+
+  Removed tm-vmm options:
+    --check-machine - replaced by --check-machine-status
+
   New features:
 
   * --machine-* switches are no longer coupled with client configurations (hesa,
