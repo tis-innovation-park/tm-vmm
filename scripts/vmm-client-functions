@@ -1685,6 +1685,7 @@ get_vbox_specific_info()
 
     if [ "$SSH_PORT" = "" ]
     then
+	debug "SSH_PORT is not set."
 	return 1
     fi
 
@@ -1714,7 +1715,6 @@ get_vm_specific_info()
     else
 	echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
     fi
-    
     return $RET
 }
 
@@ -1722,34 +1722,32 @@ get_vm_specific_info()
 get_info_for_client()
 {
     debug "Trying to get info for client: $1"
+    WANTED_CLIENT=$1
     CLIENT_FOUND=false
-    for d in $ETC_DIRS
+    for ETC_DIR in $ETC_DIRS
     do
-	TMP_CLIENTS=$(find $d/clients -name "$1.conf" 2>/dev/null)
+	TMP_CLIENTS=$(find $ETC_DIR/clients -name "$WANTED_CLIENT.conf" 2>/dev/null)
 	for i in $TMP_CLIENTS
-	do
-	    
+	do    
 	    export VM_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
-	    
 	    CLI_CONF=$i
-	    VM_TYPE=$(grep VM_TYPE $i | sed -e 's,VM_TYPE=,,g' -e 's,\",,g' )
 
 	    . $CLI_CONF
-
+	   
 	    CLIENT_FOUND=true
 
 	    get_vm_specific_info $VM_NAME
 	    RET=$?
-	    
 	    if [ $RET -ne 0 ] ; then debug "Client seems to be down"; CLIENT_FOUND=false; fi
-	done
-	if [ "$CLIENT_FOUND" = "true" ]
-	then
-	    debug "  got info for $1: $VM_NAME, $VM_TYPE, $CLI_CONF"
-	    return 0
-	fi
-    done
+	
+	    if [ "$CLIENT_FOUND" = "true" ]
+	    then
+		debug "  got info for $1: $VM_NAME, $VM_TYPE, $CLI_CONF"
+		return 0
+	    fi
 
+	done
+    done
     debug "  got no info for $1"
     return 1
 }

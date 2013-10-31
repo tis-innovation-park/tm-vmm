@@ -114,7 +114,7 @@ init_vmm()
 
     if [ "$ETC_DIRS" = "" ]
     then
-	ETC_DIRS="/etc/testingmachine $VMM_DIR/etc/ ${PERSONAL_ETC_DIR}"
+	ETC_DIRS="${PERSONAL_ETC_DIR} $VMM_DIR/etc/ /etc/testingmachine"
     fi
 
     if [ "$VM_STARTUP_TIMEOUT" = "" ]
@@ -153,6 +153,11 @@ init_vmm()
     if [ ! -d $LOG_DEBUG_DIR ]
     then
 	mkdir -p $LOG_DEBUG_DIR
+    fi
+
+    if [ ! -d $TM_TMP_FILE_DIR ]
+    then
+	mkdir -p $TM_TMP_FILE_DIR
     fi
 
     if [ -f $SCRIPT_DIR/loggers/$LOG_FORMAT-logger ]
