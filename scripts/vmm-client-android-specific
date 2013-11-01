@@ -36,13 +36,11 @@ get_avd_port_for_name()
     done
 }
 
-
 get_connected_avds() 
 {
     check_android_settings hard
     RET=$?
     if [ $RET -ne 0 ] ; then return $RET; fi
-
     $ADB devices | grep -v "List of devices attached" | \
 	grep -v "^[ \t]*$"   | \
 	awk ' { print $1 } ' | \
@@ -54,20 +52,20 @@ get_connected_avds_ports()
     get_connected_avds | sed -e "s,[ \t]*emulator\-,,g" 
 }
 
-
 setup_android()
 {
     # Set up Android path stuff
     if [ "$ANDROID_ADT_PATH" != "" ] && [ "$ANDROID" != "" ]
     then
 	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../
-   fi
+    fi
+    debug "ANDROID_ADT_PATH: $ANDROID_ADT_PATH"
 
     if [ "$ANDROID_AVD_DIR" = "" ]
     then
 	ANDROID_AVD_DIR=${HOME}/.android/avd/
     fi
-
+    debug "ANDROID_AVD_DIR: $ANDROID_AVD_DIR"
 
     # Set up Android command stuff
     if [ "$ANDROID" = "" ]
