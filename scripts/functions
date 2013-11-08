@@ -177,8 +177,10 @@ init_vmm()
 	echo "Could not find file: $SCRIPT_DIR/loggers/debug-logger"
     fi
 
-    check_android_settings
-    
+    debug ""
+    debug "### TM-VMM initiated!"
+
+    setup_android
 
     INIT_DONE=1
 }

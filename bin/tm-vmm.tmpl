@@ -164,6 +164,7 @@ do
 	
 	"--list-running-clients")
 	    LIST_RUNNING=true
+	    check_android_settings
 	    list_running_clients
 	    RET=$?
 	    ;;
@@ -174,6 +175,7 @@ do
 	
 	"--start-client")
 	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
 	    start_client $VCLIENT
 	    RET=$?
 	    shift
@@ -181,6 +183,7 @@ do
 	
 	"--start-client-headless")
 	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
 	    start_client  $VCLIENT headless
 	    RET=$?
 	    shift
@@ -188,6 +191,7 @@ do
 	
 	"--check-client-ssh")
 	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
 	    check_client_ssh  $VCLIENT
 	    RET=$?
 	    shift
@@ -195,6 +199,7 @@ do
 
 	"--check-client-online")
 	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
 	    is_client_online  $VCLIENT
 	    RET=$?
 	    shift
@@ -202,6 +207,7 @@ do
 	
 	"--check-client-status")
 	    VCLIENT="$2"
+	    get_info_for_client $VCLIENT
 	    check_client_status  "$VCLIENT"
 	    RET=$?
 	    shift
@@ -209,6 +215,7 @@ do
 	
 	"--stop-client")
 	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
 	    stop_client  $VCLIENT
 	    RET=$?
 	    shift
@@ -217,6 +224,7 @@ do
 	"--client-exec")
 	    VCLIENT=$2
 	    COMMAND="$3"
+	    get_info_for_client $VCLIENT
 	    exec_client_command $VCLIENT "$COMMAND"
 	    RET=$?
 	    shift
@@ -226,7 +234,7 @@ do
 	"--client-exec-fail")
 	    VCLIENT=$2
 	    COMMAND="$3"
-
+	    get_info_for_client $VCLIENT
 	    exec_client_command $VCLIENT "$COMMAND"
 	    RET=$?
 
@@ -244,7 +252,7 @@ do
 	"--client-exec-as-root"	)
 	    VCLIENT=$2
 	    COMMAND="$3"
-	    
+	    get_info_for_client $VCLIENT
 	    exec_client_command_as_root $VCLIENT "$COMMAND"
 	    RET=$?
 	    shift
@@ -252,67 +260,83 @@ do
 	    ;;
 
 	"--client-x11")
-	    is_client_x11_up $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    is_client_x11_up $VCLIENT
 	    shift
 	    ;;
 
 	"--wait-for-ssh")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    TIMEOUT=$3
+	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_ssh up "$TIMEOUT" $CLIENT 
+	    wait_for_ssh up "$TIMEOUT" $VCLIENT
 	    shift
 	    shift
 	    ;;
 
 	"--wait-for-client")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    TIMEOUT=$3
+	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_state up "$TIMEOUT" $CLIENT 
+	    wait_for_state up "$TIMEOUT" $VCLIENT
 	    shift
 	    shift
 	    ;;
 
 	"--open-ssh")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    TIMEOUT=$3
+	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_ssh up "$TIMEOUT" $CLIENT 
+	    wait_for_ssh up "$TIMEOUT" $VCLIENT
 	    shift
 	    shift
 	    open_ssh
 	    ;;
 
 	"--print-client")
-	    print_client $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    print_client $VCLIENT
 	    shift
 	    ;;
 	
 	"--client-screenshot")
-	    client_screenshot $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    client_screenshot $VCLIENT
 	    shift
 	    ;;
 
 	"--import-appliance")
-	    import_appliance $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    import_appliance $VCLIENT
 	    shift
 	    ;;
 
 	"--pause-client")
-	    pause_client $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    pause_client $VCLIENT
 	    shift
 	    shift
 	    ;;
 
 	"--resume-client")
-	    resume_client $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    resume_client $VCLIENT
 	    shift
 	    shift
 	    ;;
 
 	"--create-client-conf")
-	    create_client_conf "$2"
+	    VCLIENT=$2
+	    create_client_conf "$VCLIENT"
 	    shift
 	    shift
 	    ;;

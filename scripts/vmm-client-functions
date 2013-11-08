@@ -1,29 +1,28 @@
 #
-#                                                                   
-#                   Testing Machine
-#                      
-#   Copyright (C) 2012, 2013 TIS Innovation Park
-#                                                                   
-# This program is free software; you can redistribute it and/or     
-# modify it under the terms of the GNU General Public License       
-# as published by the Free Software Foundation; either version 3    
-# of the License, or any later version.                             
-#                                                                   
-#                                                                   
-# This program is distributed in the hope that it will be useful,   
-# but WITHOUT ANY WARRANTY; without even the implied warranty of    
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the     
-# GNU General Public License for more details.                      
-#                                                                   
-# You should have received a copy of the GNU General Public License 
-# along with this program; if not, write to the Free Software       
-# Foundation, Inc., 51 Franklin Street, Boston,            
-# MA  02110-1301, USA.                                              
+#
+# Testing Machine
+#
+# Copyright (C) 2012, 2013 TIS Innovation Park
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 3
+# of the License, or any later version.
+#
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Boston,
+# MA 02110-1301, USA.
 #
 
 declare -a SCRIPTS_TO_EXECUTE
 export SCRIPTS_TO_EXECUTE
-
 
 ANDROID_SPEC_FILE=$(dirname $0)/../share/testingmachine/scripts/vmm-client-android-specific
 if [ -f $ANDROID_SPEC_FILE ]
@@ -37,34 +36,33 @@ fi
 list_vbox_machines()
 {
     debug "Listing vbox machines"
-    VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
+    VB_NAMES=$(vboxmanage list vms | awk 'BEGIN { FS="\""} { printf "%s;", $2}' | sed 's,\",,g' )
     SAVED_IFS=$IFS
     export IFS=";"
 
     if [ "$VB_NAMES" != "" ]
     then
-	for VB_NAME in $VB_NAMES
-	do
- 	    if [ "$VB_NAME" != "" ]
- 	    then
+        for VB_NAME in $VB_NAMES
+        do
+            if [ "$VB_NAME" != "" ]
+            then
 		IFS=$SAVED_IFS
-		echo  "  |--$VB_NAME  "
+		echo " |--$VB_NAME "
 		CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
- 		if [ "$CONF_CLIENT" != "" ]
- 		then
- 	    	    VB_SHORT_NAME=$(basename $CONF_CLIENT)
- 	    	    echo "     |--$VB_SHORT_NAME (client)"
+		if [ "$CONF_CLIENT" != "" ]
+		then
+                    VB_SHORT_NAME=$(basename $CONF_CLIENT)
+                    echo " |--$VB_SHORT_NAME (client)"
 		else
-	    	    echo "     |--no conf file yet"
+                    echo " |--no conf file yet"
 		fi
-	    fi
-	done
+            fi
+        done
     else
- 	echo "     no virtualbox machines found"
+         echo " no virtualbox machines found"
     fi
     IFS=$SAVED_IFS
 }
-
 
 list_android_machines()
 {
@@ -73,41 +71,37 @@ list_android_machines()
     if [ $RET -ne 0 ] ; then return $RET; fi
 
     debug "Listing android machines"
-#    VB_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
     VB_NAMES=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g')
 
     for VB_NAME_LONG in $VB_NAMES
     do
-	VB_NAME=$(basename $VB_NAME_LONG)
-	if [ "$VB_NAME" != "" ]
+        VB_NAME=$(basename $VB_NAME_LONG)
+        if [ "$VB_NAME" != "" ]
 
-	then
-	    echo  "  |--$VB_NAME  "
-	    CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
-	    if [ "$CONF_CLIENT" != "" ]
-	    then
-	        VB_SHORT_NAME=$(basename $CONF_CLIENT)
-		echo "     |--$VB_SHORT_NAME  (client)"
-	    else
-		echo "     |--no conf file yet"
-	    fi
-	else
-	    echo "   no android machines found"
-	fi
+        then
+         echo " |--$VB_NAME "
+         CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+         if [ "$CONF_CLIENT" != "" ]
+         then
+         VB_SHORT_NAME=$(basename $CONF_CLIENT)
+                echo " |--$VB_SHORT_NAME (client)"
+         else
+                echo " |--no conf file yet"
+         fi
+        else
+         echo " no android machines found"
+        fi
     done
 
 }
-
-
-
 
 list_machines()
 {
     debug "Listing available machines:"
     echo "Available machines:"
-    echo "  VirtualBox"
+    echo " VirtualBox"
     list_vbox_machines
-    echo "  Android"
+    echo " Android"
     list_android_machines
 }
 
@@ -118,19 +112,19 @@ list_clients()
     echo "Available clients:"
     for d in $ETC_DIRS
     do
-	debug_enter " entering dir $d"
-	debug "  in dir $d"
-	for i in $(find $d/clients -name "*.conf" 2>/dev/null)
-	do
-	    debug_enter " using file $i"
-	    debug "    file: $i"
-	    TYPE=$(grep VM_TYPE "$i" | sed 's,[ ]*VM_TYPE=,,g' | sed 's,\",,g')
-	    echo -n "   " 
-	    printf "%s " $(basename $i | sed 's,\.conf,,g' )
-	    printf " [%.12s] ($i)\n" $TYPE
-	    debug_leave " "
-	done
-	debug_leave " "
+        debug_enter " entering dir $d"
+        debug " in dir $d"
+        for i in $(find $d/clients -name "*.conf" 2>/dev/null)
+        do
+         debug_enter " using file $i"
+         debug " file: $i"
+         TYPE=$(grep VM_TYPE "$i" | sed 's,[ ]*VM_TYPE=,,g' | sed 's,\",,g')
+         echo -n " "
+         printf "%s " $(basename $i | sed 's,\.conf,,g' )
+         printf " [%.12s] ($i)\n" $TYPE
+         debug_leave " "
+        done
+        debug_leave " "
     done
 
     debug_leave "list_clients"
@@ -138,83 +132,211 @@ list_clients()
 
 list_running_vbox()
 {
-    echo "  VirtualBox"
-    VB_NAMES=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""}  { printf "%s;", $2}' | sed 's,\",,g' )
+    echo " VirtualBox"
+    VB_NAMES=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""} { printf "%s;", $2}' | sed 's,\",,g' )
     SAVED_IFS=$IFS
     export IFS=";"
 
     if [ "$VB_NAMES" != "" ]
     then
-	for VB_NAME in $VB_NAMES
-	do
-	    if [ "$VB_NAME" != "" ]
-	    then
-		IFS=$SAVED_IFS
-		CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
-		if [ "CONF_CLIENT" != "" ]
-		then
-		    VB_SHORT_NAME=$(basename $CONF_CLIENT | sed 's,\.conf,,g')
- 		    echo "    |--$VB_SHORT_NAME  [$CONF_CLIENT] (machine: $VB_NAME )"
-		fi
-	    fi
-	done
+        for VB_NAME in $VB_NAMES
+        do
+         if [ "$VB_NAME" != "" ]
+         then
+                IFS=$SAVED_IFS
+                CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+                if [ "CONF_CLIENT" != "" ]
+                then
+                 VB_SHORT_NAME=$(basename $CONF_CLIENT | sed 's,\.conf,,g')
+                  echo " |--$VB_SHORT_NAME [$CONF_CLIENT] (machine: $VB_NAME )"
+                fi
+         fi
+        done
     else
-	echo "    no virtualbox machines currently running"
+        echo " No virtualbox machines is currently running."
     fi
     IFS=$SAVED_IFS
 }
 
 list_running_android()
 {
-    echo "  Android"
+    debug "list_running_android."
+    echo " Android"
+
     AVD_PORTS=$(get_connected_avds_ports)
 
     if [ "$AVD_PORTS" != "" ]
     then
-	for AVD_PORT in $AVD_PORTS
-	do
-	    AVD_NAME=$(get_avd_name_for_port $AVD_PORT)
-	    CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $AVD_NAME)
-	    if [ "$CONF_CLIENT" != "" ]
-	    then
-		VB_SHORT_NAME=$(basename $AVD_NAME | sed 's,\.conf,,g')
-		echo "    |--$VB_SHORT_NAME  [$CONF_CLIENT] (machine: $AVD_NAME)"
-	    fi
-	done
+        for AVD_PORT in $AVD_PORTS
+        do
+         AVD_NAME=$(get_avd_name_for_port $AVD_PORT)
+         CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $AVD_NAME)
+         if [ "$CONF_CLIENT" != "" ]
+         then
+                VB_SHORT_NAME=$(basename $AVD_NAME | sed 's,\.conf,,g')
+                echo " |--$VB_SHORT_NAME [$CONF_CLIENT] (machine: $AVD_NAME)"
+         fi
+        done
     else
-	echo "    no android emulators currently running"
+        echo " No android emulators is currently running."
     fi
 }
 
 list_running_clients()
 {
     echo "Running clients:"
-    list_running_vbox 
+    list_running_vbox
     list_running_android
+}
+
+start_client()
+{
+    WANTED_CLIENT="$1"
+    START_ARGS="$2"
+
+    debug "start_client: calling         start_helper ($WANTED_CLIENT, $VM_TYPE, $CLI_CONF, $START_ARGS)"
+    start_helper "$WANTED_CLIENT" "$VM_TYPE" "$CLI_CONF" "$START_ARGS"
+    return $?
+}
+
+start_helper()
+{
+    debug "start_helper: $*"
+
+    WANTED_CLIENT=$1
+    VM_TYPE=$2
+    CLI_CONF=$3
+    START_ARGS=$4
+
+    case $VM_TYPE in
+        "VirtualBox")
+         debug "Starting vbox \"$WANTED_CLIENT\" ($START_ARGS)"
+         if [ "$START_ARGS" = "headless" ]
+         then
+                start_vbox_headless $VM_NAME
+                RET=$?
+         else
+                start_vbox $VM_NAME
+                RET=$?
+         fi
+
+         if [ $RET -ne 0 ]
+                then
+                debug "Failed to start \"$VM_NAME\"."
+                echo "Failed to start \"$VM_NAME\"."
+                return 1
+         fi
+
+         check_vbox_proc $VM_NAME
+         RET=$?
+        
+         if [ $RET -ne 0 ]
+         then
+             OK=0
+         else
+             OK=1
+         fi
+# Shouldn't be removed???
+#        OK=$?
+         log "$OK" "Start VirtualBox" "$VM_NAME"
+         ;;
+
+        "Android")
+         debug "Starting android \"$WANTED_CLIENT\" ($START_ARGS)."
+         if [ "$START_ARGS" = "headless" ]
+         then
+                start_android_headless $VM_NAME
+                sleep 2
+         else
+                start_android $VM_NAME
+                sleep 2
+         fi
+         ;;
+
+        "qemu")
+         debug "Starting qemu \"$WANTED_CLIENT\"."
+         start_qemu "$WANTED_NAME" "&"
+
+         check_qemu_proc $VM_NAME
+         RET=$?
+         
+         if [ $RET -ne 0 ]
+         then
+             OK=0
+         else
+             OK=1
+         fi
+# Shouldn't be removed???
+#        OK=$?
+         log "$OK" "Start qemu" "$VM_NAME"
+         ;;
+
+        *)
+         echo "Failed finding vm type for \"$WANTED_CLIENT\"."
+         log "1" "Unknown vm type" "$VM_NAME"
+         exit
+         ;;
+    esac
+# Shouldn't be removed??? $2 == $VM_TYPE
+    # if [ "$2" = "--no-wait" ]
+    # then
+    #     return 0
+    # fi
+
+    wait_until_up $VM_NAME
+}
+
+start_vbox()
+{ # Why rename  VM_NAME and then export???
+    export PROC_EXPR=$1
+
+    debug "Start vbox \"$VM_NAME\"."
+
+    if [ $(vboxmanage list vms | grep -c "$PROC_EXPR" | wc -l) -eq 0 ]
+    then
+        debug "Could not find vbox image \"$PROC_EXPR\"."
+        return 1
+    fi
+    ERR_FILE=$TM_TMP_FILE_DIR/$$.vbm-err
+    rm -f $ERR_FILE
+    VBoxManage startvm "$VM_NAME" 2> $ERR_FILE >/dev/null &
+    sleep 3
+# Isn't ERR_FILE empty? because >/dev/null, change to 2>/dev/null?
+    ERROR_FOUND=$(grep -e "error" $ERR_FILE | grep -e "exit code" | wc -l)
+    if [ "$ERROR_FOUND" != "0" ]
+    then
+        debug "Could not start vbox. Error message:"
+        debug "$(cat $ERR_FILE)"
+        rm -f $ERR_FILE
+        return 1
+    fi
+    rm -f $ERR_FILE
+    maximise_vbox "$VM_NAME"
+    return 0
 }
 
 start_vbox_headless()
 {
     if [ $(vboxmanage list vms | grep "$VM_NAME" | wc -l) -eq 0 ]
-	then
-	debug "Could not find vbox image: $VM_NAME"
-	return 1
+        then
+        debug "Could not find vbox image: $VM_NAME"
+        return 1
     fi
     debug "start_vbox_headless()"
-    debug "start_vbox_headless: vboxheadless -s  \"$VM_NAME\""
+    debug "start_vbox_headless: vboxheadless -s \"$VM_NAME\""
     ERR_FILE=$TM_TMP_FILE_DIR/$$.vbm-err
     rm -f $ERR_FILE
-    vboxheadless -s  "$VM_NAME"  2> $ERR_FILE  >/dev/null  &
+    vboxheadless -s "$VM_NAME" 2> $ERR_FILE >/dev/null &
 
     sleep 5
-    ERROR_FOUND=$(grep -i -e "error" $ERR_FILE  | wc -l)
+    ERROR_FOUND=$(grep -i -e "error" $ERR_FILE | wc -l)
 
     if [ "$ERROR_FOUND" != "0" ]
-    then   
-	debug "Could not start vbox (headless). Error message:"
-	debug "$(cat $ERR_FILE)"
-	rm -f $ERR_FILE
-	return 1
+    then
+        debug "Could not start vbox (headless). Error message:"
+        debug "$(cat $ERR_FILE)"
+        rm -f $ERR_FILE
+        return 1
     fi
 
     rm -f $ERR_FILE
@@ -222,20 +344,33 @@ start_vbox_headless()
     return 0
 }
 
-set_qemu_program()
+start_android()
 {
-    WANTED_CPU=$1
-    export QEMU_BINARY
-    case $WANTED_CPU in
-	"arm")
-	    QEMU_BINARY=qemu-system-arm
-	    ;;
-	*)
-	    echo "Unsupported cmou $WANTED_CPU"
-	    ;;
-    esac
-    
+    debug "start_android."
+    export PROC_EXPR=$1
 
+    if [ ! -x $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS ] ; then
+	debug "Could not find $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS."
+        echo "Android commands doesn't seem to be set up correctly."
+        echo "Could not find $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS."
+        return 1
+    fi
+
+    $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR -netspeed full -netdelay none &
+}
+
+start_android_headless()
+{
+    debug "Start android \"$1\" in headless mode."
+    export PROC_EXPR=$1
+
+    if [ ! -x $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS ] ; then
+        echo "Android commands doesn't seem to be set up correctly."
+        echo "Could not find $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS"
+        return 1
+    fi
+
+    $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR -netspeed full -netdelay none -no-window &
 }
 
 start_qemu()
@@ -245,316 +380,50 @@ start_qemu()
     set_qemu_program $QEMU_CPU
 
     debug "Starting qemu $1"
-    debug "  $VM_START_ARGS"
+    debug " $VM_START_ARGS"
     MONITOR_ARGS="-monitor unix:/tmp/qemu-$VM_NAME.sock,server,nowait "
     REDIR_ARGS="-redir tcp:$SSH_PORT::22 "
-    EXTRA_ARGS="-no-reboot   -nographic -display none "
+    EXTRA_ARGS="-no-reboot -nographic -display none "
     
-    START_VM="$QEMU_BINARY  -M versatilepb -m 256"
-    START_VM="$START_VM  -kernel $QEMU_KERNEL  -hda $QEMU_HDA"
-    START_VM="$START_VM  -append \"root=/dev/sda1\" "
+    START_VM="$QEMU_BINARY -M versatilepb -m 256"
+    START_VM="$START_VM -kernel $QEMU_KERNEL -hda $QEMU_HDA"
+    START_VM="$START_VM -append \"root=/dev/sda1\" "
     START_VM="$START_VM -initrd $QEMU_INITRD"
-    START_VM="$START_VM  $MONITOR_ARGS $REDIR_ARGS $EXTRA_ARGS"
+    START_VM="$START_VM $MONITOR_ARGS $REDIR_ARGS $EXTRA_ARGS"
 
-    if [ ! -f $QEMU_KERNEL ] || [ ! -f $QEMU_INITRD ] || [ ! -f $QEMU_HDA ] 
-	then
-	debug "Can't find either of:"
-	debug "  kernel: $QEMU_KERNEL"
-        debug "  initrd: $QEMU_INITRD"
-	debug "  hda:    $QEMU_HDA"
-	return 1
+    if [ ! -f $QEMU_KERNEL ] || [ ! -f $QEMU_INITRD ] || [ ! -f $QEMU_HDA ]
+        then
+        debug "Can't find either of:"
+        debug " kernel: $QEMU_KERNEL"
+        debug " initrd: $QEMU_INITRD"
+        debug " hda: $QEMU_HDA"
+        return 1
     fi
-
 
     if [ "$VNC_PORT" != "" ]
     then
-	START_VM="$START_VM  -vnc :$VNC_PORT"
+        START_VM="$START_VM -vnc :$VNC_PORT"
     fi
-    debug "  $START_VM"	     
-    echo "$START_VM" | bash & 
+    debug " $START_VM"        
+    echo "$START_VM" | bash &
     
     return 0
 # /dev/null
 }
 
-maximise_vbox()
+set_qemu_program()
 {
-    VN_NAME=$1
-
-    debug "Will try to maximise VirtualBox window"
-    CTR=0
-    WIN_ID=""
-
-    export WMCTRL=$(which wmctrl)
-
-    if [ "$WMCTRL" = "" ]
-    then   	
-	echo "Command wmctrl missing on host"
-	echo "Cannot maximise the window"
-	debug "Command wmctrl missing on host"
-	debug "Cannot maximise the window"
-	return 1
-    fi     
-
-    while [ "$WIN_ID" = "" ]
-    do
-	debug "Waiting for VirtualBox window to appear"
-	countdowner 5
-	WIN_ID=$($WMCTRL -l | grep VirtualBox | grep -v Manager | grep $VM_NAME | awk ' { print $1}')
-	CTR=$(( $CTR + 1))
-	debug "     current id:$WIN_ID"
-	if [ $CTR -gt 10 ]
-	then
-	    debug "    We've been waiting long enough"
-	    RET=1
-	    break
-	fi
-    done
-    
-    if [ "$WIN_ID" != "" ]
-    then
-	debug "Maximising window: $WIN_ID"
-	sleep 2
-	$WMCTRL -i -r $WIN_ID -b add,maximized_vert,maximized_horz
-	RET=$?
-    fi
-
-    return $RET
+    WANTED_CPU=$1
+    export QEMU_BINARY
+    case $WANTED_CPU in
+        "arm")
+         QEMU_BINARY=qemu-system-arm
+         ;;
+        *)
+         echo "Unsupported cmou $WANTED_CPU"
+         ;;
+    esac
 }
-
-
-
-start_vbox()
-{
-    export PROC_EXPR=$1
-
-    debug "Start vbox: $VM_NAME"
-
-    if [ $(vboxmanage list vms | grep -c "$PROC_EXPR" | wc -l) -eq 0 ]
-	then
-	debug "Could not find vbox image: $PROC_EXPR"
-	return 1
-    fi
-    ERR_FILE=$TM_TMP_FILE_DIR/$$.vbm-err
-    rm -f $ERR_FILE
-    VBoxManage startvm "$VM_NAME"  2> $ERR_FILE  >/dev/null &
-    sleep 3
-    ERROR_FOUND=$(grep -e "error" $ERR_FILE  | grep -e "exit code" | wc -l)
-    if [ "$ERROR_FOUND" != "0" ]
-    then   
-	debug "Could not start vbox. Error message:"
-	debug "$(cat $ERR_FILE)"
-	rm -f $ERR_FILE
-	return 1
-    fi
-    rm -f $ERR_FILE
-    maximise_vbox "$VM_NAME"
-    return 0
-}
-
-start_android()
-{
-    export PROC_EXPR=$1
-    debug "Start android: $VM_NAME"
-
-    check_android_settings hard
-    if [ "$?" != "0" ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	return 1
-    fi 
-
-    if [ ! -x $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	echo "Could not find $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS"
-	return 1
-    fi
-
-    $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR  -netspeed full -netdelay none &
-}
-
-start_android_headless()
-{
-    export PROC_EXPR=$1
-    debug "Start android in headless mode: $VM_NAME"
-
-    check_android_settings hard
-    if [ "$?" != "0" ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	return 1
-    fi 
-
-    if [ ! -x $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	echo "Could not find $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS"
-	return 1
-    fi
-
-    $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR  -netspeed full -netdelay none -no-window &
-}
-
-
-kill_vb_proc()
-{
-    VB_NAME="$1"
-    KILL_ARG=$2
-
-    debug "Kill vb proc $1 ($KILL_ARG)"
-
-    sleep 5
-    VBID=$(ps auxww | grep -i virtualbox | grep -v grep | grep $VB_NAME | awk ' { print $2 }')
-    if [ "$VBID" != "" ]
-	then
-	debug "Still a vbox id to slay.. kill $KILL_ARG $VBID"
-	kill $VBID 2>/dev/null
-    fi
-}
-
-kill_android()
-{
-    VB_NAME=$1
-    VB_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
-    if [ "$VB_NAME" != "" ]
-    then
-	kill_vb_proc "$VB_NAME"
-	kill_vb_proc "$VB_NAME" "-9"
-    fi
-}
-
-kill_vbox()
-{
-    VB_NAME=$1
-    # VB_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
-    if [ "$VB_NAME" != "" ]
-    then
-	kill_vb_proc "$VB_NAME"
-	kill_vb_proc "$VB_NAME" "-9"
-    fi
-}
-
-stop_vbox()
-{
-    VM_NAME=$1
-    debug "Stopping vbox $VB_NAME"
-
-    if [ "$VM_NAME" != "" ]
-    then
-
-
-                #
-                #  Press ACPI powerbutton off
-                #
-	is_vbox_up $VM_NAME
-	RET=$?
-	if [ "$RET" != "0" ]
-	then
-	    return
-	fi
-
-	debug "  sending  acpipowerbutton off to $VM_NAME"
-	VBoxManage controlvm $VM_NAME acpipowerbutton off 2>/dev/null
-	wait_until_down $VM_NAME
-	
-                #
-                #  Do a "hard" poweroff
-                #
-	is_vbox_up $VM_NAME
-	RET=$?
-	if [ "$RET" != "0" ]
-	then
-	    debug "this happens"
-	    return
-	fi
-        debug "then this happens"
-
-	debug "  sending  poweroff to $VM_NAME"
-	VBoxManage controlvm $VM_NAME poweroff 2>/dev/null
-	wait_until_down $VM_NAME
-    fi
-}
-
-
-stop_qemu()
-{
-    VB_NAME=$1
-    debug "Stopping qemu $VM_NAME"
-
-    if [ "$VB_NAME" != "" ]
-    then
-	debug "Send to QEMU $VB_NAME: ctrl-alt-delete"
-	send_to_qemu $VB_NAME "sendkey ctrl-alt-delete"
-	wait_for_state down 20 $VB_NAME
-
-	is_qemu_up $VB_NAME 
-	RET=$?
-	if [ "$RET" != "0" ]
-	then
-	    debug "    client is up, returning"
-	    return
-	fi
-
-	debug "Send to QEMU $VB_NAME: system_powerdown"
-	send_to_qemu $VB_NAME "system_powerdown"
-	wait_for_state down 20  $VB_NAME
-
-	is_qemu_up $VB_NAME 
-	RET=$?
-	if [ "$RET" != "0" ]
-	then
-	    debug "    client is up, returning"
-	    return
-	fi
-
-	debug "Send to QEMU $VB_NAME: quit"
-	send_to_qemu $VB_NAME "quit"
-	wait_for_state down 20 $VB_NAME
-
-	break
-    fi	
-}
-
-
-
-stop_android()
-{
-    VB_NAME=$1
-    debug "Stopping Android $VM_NAME"
-
-    check_android_settings hard
-    if [ "$?" != "0" ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	return 1
-    fi 
-
-    if [ ! -x $ADB ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	echo "Could not find adb"
-	return 1
-    fi
-
-
-
-    if [ "$VB_NAME" != "" ]
-ANDROID_PORT=$(get_avd_port_for_name $VB_NAME)
-
-    then
-	debug "Killing Android $VB_NAME"
-	$ADB  -s emulator-$ANDROID_PORT emu kill  >/dev/null 2>/dev/null
-	
-	wait_for_state down 20 $VB_NAME
-
-	is_android_up $VB_NAME 
-	RET=$?
-	if [ "$RET" != "0" ]
-	then
-	    debug "    client is up, returning"
-	    return
-	fi
-
-
-	break
-    fi	
-}
-
 
 check_qemu_proc()
 {
@@ -571,7 +440,7 @@ check_android_proc()
     PROC_EXPR=$1
     RET=$(ps auxww | grep emulator | grep -c $PROC_EXPR )
 
-    debug "Number of Android processes: $RET"
+    debug "Number of Android processes: $RET."
     
     return $RET
 }
@@ -586,88 +455,269 @@ check_vbox_proc()
     return $RET
 }
 
+maximise_vbox()
+{
+    VN_NAME=$1
+
+    debug "Will try to maximise VirtualBox window"
+    CTR=0
+    WIN_ID=""
+
+    export WMCTRL=$(which wmctrl)
+
+    if [ "$WMCTRL" = "" ]
+    then
+        echo "Command wmctrl missing on host"
+        echo "Cannot maximise the window"
+        debug "Command wmctrl missing on host"
+        debug "Cannot maximise the window"
+        return 1
+    fi
+
+    while [ "$WIN_ID" = "" ]
+    do
+        debug "Waiting for VirtualBox window to appear"
+        countdowner 5
+        WIN_ID=$($WMCTRL -l | grep VirtualBox | grep -v Manager | grep $VM_NAME | awk ' { print $1}')
+        CTR=$(( $CTR + 1))
+        debug " current id:$WIN_ID"
+        if [ $CTR -gt 10 ]
+        then
+         debug " We've been waiting long enough"
+         RET=1
+         break
+        fi
+    done
+    
+    if [ "$WIN_ID" != "" ]
+    then
+        debug "Maximising window: $WIN_ID"
+        sleep 2
+        $WMCTRL -i -r $WIN_ID -b add,maximized_vert,maximized_horz
+        RET=$?
+    fi
+
+    return $RET
+}
+
+kill_vb_proc()
+{
+    VB_NAME="$1"
+    KILL_ARG=$2
+
+    debug "Kill vb proc $1 ($KILL_ARG)"
+
+    sleep 5
+    VBID=$(ps auxww | grep -i virtualbox | grep -v grep | grep $VB_NAME | awk ' { print $2 }')
+    if [ "$VBID" != "" ]
+        then
+        debug "Still a vbox id to slay.. kill $KILL_ARG $VBID"
+        kill $VBID 2>/dev/null
+    fi
+}
+
+# Not in use. Should it be removed?
+kill_android()
+{
+    VB_NAME=$1
+    VB_NAME=$(grep VM_NAME $i | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
+    if [ "$VB_NAME" != "" ]
+    then
+        # Should we use `kill_android_proc'?
+        kill_vb_proc "$VB_NAME"
+        kill_vb_proc "$VB_NAME" "-9"
+    fi
+}
+
+kill_vbox()
+{
+    VB_NAME=$1
+    if [ "$VB_NAME" != "" ]
+    then
+        kill_vb_proc "$VB_NAME"
+        kill_vb_proc "$VB_NAME" "-9"
+    fi
+}
+
+stop_vbox()
+{
+    VM_NAME=$1
+    debug "stop_vbox: \"$VM_NAME\"."
+
+    if [ "$VM_NAME" != "" ]
+    then
+        is_vbox_up $VM_NAME
+        RET=$?
+
+        if [ "$RET" != "0" ] ; then
+            debug " sending acpipowerbutton off to $VM_NAME"
+            # Press ACPI powerbutton off
+	    VBoxManage controlvm $VM_NAME acpipowerbutton off 2>/dev/null
+            wait_until_down $VM_NAME
+        else
+            return 0
+        fi
+
+        is_vbox_up $VM_NAME
+        RET=$?
+
+        if [ "$RET" != "0" ]
+        then
+            debug "Power on still after pressing ACPI power off."
+            debug "Do a \"hard\" poweroff to \"$VM_NAME\" ."
+            VBoxManage controlvm $VM_NAME poweroff 2>/dev/null
+            wait_until_down $VM_NAME
+	else
+	    return 0
+        fi
+        debug "then this happens"
+    fi
+}
+
+
+stop_qemu()
+{
+    VB_NAME=$1
+    debug "Stopping qemu $VM_NAME"
+
+    if [ "$VB_NAME" != "" ]
+    then
+        debug "Send to QEMU $VB_NAME: ctrl-alt-delete"
+        send_to_qemu $VB_NAME "sendkey ctrl-alt-delete"
+        wait_for_state down 20 $VB_NAME
+
+        is_qemu_up $VB_NAME
+        RET=$?
+        if [ "$RET" != "0" ]
+        then
+         debug " client is up, returning"
+         return
+        fi
+
+        debug "Send to QEMU $VB_NAME: system_powerdown"
+        send_to_qemu $VB_NAME "system_powerdown"
+        wait_for_state down 20 $VB_NAME
+
+        is_qemu_up $VB_NAME
+        RET=$?
+        if [ "$RET" != "0" ]
+        then
+         debug " client is up, returning"
+         return
+        fi
+
+        debug "Send to QEMU $VB_NAME: quit"
+        send_to_qemu $VB_NAME "quit"
+        wait_for_state down 20 $VB_NAME
+
+        break
+    fi
+}
+
+stop_android()
+{
+    VB_NAME=$1
+    debug "Stopping Android $VM_NAME"
+
+    if [ "$VB_NAME" != "" ]
+    then
+        debug "Killing Android \"$VB_NAME\"."
+        $ADB -s emulator-$ANDROID_PORT emu kill >/dev/null 2>/dev/null
+
+        wait_for_state down 20 $VB_NAME
+
+        is_android_up $VB_NAME
+        RET=$?
+        if [ "$RET" != "0" ]
+        then
+         debug " client is up, returning $RET"
+        fi
+        return $RET
+    fi
+}
+
 stop_helper()
 {
     WANTED_VM=$1
     VM_TYPE=$2
     CLI_CONF=$3
 
+    debug "stop_helper: $WANTED_VM"
 
-    debug "stop_helper: $VM_NAME"
-
-    if [ "$CLI_CONF" != "" ]
-    then
-        # `get_info_for_client' has already sourced the configuration file. The
-        # code below will override the SSH port when the port is set to `auto'.
-        # Because of this, I have commented it out.
-        # # debug "Reading client conf $CLI_CONF"
-        # # . $CLI_CONF
-        is_client_ssh_up
-        RET=$?
-    fi
+    is_client_ssh_up
+    RET=$?
 
     if [ "$RET" = "0" ]
     then
-	if [ "$VM_SUPERUSER" != "" ] && [ "$SSH_SHUTDOWN_COMMAND" != "" ] 
-	then
-	    debug "Super user account available"
-	    debug "  trying to stop via ssh"
-	    $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND
-	    RET=$?
-	    if [ "$RET" != "0" ]
-	    then
-		debug "Failed stopping client with ssh"
-		debug "   Command: $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND"
-	    else
-		wait_until_down $WANTED_VM
-	    fi
-	else
-	    debug "Missing credentials to stop via ssh and super user"
-	fi
+        if [ "$VM_SUPERUSER" != "" ] && [ "$SSH_SHUTDOWN_COMMAND" != "" ]
+        then
+         debug "Super user account available"
+         debug " trying to stop via ssh"
+         $SSH $SSH_TEST_OPTIONS -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND
+         RET=$?
+         if [ "$RET" != "0" ]
+         then
+                debug "Failed stopping client with ssh"
+                debug " Command: $SSH $SSH_TEST_OPTIONS -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND"
+         else
+                wait_until_down $WANTED_VM
+         fi
+        else
+         debug "Missing credentials to stop via ssh and super user"
+        fi
     else
-	debug "Host $1 ssh seems down, or the vm is not registered as a client"
-	debug "Stop $1 using virtual machine ($VM_TYPE)"
+        debug "Host \"$WANTED_VM\" ssh seems down, or the vm is not registered as a client"
+        debug "Stop \"$WANTED_VM\" using virtual machine ($VM_TYPE)"
 
-	case $VM_TYPE in
-	    "VirtualBox")
-		debug "Stopping vbox $1"
-	        stop_vbox $1
-		kill_vbox $1
-		check_vbox_proc $1
+        case $VM_TYPE in
+            "VirtualBox")
+                debug "Stopping vbox \"$WANTED_VM\""
+		stop_vbox $WANTED_VM
+                kill_vbox $WANTED_VM
+                check_vbox_proc $WANTED_VM
 
-		RET=$?
-		log "$RET" "Stop VirtualBox" "$VM_NAME"
-		return $RET
-		;;
+                RET=$?
+                log "$RET" "Stop VirtualBox" "$VM_NAME"
+                return $RET
+                ;;
 
-	    "qemu")
-		debug "Stoping qemu $WANTED_VM"
-		stop_qemu "$WANTED_VM"
+            "qemu")
+                debug "Stoping qemu $WANTED_VM"
+                stop_qemu "$WANTED_VM"
 
-		check_qemu_proc $1
-		RET=$?
-		log "$RET" "Stop qemu" "$VM_NAME"
-		return $RET
-		;;
+                check_qemu_proc $1
+                RET=$?
+                log "$RET" "Stop qemu" "$VM_NAME"
+                return $RET
+                ;;
 
-	    "Android")
-		debug "Stoping Android $WANTED_VM"
-		stop_android "$WANTED_VM"
+            "Android")
+                debug "Stoping Android $WANTED_VM"
+                stop_android "$WANTED_VM"
 
-		check_android_proc $1
-		RET=$?
-		log "$RET" "Stop Androd" "$VM_NAME"
-		return $RET
-		;;
+                check_android_proc $1
+                RET=$?
+                log "$RET" "Stop Androd" "$VM_NAME"
+                return $RET
+                ;;
 
-	    *)
-		echo "Failed finding vm type for $1"
-		exit 123
-		;;
-	esac
+            *)
+                echo "Failed finding vm type for $1"
+                exit 123
+                ;;
+        esac
     fi
 }
 
+stop_client()
+{
+    WANTED_CLIENT=$1
+    START_ARGS=$2
+
+    debug "stop_helper ($VM_NAME, $VM_TYPE, $CLI_CONF)"
+    stop_helper $VM_NAME $VM_TYPE $CLI_CONF
+    return $?
+}
 
 pause_helper()
 {
@@ -679,33 +729,33 @@ pause_helper()
 
     if [ "$CLI_CONF" != "" ]
     then
-	debug "Reading client conf $CLI_CONF"
-	. $CLI_CONF
+        debug "Reading client conf $CLI_CONF"
+        . $CLI_CONF
     fi
 
     debug "Pause $1 using virtual machine ($VM_TYPE)"
 
     case $VM_TYPE in
-	"VirtualBox")
-	    debug "Pausing vbox $1"
-	    VBoxManage controlvm $VM_NAME pause 
-#sleep 10 ; VBoxManage controlvm Ubuntu-12.04 pause ; sleep 600 ; VBoxManage controlvm Ubuntu-12.04 resume ; ssh -p 9022  root@localhost ntpdate-debian	    kill_vbox $1
-	    ;;
+        "VirtualBox")
+         debug "Pausing vbox $1"
+         VBoxManage controlvm $VM_NAME pause
+#sleep 10 ; VBoxManage controlvm Ubuntu-12.04 pause ; sleep 600 ; VBoxManage controlvm Ubuntu-12.04 resume ; ssh -p 9022 root@localhost ntpdate-debian         kill_vbox $1
+         ;;
 
-	"Android")
+        "Android")
             echo "Can't pause Android yet!"
-	    return 1
-	    ;;
+         return 1
+         ;;
 
-	"qemu")
+        "qemu")
             echo "Can't pause qemus yet!"
-	    return 1
-	    ;;
+         return 1
+         ;;
 
-	*)
-	    echo "Failed finding vm type for $1"
-	    exit 123
-	    ;;
+        *)
+         echo "Failed finding vm type for $1"
+         exit 123
+         ;;
     esac
 }
 
@@ -719,94 +769,50 @@ resume_helper()
 
     if [ "$CLI_CONF" != "" ]
     then
-	debug "Reading client conf $CLI_CONF"
-	. $CLI_CONF
+        debug "Reading client conf $CLI_CONF"
+        . $CLI_CONF
     fi
 
     debug "Resume $1 using virtual machine ($VM_TYPE)"
 
     case $VM_TYPE in
-	"VirtualBox")
-	    debug "Resuming vbox $1"
-	    VBoxManage controlvm $VM_NAME resume
-	    printf "\n\n\t*****RESET TIME LATER!!!!\n\n\n"
-#sleep 10 ; VBoxManage controlvm Ubuntu-12.04 pause ; sleep 600 ; VBoxManage controlvm Ubuntu-12.04 resume ; ssh -p 9022  root@localhost ntpdate-debian	    kill_vbox $1
-	    ;;
+        "VirtualBox")
+         debug "Resuming vbox $1"
+         VBoxManage controlvm $VM_NAME resume
+         printf "\n\n\t*****RESET TIME LATER!!!!\n\n\n"
+#sleep 10 ; VBoxManage controlvm Ubuntu-12.04 pause ; sleep 600 ; VBoxManage controlvm Ubuntu-12.04 resume ; ssh -p 9022 root@localhost ntpdate-debian         kill_vbox $1
+         ;;
 
-	"qemu")
+        "qemu")
             echo "Can't pause qemus yet!"
-	    return 1
-	    ;;
+         return 1
+         ;;
 
-	*)
-	    echo "Failed finding vm type for $1"
-	    exit 123
-	    ;;
+        *)
+         echo "Failed finding vm type for $1"
+         exit 123
+         ;;
     esac
-}
-
-
-stop_client()
-{
-    CLIENT_FOUND=false
-    WANTED_VM=$1
-    START_ARGS=$2
-
-    get_info_for_client $1
-#    CLIENT_FOUND=$?
-
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found for: $1"
-    else
-	debug "stop_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
-	stop_helper $WANTED_VM $VM_TYPE $CLI_CONF
-	return $?
-    fi
-
-    return 1
 }
 
 pause_client()
 {
-    debug "Start debugging: --pause-client"
-    CLIENT_FOUND=false
     WANTED_VM=$1
     START_ARGS=$2
 
-    get_info_for_client $1
-    
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found for: $1"
-    else
-	debug "pause_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
-	pause_helper $WANTED_VM $VM_TYPE $CLI_CONF
-	return $?
-    fi
-
-    return 1
+    debug "pause_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
+    pause_helper $WANTED_VM $VM_TYPE $CLI_CONF
+    return $?
 }
-
 
 resume_client()
 {
-    CLIENT_FOUND=false
     WANTED_VM=$1
     START_ARGS=$2
 
-    get_info_for_client $1
-    
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found for: $1"
-    else
-	debug "resume_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
-	resume_helper $WANTED_VM $VM_TYPE $CLI_CONF
-	return $?
-    fi
-
-    return 1
+    debug "resume_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF)"
+    resume_helper $WANTED_VM $VM_TYPE $CLI_CONF
+    return $?
 }
 
 
@@ -814,140 +820,19 @@ find_vm_type()
 {
     VM_NAME=$1
     
-    VBOX_FOUND=$(vboxmanage list vms | awk ' BEGIN { FS="\""}  { print $2 } ' | sed 's,\",,g' | grep -w $VM_NAME | wc -l)
+    VBOX_FOUND=$(vboxmanage list vms | awk ' BEGIN { FS="\""} { print $2 } ' | sed 's,\",,g' | grep -w $VM_NAME | wc -l)
 
-    ANDROID_FOUND=$(list_android_machines  | grep -w $VM_NAME | wc -l)
+    ANDROID_FOUND=$(list_android_machines | grep -w $VM_NAME | wc -l)
 
-    debug "find_vm_type: VBOX_FOUND:    $VBOX_FOUND"
+    debug "find_vm_type: VBOX_FOUND: $VBOX_FOUND"
     debug "find_vm_type: ANDROID_FOUND: $ANDROID_FOUND"
 
     if [ $VBOX_FOUND -ne 0 ]
     then
-	export VM_TYPE="VirtualBox"
+        export VM_TYPE="VirtualBox"
     elif [ $ANDROID_FOUND -ne 0 ]
     then
-	export VM_TYPE="Android"
-    fi
-}
-
-
-start_helper()
-{
-    debug "start_helper: $*"
-
-    WANTED_NAME=$1
-    VM_TYPE=$2
-    CLI_CONF=$3
-    START_ARGS=$4
-
-    if [ "$CLI_CONF" != "" ]
-    then
-	debug "Reading client conf $CLI_CONF"
-	. $CLI_CONF
-    fi
-
-    case $VM_TYPE in
-	"VirtualBox")
-	    debug "Starting vbox $1 ($START_ARGS)"
-	    if [ "$START_ARGS" = "headless"  ]
-	    then
-		start_vbox_headless $VM_NAME
-		RET=$?
-	    else
-		start_vbox $VM_NAME
-		RET=$?
-	    fi
-
-	    if [ $RET -ne 0 ]
-		then
-		debug "Failed to start: $VM_NAME"
-		echo "Failed to start: $VM_NAME"
-		return 1
-	    fi
-
-
-	    check_vbox_proc $VM_NAME
-	    RET=$?
-	    
-	    if [ $RET -ne 0 ]
-		then
-		OK=0
-	    else
-		OK=1
-	    fi
-
-	    OK=$?
-	    log "$OK" "Start VirtualBox" "$VM_NAME"
-	    ;;
-	"Android")
-	    debug "Starting android $1 ($START_ARGS)"
-	    if [ "$START_ARGS" = "headless"  ]
-	    then
-		start_android_headless $VM_NAME
-		sleep 2
-	    else
-		start_android $VM_NAME
-		sleep 2
-	    fi
-
-		
-	    ;;
-	"qemu")
-	    debug "Starting qemu $1"
-	    start_qemu "$WANTED_NAME" "&"
-
-	    check_qemu_proc $VM_NAME
-	    RET=$?
-	    
-	    if [ $RET -ne 0 ]
-		then
-		OK=0
-	    else
-		OK=1
-	    fi
-
-	    OK=$?
-	    log "$OK" "Start qemu" "$VM_NAME"
-	    ;;
-	*)
-	    echo "Failed finding vm type for $1"
-	    log "1" "Unknown vm type" "$VM_NAME"
-	    exit
-	    ;;
-    esac
-    
-
-
-    if [ "$2" = "--no-wait" ]
-    then
-	return 0
-    fi
-    
-    wait_until_up $VM_NAME
-
-
-}
-
-start_client()
-{
-    CLIENT_FOUND=false
-    WANTED_VM="$1"
-    START_ARGS="$2"
-
-    debug "start_client: $*"
-
-    get_info_for_client $1
-#    CLIENT_FOUND=$?
-
-    
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found for: $1"
-	return 1
-    else
-        debug "start_client: calling 	start_helper ($WANTED_VM, $VM_TYPE, $CLI_CONF, $START_ARGS)"
-	start_helper "$WANTED_VM" "$VM_TYPE" "$CLI_CONF" "$START_ARGS"
-	return $?
+        export VM_TYPE="Android"
     fi
 }
 
@@ -970,16 +855,16 @@ is_qemu_up()
 
     CNT=$(send_to_qemu $WANTED_VM "info status" | grep "VM status: running" | wc -l)
 
-    debug "    is_qemu_up: $CNT"
+    debug " is_qemu_up: $CNT"
 
     # If the VM is running (>1), return 0
     if [ $CNT -ne 0 ]
     then
-	debug "qemu vm ($WANTED_VM) is running"
-	return 0
+        debug "qemu vm \"$WANTED_VM\" is running."
+        return 0
     fi
 
-    debug "qemu vm ($WANTED_VM) is NOT running"
+    debug "qemu vm \"$WANTED_VM\" is NOT running."
     return 1
 }
 
@@ -987,20 +872,20 @@ is_vbox_up()
 {
     export WANTED_VM=$1
 
-    debug "    is_vbox_up? "
+    debug " is_vbox_up? "
 
-    CNT=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""}  { print $2 } ' | sed 's,\",,g' | grep $WANTED_VM | wc -l)
+    CNT=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""} { print $2 } ' | sed 's,\",,g' | grep $WANTED_VM | wc -l)
     
-    debug "    is_vbox_up: $CNT"
+    debug " is_vbox_up: $CNT"
 
     # If the VM is running (>1), return 0
-    if [ $CNT -ne 0 ]
+    if [ $CNT -eq 1 ]
     then
-	debug "vbox vm ($WANTED_VM) is running"
-	return 0
+        debug "vbox vm \"$WANTED_VM\" is running."
+        return 0
     fi
 
-    debug "vbox vm ($WANTED_VM) is NOT running"
+    debug "vbox vm \"$WANTED_VM\" is NOT running."
     return 1
 }
 
@@ -1008,43 +893,32 @@ is_android_up()
 {
     export WANTED_VM=$1
 
-
-    check_android_settings hard
-    if [ "$?" != "0" ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	return 1
-    fi 
-
     if [ ! -x $ADB ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	echo "Could not find adb"
-	return 1
+        echo "Android commands doesn't seem to be set up correctly."
+        echo "Could not find adb."
+        return 1
     fi
 
-
-    debug "    get_info_for_client $1"
-    get_info_for_client "$1"
-
-    if [ "$ANDROID_PORT" = "" ] ; 
-    then 
-	sleep 3
-	get_info_for_client "$1"
+    if [ "$ANDROID_PORT" = "" ] ;
+    then
+        sleep 3
+        get_android_specific_info $WANTED_VM
     fi
 
-    debug "    is_android_up? adb  -s emulator-$ANDROID_PORT shell ls"
-    $ADB  -s emulator-$ANDROID_PORT shell ls >/dev/null 2>/dev/null
+    debug " is_android_up? adb -s emulator-$ANDROID_PORT shell ls"
+    $ADB -s emulator-$ANDROID_PORT shell ls >/dev/null 2>/dev/null
     RET=$?
     
-    debug "    is_android_up: $CNT"
+    debug " is_android_up: $RET"
 
     # If the VM is NOT running (!=0), return 1
     if [ $RET -ne 0 ]
     then
-	debug "android avd ($WANTED_VM) is NOT running"
-	return 1
+        debug "Android avd \"$WANTED_VM\" is NOT running."
+        return 1
     fi
 
-    debug "android avd ($WANTED_VM) is running"
+    debug "Android avd \"$WANTED_VM\" is running."
     return 0
 }
 
@@ -1053,56 +927,46 @@ is_client_up()
 {
     WANTED_VM=$1
 
-    if  [ "$VM_TYPE" = "" ]
-    then
-	get_info_for_client $1
-    fi
-
     case $VM_TYPE in
-	"VirtualBox")
-	    is_vbox_up $1
-	    RET=$?
-	    if [ $RET = 0 ]
-	    then
-		echo "$WANTED_VM is running."
-	    else
-		echo "$WANTED_VM is not running."
-	    fi
-	    ;;
+        "VirtualBox")
+            is_vbox_up $WANTED_VM
+            RET=$?
+            ;;
 
-	"Android")
-	    is_android_up $1
-	    RET=$?
-	    ;;
+        "Android")
+            is_android_up $WANTED_VM
+            RET=$?
+            ;;
 
-	"qemu")
-	    is_qemu_up $1
-	    RET=$?
-	    ;;
+        "qemu")
+            is_qemu_up $WANTED_VM
+            RET=$?
+            ;;
 
-	*)
-	    echo "Failed finding vm type for $1"
-	    exit 123
-	    ;;
+        *)
+	    debug "Failed finding vm type for \"$WANTED_VM\"."
+            echo "Failed finding vm type for \"$WANTED_VM\"."
+            exit 123
+            ;;
     esac
     
-    debug "is_client_up ($WANTED_VM, $VM_TYPE)  => $RET"
+    debug "is_client_up ($WANTED_VM, $VM_TYPE) => $RET"
     return $RET
 }
 
 is_client_ssh_up()
 {
     debug "Check if Client ssh server is up"
-    debug "   ssh:     $SSH"
-    debug "   options: $SSH_TEST_OPTIONS"
-    debug "   port:    -p $SSH_PORT"
-    debug "   user     $VM_USER@$VM_IP_ADDRESS"
-    debug "   command: exit"
+    debug " ssh: $SSH"
+    debug " options: $SSH_TEST_OPTIONS"
+    debug " port: -p $SSH_PORT"
+    debug " user $VM_USER@$VM_IP_ADDRESS"
+    debug " command: exit"
     $SSH $SSH_TEST_OPTIONS \
         -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS exit \
          2>/dev/null
     RET=$?
-    debug "  Returning: $RET"
+    debug " Returning: $RET"
     return $RET
 }
 
@@ -1110,191 +974,94 @@ is_client_x11_up()
 {
     WANTED_VM=$1
 
-    CLIENT_FOUND=false
-    WANTED_VM=$1
-
-    get_info_for_client $1
-
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found for: $1"
-	return 120
-    fi
-
     case $VM_TYPE in
-	"VirtualBox")
-	    debug "Check if Client X11 is up"
-	    exec_client_command $1 "DISPLAY=:0 xdpyinfo 2>/dev/null >/dev/null 2>/dev/null "
-	    RET=$?
-	    ;;
-	"qemu")
-	    echo "Can't check X11 on qemu"
-	    debug "Can't check X11 on qemu"
-	    RET=1
-	    ;;
-	"Android")
-	    echo "Can't check X11 on Android"
-	    debug "Can't check X11 on Android"
-	    RET=1
-	    ;;
-	*)
-	    debug "  Unknown vm type"
-	    echo "Failed finding vm type for $1"
-	    RET=1
-	    ;;
+        "VirtualBox")
+         debug "Check if Client X11 is up"
+         exec_client_command $1 "DISPLAY=:0 xdpyinfo 2>/dev/null >/dev/null 2>/dev/null "
+         RET=$?
+         ;;
+        "qemu")
+         echo "Can't check X11 on qemu"
+         debug "Can't check X11 on qemu"
+         RET=1
+         ;;
+        "Android")
+         echo "Can't check X11 on Android"
+         debug "Can't check X11 on Android"
+         RET=1
+         ;;
+        *)
+         debug " Unknown vm type"
+         echo "Failed finding vm type for $1"
+         RET=1
+         ;;
     esac
 
-
-    debug "is_client_x11_up  Returning: $RET"
+    debug "is_client_x11_up Returning: $RET"
     return $RET
 }
 
-#    Can be used with other VM's that require Internet access
-
 is_client_online()
 {
-    CLIENT_FOUND=false
-
-    get_info_for_client $1
-#    CLIENT_FOUND=$?
-    RET=1
-
-    if [ "$CLIENT_FOUND" = "false" ]
+    if [ "$VM_TYPE" = "VirtualBox" ]
     then
-	echo "No client configuration found for: $1"
-	return 120
-    fi
+        echo "Check if Vbox client is online"
+        debug " ssh: $SSH"
+        debug " options: $SSH_TEST_OPTIONS"
+        debug " port: -p $SSH_PORT"
+        debug " user $VM_USER@$VM_IP_ADDRESS"
+        debug " command: ping -c1 www.google.com"
 
-    if [ "$VM_TYPE" = "$VirtualBox" ]
-    then
-	echo "Check if Vbox client is online"
-	debug "   ssh:     $SSH"
-	debug "   options: $SSH_TEST_OPTIONS"
-	debug "   port:    -p $SSH_PORT"
-	debug "   user     $VM_USER@$VM_IP_ADDRESS"
-	debug "   command: ping -c1 www.google.com"
-
-	$SSH $SSH_TEST_OPTIONS \
+        $SSH $SSH_TEST_OPTIONS \
             -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS ping -c1 www.google.com \
             > /dev/null
 
-	RET=$?
+        RET=$?
     fi
 
     if [ "$VM_TYPE" = "Android" ]
     then
 
-	ANDROID_PORT=$(get_avd_port_for_name $1)
-	echo "Check if Android client is online"
+        ANDROID_PORT=$(get_avd_port_for_name $1)
+        echo "Check if Android client is online"
 
-	debug "   client:  $1"
-	debug "   adb:     $ADB"
-	debug "   port:    $ANDROID_PORT"
-	debug "   command: ping -c1 www.google.com"
+        debug " client: $1"
+        debug " adb: $ADB"
+        debug " port: $ANDROID_PORT"
+        debug " command: ping -c1 www.google.com"
 
-	$ADB -s emulator-$ANDROID_PORT shell ping -c1 www.google.com > /dev/null
+        $ADB -s emulator-$ANDROID_PORT shell ping -c1 www.google.com > /dev/null
 
-	RET=$?
+        RET=$?
     fi
 
-    debug "  Returning: $RET"
+    debug " Returning: $RET"
     if [ "$RET" = "0" ]
     then
     ## printf probably a little silly here
-	printf "  Google can be reached...\n"
+        printf " Google can be reached...\n"
     else
-	printf "  Google can NOT be reached...\n"
+        printf " Google can NOT be reached...\n"
     fi
 
     return $RET
-
 }
 
-#    eGov specific, is service actually online, if not abort...
+# eGov specific, is service actually online, if not abort...
 #is_egovonline()
 #{
-#    if ping -c1 account.egov.bz.it > /dev/null
-#      then echo "eGov online..."
-#    else
-#      echo "Abort, server nor reachable"
-#    fi
+# if ping -c1 account.egov.bz.it > /dev/null
+# then echo "eGov online..."
+# else
+# echo "Abort, server nor reachable"
+# fi
 #}
-
-wait_for_state()
-{
-    EXPECTED_STATE="$1"
-    TIMEOUT=$2
-    VB_NAME=$3
-
-    debug "Will wait (vm:$VB_NAME) for $1 for $2 seconds"
-    
-    TIMEDOUT=false
-    START_SECS=$(date "+%s")
-    # Set to a negative integer value
-    DIFF=-12
-
-    while [ "$TIMEDOUT" = "false" ]
-    do
-	BREAK=false
-
-	debug "    Check if client is up: "
-
-	is_client_up $VB_NAME
-	RET=$?
-
-	# Break waiting when the client is up.
-	if [ "$EXPECTED_STATE" = "up" ]
-	then
-	    if [ "$RET" = "0" ]
-	    then
-		BREAK=true
-	    else
-		BREAK=false
-	    fi
-	# Break waiting when the client is down.
-	elif [ "$EXPECTED_STATE" = "down" ]
-	then
-	    if [ "$RET" = "0" ]
-	    then
-		BREAK=false
-	    else
-		BREAK=true
-	    fi
-	fi
-
-	debug "   Should we break? $BREAK  "
-
-	if [ "$BREAK" = "true" ]
-	then
-	    break
-	fi
-
-	sleep 10
-	CURRENT=$(date "+%s")
-	DIFF=$(( $START_SECS + $TIMEOUT - $CURRENT))
-	debug "  Started: $START_SECS  Current: $CURRENT Timeout:  $TIMEOUT"
-	debug "  Diff:    $DIFF"
-
-	if [ $DIFF -le 0 ]
-	then
-	    TIMEDOUT=true
-	fi
-	debug "   have we timed out?   $TIMEDOUT "
-    done
-    debug "timeout or state reached ... continuing"
-}
-
 
 wait_for_ssh()
 {
     EXPECTED_STATE="$1"
     TIMEOUT=$2
     CLIENT=$3
-
-    if [ "$CLIENT" != "" ]
-    then
-	get_info_for_client $CLIENT
-    fi
 
     debug "Will wait for (ssh) $1 for $2 seconds"
     
@@ -1305,55 +1072,53 @@ wait_for_ssh()
 
     while [ "$TIMEDOUT" = "false" ]
     do
-	BREAK=false
+        BREAK=false
 
-	debug "    Check if client is up: "
+        debug " Check if client is up: "
 
-	is_client_ssh_up
-	RET=$?
-	if [ "$EXPECTED_STATE" = "up" ]
-	then
-	    if [ "$RET" = "0" ]
-	    then
-		BREAK=true
-	    
-	    elif [ "$RET" != "0" ]
-	    then
-		BREAK=false
-	    fi
-	# elif [ "$EXPECTED_STATE" = "down" ] ? in future ?
-	# then
-	fi
+        is_client_ssh_up
+        RET=$?
+        if [ "$EXPECTED_STATE" = "up" ]
+        then
+         if [ "$RET" = "0" ]
+         then
+                BREAK=true
+         elif [ "$RET" != "0" ]
+         then
+                BREAK=false
+         fi
+        # elif [ "$EXPECTED_STATE" = "down" ] ? in future ?
+        # then
+        fi
 
-	debug "   Should we break? $BREAK  "
+        debug " Should we break? $BREAK "
 
-	if [ "$BREAK" = "true" ]
-	then
-	    break
-	fi
+        if [ "$BREAK" = "true" ]
+        then
+         break
+        fi
 
-	sleep 10
-	CURRENT=$(date "+%s")
-	DIFF=$(( $START_SECS + $TIMEOUT - $CURRENT))
-	debug "  Started: $START_SECS  Current: $CURRENT Timeout:  $TIMEOUT"
-	debug "  Diff:    $DIFF"
+        sleep 10
+        CURRENT=$(date "+%s")
+        DIFF=$(( $START_SECS + $TIMEOUT - $CURRENT))
+        debug " Started: $START_SECS Current: $CURRENT Timeout: $TIMEOUT"
+        debug " Diff: $DIFF"
 
-	if [ $DIFF -le 0 ]
-	then
-	    TIMEDOUT=true
-	fi
-	debug "   have we timed out?   $TIMEDOUT "
+        if [ $DIFF -le 0 ]
+        then
+         TIMEDOUT=true
+        fi
+        debug " have we timed out? $TIMEDOUT "
     done
     debug "timeout or state reached ... continuing"
 }
-
 
 wait_until_up()
 {
     # Set timeout in case it's not set. Move to defaults?
     if [ "$VM_STARTUP_TIMEOUT" = "" ]
     then
-	VM_STARTUP_TIMEOUT="10"
+        VM_STARTUP_TIMEOUT="10"
     fi
     wait_for_state up $VM_STARTUP_TIMEOUT $1
 }
@@ -1363,40 +1128,80 @@ wait_until_down()
     # Set timeout in case it's not set. Move to defaults?
     if [ "$VM_STOP_TIMEOUT" = "" ]
     then
-	VM_STOP_TIMEOUT="20"
+        VM_STOP_TIMEOUT="20"
     fi
     wait_for_state down $VM_STOP_TIMEOUT $1
 }
 
-
-check_ssh_helper()
+wait_for_state()
 {
-    VM_NAME=$1
-    VM_TYPE=$2
-    CLI_CONF=$3
+    EXPECTED_STATE="$1"
+    TIMEOUT=$2
+    VB_NAME=$3
 
-    debug "Check ssh of $VM_NAME"
-
-    get_info_for_client $1
+    debug "Will wait vm \"$VB_NAME\" for \"$1\" for \"$2\" seconds."
     
-#echo     $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS 
-    $SSH $SSH_TEST_OPTIONS  -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS exit \
-	2>/dev/null >/dev/null
-    RET=$?
-    
-    if [ $RET -ne 0 ]
-    then
-	echo "not available"
-	debug "   $VM_NAME down or not responding"
-    else	     
-	debug "   $VM_NAME is ok"
-	echo "ok"
-    fi
+    TIMEDOUT=false
+    START_SECS=$(date "+%s")
+    # Set to a negative integer value
+    DIFF=-12
 
+    while [ "$TIMEDOUT" = "false" ]
+    do
+        BREAK=false
 
-    return $RET
+        debug "Check if client is up: "
+
+        is_client_up $VB_NAME
+        RET=$?
+
+        # Break waiting when the client is up.
+        if [ "$EXPECTED_STATE" = "up" ]
+        then
+            if [ "$RET" = "0" ]
+            then
+                BREAK=true
+		debug "\"$WANTED_VM\" is running."
+		echo "\"$WANTED_VM\" is running."
+            else
+                BREAK=false
+		debug "\"$WANTED_VM\" is not running yet."
+            fi
+        # Break waiting when the client is down.
+        elif [ "$EXPECTED_STATE" = "down" ]
+        then
+            if [ "$RET" = "0" ]
+            then
+                BREAK=false
+		debug "\"$WANTED_VM\" is still running."
+            else
+                BREAK=true
+		debug "\"$WANTED_VM\" is shut down."
+		echo "\"$WANTED_VM\" is shut down."
+            fi
+        fi
+
+        debug " Should we break? $BREAK "
+
+        if [ "$BREAK" = "true" ]
+        then
+            break
+        fi
+
+        sleep 10
+        CURRENT=$(date "+%s")
+        DIFF=$(( $START_SECS + $TIMEOUT - $CURRENT ))
+        debug " Started: $START_SECS Current: $CURRENT Timeout: $TIMEOUT"
+        debug " Diff: $DIFF"
+
+        if [ $DIFF -le 0 ]
+        then
+            TIMEDOUT=true
+        fi
+        debug "Have we timed out? $TIMEDOUT "
+    done
+    debug "Timeout or state reached ... continuing"
 }
-
 
 send_to_qemu()
 {
@@ -1412,41 +1217,41 @@ check_status_helper()
     VM_TYPE=$2
     CLI_CONF=$3
 
-    debug "Check status of $WANTED_VM"
+    debug "Check status of \"$WANTED_VM\"."
 
     CLI_CONF=$i
     debug "Reading client conf $CLI_CONF"
-    .  $CLI_CONF
+    . $CLI_CONF
     
 
     case $VM_TYPE in
-	"VirtualBox")
-	    debug "  check status with vbox"
-	    is_vbox_up "$VM_NAME"
-	    RET=$?
-	    debug "  status: $RET"
-	    return $RET
-	    ;;
-	"Android")
-	    debug "  check status with android"
-	    check_client_android "$WANTED_VM" 
+        "VirtualBox")
+         debug " check status with vbox"
+         is_vbox_up "$VM_NAME"
+         RET=$?
+         debug " status: $RET"
+         return $RET
+         ;;
+        "Android")
+         debug " check status with android"
+         check_client_android "$WANTED_VM"
 #> /dev/null
-	    RET=$?
-	    debug "  status: $RET"
-	    return $RET
-	    ;;
-	"qemu")
-	    debug "  check status with qemu"
-	    send_to_qemu "$WANTED_VM" "info status" > /dev/null
-	    RET=$?
-	    debug "  status: $RET"
-	    return $RET
-	    ;;
-	*)
-	    debug "  Unknown vm type"
-	    echo "Failed finding vm type for $1"
-	    exit 123
-	    ;;
+         RET=$?
+         debug " status: $RET"
+         return $RET
+         ;;
+        "qemu")
+         debug " check status with qemu"
+         send_to_qemu "$WANTED_VM" "info status" > /dev/null
+         RET=$?
+         debug " status: $RET"
+         return $RET
+         ;;
+        *)
+         debug " Unknown vm type"
+         echo "Failed finding vm type for $1"
+         exit 123
+         ;;
     esac
 
     return $RET
@@ -1454,83 +1259,57 @@ check_status_helper()
 
 check_client_ssh()
 {
-    CLIENT_FOUND=false
     WANTED_VM=$1
 
-    get_info_for_client $1
-#    CLIENT_FOUND=$?
+    echo -n "Client \"$WANTED_VM\" ssh connection: "
+    debug "Check ssh connection for \"$WANTED_VM\"."
+    check_ssh_helper $WANTED_VM $VM_TYPE $CLI_CONF
+    RET=$?
+    debug " status: $RET"
+    return $RET
+}
 
-    if [ "$CLIENT_FOUND" = "false" ]
+check_ssh_helper()
+{
+    VM_NAME=$1
+    VM_TYPE=$2
+    CLI_CONF=$3
+
+    debug "Check ssh of \"$VM_NAME\"."
+    debug "ssh: $SSH option: $SSH_TEST_OPTIONS -p port: $SSH_PORT user: $VM_USER address: $VM_IP_ADDRESS"
+    $SSH $SSH_TEST_OPTIONS -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS exit \
+        2>/dev/null >/dev/null
+    RET=$?
+    
+    if [ $RET -ne 0 ]
     then
-	echo "No client configuration found for: $1"
-	return 120
+        echo "not available"
+        debug " $VM_NAME down or not responding"
     else
-	echo -n "Client \"$WANTED_VM\" ssh connection: "
-	debug "Check ssh connection for $WANTED_VM"
-	check_ssh_helper $WANTED_VM $VM_TYPE $CLI_CONF
-	RET=$?
-	debug "  status: $RET"
-	return $RET
-	return $?
+        debug " $VM_NAME is ok"
+        echo "ok"
     fi
+
+    return $RET
 }
 
 check_client_status()
 {
-    CLIENT_FOUND=false
     WANTED_VM="$1"
 
     debug "Checking status of $1"
 
-    get_info_for_client $1
-#    CLIENT_FOUND=$?
-
-    if [ "$CLIENT_FOUND" = "false" ]
+    echo -n "Client \"$WANTED_VM\" status: "
+    check_status_helper "$WANTED_VM" "$VM_TYPE" "$CLI_CONF"
+    RET=$?
+    if [ "$RET" = "0" ]
     then
-	echo "No client configuration found for: $1"
-	return 120
-    else
-	echo -n "Client \"$WANTED_VM\" status: "
-	check_status_helper "$WANTED_VM" "$VM_TYPE" "$CLI_CONF"
-	RET=$?
-	if [ "$RET" = "0" ]
-	then
-	    echo "running"
-	    return 0
-	fi
-	echo "not running"
-
-	return $RET
+        echo "running"
+        return 0
     fi
-}
+    echo "not running"
 
-check_client_status()
-{
-    CLIENT_FOUND=false
-    WANTED_VM="$1"
-
-    debug "Checking status of $1"
-
-    get_info_for_client $1
-#    CLIENT_FOUND=$?
-
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found for: $1"
-	return 120
-    else
-	echo -n "Client \"$WANTED_VM\" status: "
-	check_status_helper "$WANTED_VM" "$VM_TYPE" "$CLI_CONF"
-	RET=$?
-	if [ "$RET" = "0" ]
-	then
-	    echo "running"
-	    return 0
-	fi
-	echo "not running"
-
-	return $RET
-    fi
+    return $RET
 }
 
 print_client()
@@ -1539,102 +1318,73 @@ print_client()
 
     for d in $ETC_DIRS
     do
-	for i in $(find $d/clients -name "$1.conf" 2>/dev/null)
-	do
-	    CLI_CONF=$i
-	    echo "Configuration file: $CLI_CONF"
-	    cat $CLI_CONF
-	done
+        for i in $(find $d/clients -name "$1.conf" 2>/dev/null)
+        do
+         CLI_CONF=$i
+         echo "Configuration file: $CLI_CONF"
+         cat $CLI_CONF
+        done
     done
 }
 
-
-
-
 exec_client_command()
 {
-    CLIENT_FOUND=false
     WANTED_VM=$1
     COMMAND="$2"
     ON_FAIL="$3"
 
     debug "exec_client_command $1 $2"
 
-    get_info_for_client $1
-#    CLIENT_FOUND=$?
-    RET=1
-
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found for: $1"
-	return 120
-    fi
-
     if [ "$VM_TYPE" = "VirtualBox" ]
     then
-	debug "$SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS $COMMAND"
-	$SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS \
-	    "$COMMAND"
-	RET=$?
+        debug "$SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS $COMMAND"
+        $SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS \
+            "$COMMAND"
+        RET=$?
     elif [ "$VM_TYPE" = "Android" ]
     then
-	exec_client_command_android $ANDROID_PORT "$COMMAND"
-	RET=$?
+        exec_client_command_android $ANDROID_PORT "$COMMAND"
+        RET=$?
     else
-	echo "exec_client_command(): support for \"$VM_NAME\" not implemented yet!"
-	RET=1
+        echo "exec_client_command(): support for \"$VM_NAME\" not implemented yet!"
+        RET=1
     fi
-    
-    
-	
+
     return $RET
 }
 
 exec_client_command_as_root()
 {
-    CLIENT_FOUND=false
     WANTED_VM=$1
     COMMAND="$2"
 
     debug "exec_client_command $1 $2"
-
-    get_info_for_client $1
-#    CLIENT_FOUND=$?
-
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found for: $1"
-	return 120
-    else
-	debug "$SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $COMMAND"
-	$SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS \
-	    "$COMMAND"
-	return $?
-    fi
+    debug "$SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $COMMAND"
+    $SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS \
+        "$COMMAND"
+    return $?
 }
-
 
 check_client_android()
 {
     AVD_NAME="$1"
     export IFS=";"
-    for dir in  $(echo $ETC_DIRS | sed 's, ,;,'g)
+    for dir in $(echo $ETC_DIRS | sed 's, ,;,'g)
     do
-	if [ -d ${dir}/clients ]
-	then
-	    for vb in $(find ${dir}/clients -name $AVD_NAME.conf  )
-	    do
-		AVD_MACHINE=$(grep VM_NAME $vb | sed -e 's,VM_NAME=,,g' -e 's,\",,g')
-		check_machine_android $AVD_MACHINE
-		RET=$?
-		break 
-	    done
-	fi
+        if [ -d ${dir}/clients ]
+        then
+         for vb in $(find ${dir}/clients -name $AVD_NAME.conf )
+         do
+                AVD_MACHINE=$(grep VM_NAME $vb | sed -e 's,VM_NAME=,,g' -e 's,\",,g')
+                check_machine_android $AVD_MACHINE
+                RET=$?
+                break
+         done
+        fi
     done
     export IFS=""
     return $RET
 }
-
 
 check_machine_android()
 {
@@ -1645,28 +1395,28 @@ check_machine_android()
     if [ $RET -ne 0 ] ; then return $RET; fi
 
     debug "Trying to find $WANTED_VM among android avds to check for status"
-    VB_NAMES=$($ANDROID list avd | grep Name | sed -e 's,[ \t]*Name: ,,g'  | tr  '\n' ' ')
+    VB_NAMES=$($ANDROID list avd | grep Name | sed -e 's,[ \t]*Name: ,,g' | tr '\n' ' ')
 
     SAVED_IFS=$IFS
     export IFS=" "
     for VB_NAME in $VB_NAMES
     do
-	FOUND=false
-	if [ "$VB_NAME" = "$WANTED_VM" ]
-	    then
-	    FOUND=true
-	    MACHINE_FOUND=true
-	    AP=$(get_avd_port_for_name $WANTED_VM)
-	    # Hard to get good info out of adb about avd status
-	    #   check files in root - if not 0 then ok  ... ehum
-	    LS_LEN=$(exec_client_command_android $AP ls  2>/dev/null | wc -l)
-	    if [ $LS_LEN -gt 0 ]
-		then
-		RET=0
-	    else
-		RET=1
-	    fi
-	fi
+        FOUND=false
+        if [ "$VB_NAME" = "$WANTED_VM" ]
+         then
+         FOUND=true
+         MACHINE_FOUND=true
+         AP=$(get_avd_port_for_name $WANTED_VM)
+         # Hard to get good info out of adb about avd status
+         # check files in root - if not 0 then ok ... ehum
+         LS_LEN=$(exec_client_command_android $AP ls 2>/dev/null | wc -l)
+         if [ $LS_LEN -gt 0 ]
+                then
+                RET=0
+         else
+                RET=1
+         fi
+        fi
     done
 
     IFS=$SAVED_IFS
@@ -1674,191 +1424,228 @@ check_machine_android()
     return $RET
 }
 
-
 get_vbox_specific_info()
 {
-    MY_VM=$1
-    debug "Try to find virtual machine: $MY_VM."
-    if [ 0 -eq $(vboxmanage list vms | awk ' { printf "%s\n", $MY_VM }' | grep "\"$MY_VM\"" | wc -l) ]
+    WANTED_VM=$1
+
+    if [ "$SSH_PORT" = "auto" ]
     then
-	debug "Could not find virtual machine: $MY_VM"
-	echo "Could not find virtual machine: $MY_VM"
-	return 1
+        SSH_PORT=$(vboxmanage showvminfo $WANTED_VM 2>/dev/null | grep "NIC" | grep -e Rule -e ssh | grep 22 | grep "host port" | sed 's,[a-zA-Z0-9,: \ =()]*host port[ \t]*=,,g' | cut -d, -f1 )
+	return 0
+    fi
+
+    if [ "$SSH_PORT" = "" ]
+    then
+        debug "SSH_PORT is not set."
+        return 1
     else
-	debug "Virtual machine $MY_VM has been found."
-	debug "Set ssh port for $MY_VM."
-	if [ "$SSH_PORT" = "auto" ]
-	then
-	    SSH_PORT=$(vboxmanage showvminfo $VM_NAME 2>/dev/null | grep "NIC" | grep -e Rule -e ssh | grep 22 | grep "host port" | sed 's,[a-zA-Z0-9,: \ =()]*host port[ \t]*=,,g' | awk '{print $MY_VM}' | sed 's/,//g' )
-	    return 0
-	fi
-
-	if [ "$SSH_PORT" = "" ]
-	then
-	    debug "SSH_PORT is not specified in the configuration file."
-	    return 1
-	fi
-
-	debug "SSH_PORT is NOT set to auto NOR null. Return 1"
+	debug "SSH_PORT is set as $SSH_PORT."
 	return 1
     fi
 }
 
 get_android_specific_info()
 {
-    MY_VM=$1
-    debug "Try to find Android emulator: $MY_VM"
-    # The following command only works when the avd is running.
-    # So I am going to add a functionality to enable 
-    # get_android_specific_info()
-    # to check if there is an avd matches the $WANTED_CLIENT
-    # when there is no avd running.
-    ANDROID_PORT=$(get_avd_port_for_name $MY_VM)
-    debug "ANDROID_PORT:  $ANDROID_PORT"
+    check_android_settings
 
-#   List all avds
-#   $ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep "$1"
-
+    WANTED_VM="$1"
+    ANDROID_SYS=$( grep ANDROID_SYS $CLI_CONF | sed 's,ANDROID_SYS=,,g' | sed 's,\",,g')
+# This function only works when the avd is running/attached.
+    ANDROID_PORT=$(get_avd_port_for_name $WANTED_VM)
 }
 
 get_vm_specific_info()
 {
-    MY_VM="$1"
+    WANTED_VM="$1"
     RET=1
     if [ "$VM_TYPE" = "VirtualBox" ]
     then
-	get_vbox_specific_info $MY_VM
-	RET=$?
+        get_vbox_specific_info $WANTED_VM
+        RET=$?
     elif [ "$VM_TYPE" = "Android" ]
     then
-	get_android_specific_info $MY_VM
-	RET=$?
+        get_android_specific_info $WANTED_VM
+        RET=$?
     else
-	echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
+        echo "get_vm_specific_info(): support for \"$WANTED_VM\" not implemented yet!"
     fi
     return $RET
 }
 
-
 get_info_for_client()
 {
-    debug "Trying to get info for client: $1"
+    debug "Trying to get info for client \"$1\"."
     WANTED_CLIENT=$1
-    CONF_READY=false
-    MACHINE_READY=false
+    CLI_CONF=""
+    CONF_FOUND=false
 
-    # CLIENT_FOUND == true only when 
-    # CONF_READY == true && MACHINE_FOUND == true
-    CLIENT_FOUND=false
-    STATE=false
-
-    debug "Looking for $WANTED_CLIENT.conf at following paths."
-    debug "$ETC_DIRS"
     for ETC_DIR in $ETC_DIRS
     do
-	CLI_CONF=$(find $ETC_DIR/clients -name "$WANTED_CLIENT.conf" 2>/dev/null)
+        CLI_CONF=$(find $ETC_DIR/clients -name "$WANTED_CLIENT.conf" 2>/dev/null)
 
-	if [ -f $CLI_CONF ]
-	then
-	    debug "Client $WANTED_CLIENT has been found."
-	    debug "$CLI_CONF"
-	    . "$CLI_CONF"
-	    CONF_READY=true
-	    break
-	else
-	    debug "Client $WANTED_CLIENT can not be found."
-	    CONF_READY=false
-	fi
+	if [ "$CLI_CONF" != "" ] ; then
+	    CONF_FOUND=true
+            . $CLI_CONF
+            export VM_NAME=$(grep VM_NAME $CLI_CONF | sed -e 's,VM_NAME=,,g' -e 's,\",,g' )
+
+            get_vm_specific_info $VM_NAME
+            RET=$?
+            if [ $RET -ne 0 ] ; then
+		debug "Client \"$WANTED_CLIENT\" seems to be down"
+		debug "exit tm-vmm."
+		exit 1
+	    else
+		debug "Got client info for \"$WANTED_CLIENT\": $VM_NAME, $VM_TYPE, $CLI_CONF."
+		break
+	    fi
+        fi
     done
-    
-    debug "Checking virtual machine: $WANTED_CLIENT"
-    get_vm_specific_info $VM_NAME
 
-    RET=$?
-    debug "$RET"
-    if [ $RET -ne 0 ]
-    then
-	debug "Machine seems to be down."
-	MACHINE_READY=false
+    if [ $CONF_FOUND = true ] ; then
+	debug "Found .conf file for \"WANTED_CLIENT\"."
+	case $VM_TYPE in
+	   VirtualBox)
+		check_vbox_vm_existence $VM_NAME
+		if [ 0 = $? ] ; then
+		    debug "vbox machine \"$VM_NAME\" has been found."
+		    return 0
+		else
+		    debug "Couldn't find vbox machine \"$VM_NAME\"."
+		    echo "Couldn't find vbox machine \"$VM_NAME\"."
+		    exit 1
+		fi
+		;;
+
+	    Android)
+		check_android_vm_existence $VM_NAME
+		if [ 0 = $? ] ; then
+		    debug "Android machine \"$VM_NAME\" has been found."
+		    return 0
+		else
+		    debug "Can't find android machine \"$VM_NAME\"."
+		    echo "Can't find android machine \"$VM_NAME\"."
+		    exit 1
+		fi
+		;;
+
+	    # qemu in the future?
+
+	    *)
+		debug "Not implemented for this type of vm yet."
+		echo "Not implemented for this type of vm yet."
+		exit 1
+	esac
     else
-	MACHINE_READY=true
-    fi
-    
-    STATE=$CONF_READY$MACHINE_READY
-    debug "STATE: $STATE"
-    case "$STATE" in
-	truetrue)
-	    debug "Got info for $WANTED_CLIENT: $VM_NAME, $VM_TYPE, $CLI_CONF"
-	    CLIENT_FOUND=true
-	    return 0
-	    ;;
+	debug "Can't find .conf file for \"$WANTED_CLIENT\"."
+	echo "Can't not find .conf file for \"$WANTED_CLIENT\"."
 
-	truefalse)
-	    debug "conf is found but vm is not ready."
-	    return 1
-	    ;;
+	check_vbox_vm_existence $WANTED_CLIENT
+	RET_VBOX=$?
+	check_android_vm_existence $WANTED_CLIENT
+	RET_ANDROID=$?
 
-	falsetrue)
-	    debug "Counld not find conf for vm."
-	    return 1
-	    ;;
+	if [ $RET_VBOX = 0 ] ; then
+	    if [ $RET_ANDROID = 0 ] ; then
+	        # No configation found, multiple virtual machines found, exit 1
+		talk_to_user Multi
+		exit 1
+	    fi
+	    # No configuration found, only one vbox vm, continue or exit 0
+	    talk_to_user VirtualBox
+	    RET=$?
 
-	falsefalse)
-	    debug "Got no info for $WANTED_CLIENT"
-	    return 1
-	    ;;
-
-	*)
-	    echo "Something wrong!"
-	    return 1
-    esac
-}
-
-
-get_info_for_machine()
-{
-    debug "Trying to get info for machine: $1"
-
-    CLIENT_FOUND=false
-    if [ 0 -eq $(vboxmanage list vms | awk ' { printf "%s\n", $1 }' | grep "\"$1\"" | wc -l) ]
-    then
-	# TODO: Implement support for Android machines (not clients) here.
-
-	if [ 0 -eq $($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep "$1" | wc -l) ]
-	then
-	    echo "The machine $1 can not be found."
-	    debug "  got no info for $1"
-	    return 1
+	elif [ $RET_ANDROID = 0 ] ; then
+	    # No configuration found, only one android vm, continue or exit 0
+	    talk_to_user Android
+	    RET=$?
 	else
-	    VM_NAME=$1
-	    VM_TYPE="Android"
-	    WANTED_VM=$1
-	    CLIENT_FOUND="true"
-	    
-	    return 0
+	    debug "Can't find any info for \"$WANTED_CLIENT\". Exits..."
+	    echo "Can't find any info for \"$WANTED_CLIENT\". Exits..."
+	    RET=1
 	fi
-    else
-	VM_NAME=$1
-	VM_TYPE="VirtualBox"
-	WANTED_VM=$1
-	CLIENT_FOUND="true"
-	return 0
+
+	if [ $RET = 0 ] ; then
+	    return $RET
+	else
+	    exit $RET
+	fi
     fi
-
-    # check_android_settings hard
-    # RET=$?
-    # if [ $RET -ne 0 ] ; then return $RET; fi
-
 }
 
+talk_to_user()
+{
+    VM_TYPE=$1
+
+    if [ $VM_TYPE = Multi ] ; then
+	echo "There are more than one virtual machine named \"$WANTED_CLIENT\"."
+	echo "You have to manually create a configuration file."
+	return 1
+    else
+	echo "There is a $VM_TYPE machine named \"$WANTED_CLIENT\" that does not have a .conf file yet."
+	echo -n "To create a configuration file enter \"y\" and press Enter; to quit tm-vmm enter\"n\" and press Enter: "
+	while true
+	do
+	    read ANSWER
+	    if [ $VM_TYPE = VirtualBox ] ; then
+		if [ $ANSWER = y ] ; then
+		    create_vbox_client_conf $WANTED_CLIENT
+		    return $?
+		elif [ $ANSWER = n ] ; then
+		    return 1
+		else
+		    echo "Invalid input. Try again."
+		fi
+	    elif [ $VM_TYPE = Android ] ; then
+		if [ $ANSWER = y ] ; then
+		    create_android_client_conf $WANTED_CLIENT
+		    return $?
+		elif [ $ANSWER = n ] ; then
+		    return 1
+		else
+		    echo "Invalid input. Try again."
+		fi
+	    fi
+	done
+    fi
+}
+
+check_vbox_vm_existence()
+{
+    WANTED_VM=$1
+    debug "check_vbox_vm_existence: \"$WANTED_VM\""
+    CNT=0
+
+    CNT=$(vboxmanage list vms | grep \"$WANTED_VM\" | wc -l)
+
+    debug "Found $CNT vbox machine."
+    if [ $CNT = 1 ] ; then
+	return 0
+    else
+	return 1
+    fi
+}
+
+check_android_vm_existence()
+{
+    WANTED_VM=$1
+    debug "check_android_vm_existence: \"$WANTED_VM\""
+    CNT=0
+
+    CNT=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep "$WANTED_VM" | wc -l)
+
+    debug "Found $CNT Android machine."
+    if [ $CNT = 1 ] ; then
+	return 0
+    else
+	return 1
+    fi
+}
 
 vnc_snapshot()
 {
-    rm -f tmp.jpg 
-   vncsnapshot :5 tmp.jpg 
+    rm -f tmp.jpg
+    vncsnapshot :5 tmp.jpg
 }
-
-
 
 vbox_snapshot()
 {
@@ -1870,19 +1657,18 @@ android_snapshot()
 {
     check_android_settings hard
     if [ "$?" != "0" ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	return 1
-    fi 
-
-    if [ ! -x $ADB ] ; then
-	echo "Android commands doesn't seem to be set up correctly."
-	echo "Could not find adb"
-	return 1
+        echo "Android commands don't seem to be set up correctly."
+        return 1
     fi
 
+    if [ ! -x $ADB ] ; then
+        echo "Android commands don't seem to be set up correctly."
+        echo "Could not find adb"
+        return 1
+    fi
 
     # COmmand line fron http://blog.shvetsov.com/2013/02/grab-android-screenshot-to-computer-via.html
-    $ADB  -s emulator-$1 shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > $2
+    $ADB -s emulator-$1 shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > $2
 }
 
 rename_screenshot_name()
@@ -1903,46 +1689,36 @@ rename_screenshot_name()
 
 client_screenshot()
 {
-    init_vmm
+    debug "client_screenshot $VM_NAME"
 
-    debug "client_screenshot $1"
-
-    get_info_for_client "$1"
-
-    if [ "$CLIENT_FOUND" = "false" ]
-	then
-	echo "No client configuration found for machine: $1"
-	return 111
-    fi
-    
     if [ ! -d $TM_IMAGE_DIR ] ; then mkdir -p $TM_IMAGE_DIR ; fi
     PIC_NAME=$TM_IMAGE_DIR/image-$VM_NAME-`date +%s`.png
 
     case $VM_TYPE in
-	"VirtualBox")
-	    vbox_snapshot $VM_NAME $PIC_NAME
-	    echo "VBOX screenshots not implemented"
-	    ;;
-	"qemu")
-	    vnc_snapshot > /dev/null 2> /dev/null
-	    ;;
-	
-	"Android")
-	    android_snapshot "$ANDROID_PORT" "$PIC_NAME"
-# > /dev/null 2> /dev/null
-	    ;;
-	
-	*)
-	    echo "Screenshots not implemented for $1"
-	    ;;
+        "VirtualBox")
+         vbox_snapshot $VM_NAME $PIC_NAME
+         echo "VBOX screenshots not implemented"
+         ;;
+        "qemu")
+         vnc_snapshot > /dev/null 2> /dev/null
+         ;;
+        
+        "Android")
+         android_snapshot "$ANDROID_PORT" "$PIC_NAME"
+         # > /dev/null 2> /dev/null
+         ;;
+        
+        *)
+         echo "Screenshots not implemented for $1"
+         ;;
     esac
 
     if [ -f tmp.jpg ]
     then
-	rename_screenshot_name $1
-	echo "Stored: \"$NEXT_IMG\""
+        rename_screenshot_name $1
+        echo "Stored: \"$NEXT_IMG\""
     else
-	echo "Uh oh"
+        echo "Uh oh"
     fi
 }
 
@@ -1960,33 +1736,33 @@ exec_user_scripts()
     export script=bogus
     while [ "$script" != "" ]
     do
-	
- 	LINE=${SCRIPTS_TO_EXECUTE[$TMP]}
-	if [ "$LINE" = "" ] ; then break ; fi
-	auto_debug "Executing user supplied script: $script"
-	
-	TYPE=${LINE:0:9}
-	script=${LINE:9}
-	
-	if [ "$TYPE" = "rem-user:" ]
-	then
-	    echo ${VMM_CLIENT} --client-exec ${CLIENT_NAME} "\"${script}\"" | bash
-	elif [ "$TYPE" = "rem-root:" ]
-	then
-	    echo ${VMM_CLIENT} --client-exec-as-root ${CLIENT_NAME} "\"${script}\"" | bash
-	else
-	    ${script}
-	fi
-	
-	RET=$?
-	auto_debug "User supplied script ($script)returned:  $RET"
-	
-	if [ $RET -ne 0 ]
-	then
-	    return $RET
-	fi
-	
-	TMP=$(( $TMP + 1 ))
+        
+        LINE=${SCRIPTS_TO_EXECUTE[$TMP]}
+        if [ "$LINE" = "" ] ; then break ; fi
+        auto_debug "Executing user supplied script: $script"
+        
+        TYPE=${LINE:0:9}
+        script=${LINE:9}
+        
+        if [ "$TYPE" = "rem-user:" ]
+        then
+         echo ${VMM_CLIENT} --client-exec ${CLIENT_NAME} "\"${script}\"" | bash
+        elif [ "$TYPE" = "rem-root:" ]
+        then
+         echo ${VMM_CLIENT} --client-exec-as-root ${CLIENT_NAME} "\"${script}\"" | bash
+        else
+         ${script}
+        fi
+        
+        RET=$?
+        auto_debug "User supplied script ($script)returned: $RET"
+        
+        if [ $RET -ne 0 ]
+        then
+         return $RET
+        fi
+        
+        TMP=$(( $TMP + 1 ))
     done
 
 
@@ -1994,30 +1770,24 @@ exec_user_scripts()
     return 0
 }
 
-
-
 open_ssh()
 {
-    get_info_for_client $1
-    
     $SSH $SSH_TEST_OPTIONS \
-        -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS 
-	
+        -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS
+        
     return $?
 }
-
-
 
 import_appliance()
 {
     OVA_FILE=$1
     if [ ! -f $OVA_FILE ]
     then
-	echo "Can't find the ova file $OVA_FILE"
-	return 1
+        echo "Can't find the ova file $OVA_FILE"
+        return 1
     fi
 
-    VBoxManage import "$OVA_FILE" 
+    VBoxManage import "$OVA_FILE"
 
 }
 
@@ -2027,46 +1797,37 @@ copy_from_client()
     MY_SRC_LOC=$2
     MY_DST_LOC=$3
 
-    get_info_for_client $MY_SRC_HOST
-    
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found or client is not running: $1"
-	return 1
-    fi
-
     case $VM_TYPE in
-	"VirtualBox")
-	    echo "copy vbox"
-	    $SCP -r -P $SSH_PORT $VM_USER@$VM_IP_ADDRESS:$MY_SRC_LOC $MY_DST_LOC
-	    ;;
+        "VirtualBox")
+         echo "copy vbox"
+         $SCP -r -P $SSH_PORT $VM_USER@$VM_IP_ADDRESS:$MY_SRC_LOC $MY_DST_LOC
+         ;;
     
-	"Android")
+        "Android")
 
-	    check_android_settings hard
-	    if [ "$?" != "0" ] ; then
-		echo "Android commands doesn't seem to be set up correctly."
-		return 1
-	    fi 
-	    
-	    if [ ! -x $ADB ] ; then
-		echo "Android commands doesn't seem to be set up correctly."
-		echo "Could not find adb"
-		return 1
-	    fi
-	    debug "copy android"
-	    debug "     adb  -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC"
-	    $ADB -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC
-	    ;;
-	*)
-	    echo "copy not supported"
-	    return 1
-	    ;;
-
+         check_android_settings hard
+         if [ "$?" != "0" ] ; then
+                echo "Android commands doesn't seem to be set up correctly."
+                return 1
+         fi
+        
+         if [ ! -x $ADB ] ; then
+                echo "Android commands doesn't seem to be set up correctly."
+                echo "Could not find adb"
+                return 1
+         fi
+         debug "copy android"
+         debug " adb -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC"
+         $ADB -s emulator-$ANDROID_PORT pull $MY_SRC_LOC $MY_DST_LOC
+         ;;
+        *)
+         echo "copy not supported"
+         return 1
+         ;;
     esac
-    
+
     return 0
-} 
+}
 
 
 copy_to_client()
@@ -2074,46 +1835,39 @@ copy_to_client()
     MY_SRC_LOC=$1
     MY_DST_HOST=$2
     MY_DST_LOC=$3
-    get_info_for_client $MY_DST_HOST
-
-    if [ "$CLIENT_FOUND" = "false" ]
-    then
-	echo "No client configuration found or client is not running: $1"
-	return 1
-    fi
 
     case $VM_TYPE in
-	"VirtualBox")	
-	    debug "$SCP -r  $MY_SRC_LOC -P  $SSH_PORT $VM_USER@$VM_IP_ADDRESS:$MY_DST_LOC"
-	    $SCP -r -P $SSH_PORT $MY_SRC_LOC $VM_USER@$VM_IP_ADDRESS:$MY_DST_LOC
-	    ;;
+        "VirtualBox")
+         debug "$SCP -r $MY_SRC_LOC -P $SSH_PORT $VM_USER@$VM_IP_ADDRESS:$MY_DST_LOC"
+         $SCP -r -P $SSH_PORT $MY_SRC_LOC $VM_USER@$VM_IP_ADDRESS:$MY_DST_LOC
+         ;;
     
-	"Android")
+        "Android")
 
-	    check_android_settings hard
-	    if [ "$?" != "0" ] ; then
-		echo "Android commands doesn't seem to be set up correctly."
-		return 1
-	    fi 
+         check_android_settings hard
+         if [ "$?" != "0" ] ; then
+                echo "Android commands doesn't seem to be set up correctly."
+                return 1
+         fi
 
-	    if [ ! -x $ADB ] ; then
-		echo "Android commands doesn't seem to be set up correctly."
-		echo "Could not find adb"
-		return 1
-	    fi
-	    debug "copy android"
-	    debug "     adb -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC"
-	    $ADB -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC
-	    ;;
-	*)
-	    echo "copy not supported"
-	    return 1
-	    ;;
+         if [ ! -x $ADB ] ; then
+                echo "Android commands doesn't seem to be set up correctly."
+                echo "Could not find adb"
+                return 1
+         fi
+         debug "copy android"
+         debug " adb -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC"
+         $ADB -s emulator-$ANDROID_PORT push $MY_SRC_LOC $MY_DST_LOC
+         ;;
+        *)
+         echo "copy not supported"
+         return 1
+         ;;
 
     esac
     
     return 0
-} 
+}
 
 
 client_copy_file()
@@ -2121,12 +1875,12 @@ client_copy_file()
     MY_SRC="$1"
     MY_DST="$2"
 
-    IFS=":"; declare -a MY_SRC_ARR=($MY_SRC) 
+    IFS=":"; declare -a MY_SRC_ARR=($MY_SRC)
     SRC_HOST=${MY_SRC_ARR[0]}
     SRC_LOC=${MY_SRC_ARR[1]}
     if [ "$SRC_LOC" = "" ] ; then SRC_LOC=$SRC_HOST; SRC_HOST="" ; fi
     
-    IFS=":"; declare -a MY_DST_ARR=($MY_DST) 
+    IFS=":"; declare -a MY_DST_ARR=($MY_DST)
     DST_HOST=${MY_DST_ARR[0]}
     DST_LOC=${MY_DST_ARR[1]}
     if [ "$DST_LOC" = "" ] ; then DST_LOC=$DST_HOST; DST_HOST="" ; fi
@@ -2135,26 +1889,26 @@ client_copy_file()
     IFS=" "
 
     debug "Copy:"
-    debug "  '$SRC_HOST' ::: $SRC_LOC"
-    debug "  '$DST_HOST' ::: $DST_LOC"
+    debug " '$SRC_HOST' ::: $SRC_LOC"
+    debug " '$DST_HOST' ::: $DST_LOC"
 
     RET=1
 
-    if [ "$SRC_HOST" != "" ] && [ "$DST_HOST" != "" ] 
+    if [ "$SRC_HOST" != "" ] && [ "$DST_HOST" != "" ]
     then
-	echo "Currently tm-vmm does not support copying from one client to another"
+        echo "Currently tm-vmm does not support copying from one client to another"
     elif [ "$SRC_HOST" != "" ]
     then
-	debug copy_from_client $SRC_HOST $SRC_LOC  $DST_LOC
-	copy_from_client $SRC_HOST $SRC_LOC  $DST_LOC
-	RET=$?
+        debug copy_from_client $SRC_HOST $SRC_LOC $DST_LOC
+        copy_from_client $SRC_HOST $SRC_LOC $DST_LOC
+        RET=$?
     elif [ "$DST_HOST" != "" ]
     then
-	debug copy_to_client   $SRC_LOC  $DST_HOST $DST_LOC
-	copy_to_client         $SRC_LOC  $DST_HOST $DST_LOC
-	RET=$?
+        debug copy_to_client $SRC_LOC $DST_HOST $DST_LOC
+        copy_to_client $SRC_LOC $DST_HOST $DST_LOC
+        RET=$?
     else
-	echo "uh oh"
+        echo "uh oh"
     fi
 
     echo "RETURN $RET"
@@ -2162,40 +1916,32 @@ client_copy_file()
     return $RET
 }
 
-
 unlock_screen()
 {
     CLIENT=$1
-    get_info_for_client "$1"
+    RET=1
 
-
-    if [ "$CLIENT_FOUND" = "false" ]
-	then
-	echo "No client configuration found for machine: $1"
-	return 111
-    fi
-    RET=0
     case $VM_TYPE in
-	"VirtualBox")
-	    echo "VBOX unlock screen"
-	    RET=1
-	    ;;
-	"qemu")
-	    echo "QEMU unlock screen"
-	    RET=1
-	    ;;
-	
-	"Android")
-	    exec_client_command $CLIENT "input keyevent 82"
-	    RET=$?
-	    ;;
-	
-	*)
-	    echo "Screenshots not implemented for $1"
-	    RET=1
-	    ;;
+        "VirtualBox")
+         echo "VBOX unlock screen"
+         RET=1
+         ;;
+        "qemu")
+         echo "QEMU unlock screen"
+         RET=1
+         ;;
+        
+        "Android")
+         exec_client_command $CLIENT "input keyevent 82"
+         RET=$?
+         ;;
+        
+        *)
+         echo "Screenshots not implemented for $1"
+         RET=1
+         ;;
     esac
-    
+
     return $RET
 }
 
@@ -2223,8 +1969,6 @@ android_install_app()
     APP=$2
     MODE=$3
 
-    get_info_for_client "$CLIENT"
-
     exec_client_raw_android "$ANDROID_PORT" "$MODE $APP"
 }
 
@@ -2234,59 +1978,57 @@ vbox_install_app()
     APP=$2
     MODE=$3
 
-    get_info_for_client "$CLIENT"
-
     APP_SUF=$(get_suffix_from_file "$APP")
 
     if [ "$MODE" = "uninstall" ]
     then
-	exec_client_command_as_root $CLIENT "dpkg --remove $APP"
-	RET=$?
-	
+        exec_client_command_as_root $CLIENT "dpkg --remove $APP"
+        RET=$?
+        
     else
 
-	case $APP_SUF in
-	    "deb")
-		echo "VBOX is trying to install deb pkg: $APP"		
-		copy_to_client                $APP  $CLIENT "/tmp"
-		RET=$?
-		if [ "$RET" != "0" ]; then
-		    echo "Installation failed: copy deb pkg to client failed."
-		    return $RET
+        case $APP_SUF in
+         "deb")
+                echo "VBOX is trying to install deb pkg: $APP"
+                copy_to_client $APP $CLIENT "/tmp"
+                RET=$?
+                if [ "$RET" != "0" ]; then
+                 echo "Installation failed: copy deb pkg to client failed."
+                 return $RET
                 fi
-		
-		exec_client_command_as_root $CLIENT "dpkg --install /tmp/$(basename $APP)"
-		RET=$?
-		if [ "$RET" != "0" ]; then
-		    echo "Installation failed: dpkg --install app failed."
-		    return $RET
+                
+                exec_client_command_as_root $CLIENT "dpkg --install /tmp/$(basename $APP)"
+                RET=$?
+                if [ "$RET" != "0" ]; then
+                 echo "Installation failed: dpkg --install app failed."
+                 return $RET
                 fi
-		
-		exec_client_command_as_root $CLIENT "rm -f /tmp/$(basename $APP)"
-		RET=$?
+                
+                exec_client_command_as_root $CLIENT "rm -f /tmp/$(basename $APP)"
+                RET=$?
 
-		;;
-	    "rpm")
-		echo "VBOX is trying to install rpm pkg: $APP"
-		copy_to_client                $APP  $CLIENT "/tmp"
-		RET=$?
-		if [ "$RET" != "0" ]; then
-		    echo "Installation failed: copy rmp pkge to client failed."
-		    return $RET
+                ;;
+         "rpm")
+                echo "VBOX is trying to install rpm pkg: $APP"
+                copy_to_client $APP $CLIENT "/tmp"
+                RET=$?
+                if [ "$RET" != "0" ]; then
+                 echo "Installation failed: copy rmp pkge to client failed."
+                 return $RET
                 fi
 
-		exec_client_command_as_root $CLIENT "rpm --install /tmp/$(basename $APP)"
-		RET=$?
-		if [ "$RET" != "0" ]; then
-		    echo "Installation failed: rpm --install app failed."
-		    return $RET
+                exec_client_command_as_root $CLIENT "rpm --install /tmp/$(basename $APP)"
+                RET=$?
+                if [ "$RET" != "0" ]; then
+                 echo "Installation failed: rpm --install app failed."
+                 return $RET
                 fi
-		;;
-	    *)
-		echo "Don't know how to install $APP_SUF packages"
-		RET=1
-		;;
-	esac
+                ;;
+         *)
+                echo "Don't know how to install $APP_SUF packages"
+                RET=1
+                ;;
+        esac
     fi
 
     if [ "$RET" = "0" ]
@@ -2313,10 +2055,10 @@ get_guest_os_for_client_android()
     GUEST_OS_TMP="Android"
 
     echo "$GUEST_OS_TMP"
-    echo "  Version: $($ADB -s emulator-$1 shell getprop ro.build.version.release)"
+    echo " Version: $($ADB -s emulator-$1 shell getprop ro.build.version.release)"
     # TODO: Some problem going on here - will fix later.
-    # echo "  Kernel version: $(adb -s emulator-$1 shell cat /proc/version)"
-    # echo "  Build number: $($ADB -s emulator-$1 shell getprop ro.build.description)"
+    # echo " Kernel version: $(adb -s emulator-$1 shell cat /proc/version)"
+    # echo " Build number: $($ADB -s emulator-$1 shell getprop ro.build.description)"
 
     return 0
 }
@@ -2324,34 +2066,32 @@ get_guest_os_for_client_android()
 get_guest_os_for_client()
 {
     CLIENT="$1"
-    get_info_for_client "$CLIENT"
 
     export GUEST_OS=""
 
     case $VM_TYPE in
-	"VirtualBox")
-	    GUEST_OS=$(get_guest_os_for_client_vbox "$CLIENT")
-	    RET=$?
-	    ;;
-	"qemu")
-	    echo "QEMU get_guest_os_for_client()"
-	    RET=1
-	    ;;
-	
-	"Android")
-	    GUEST_OS=$(get_guest_os_for_client_android "$ANDROID_PORT")
-	    RET=$?
-	    ;;
-	
-	*)
-	    echo "get_guest_os_for_client() not implemented for $VM_TYPE"
-	    RET=1
-	    ;;
+        "VirtualBox")
+         GUEST_OS=$(get_guest_os_for_client_vbox "$CLIENT")
+         RET=$?
+         ;;
+        "qemu")
+         echo "QEMU get_guest_os_for_client()"
+         RET=1
+         ;;
+        
+        "Android")
+         GUEST_OS=$(get_guest_os_for_client_android "$ANDROID_PORT")
+         RET=$?
+         ;;
+        
+        *)
+         echo "get_guest_os_for_client() not implemented for $VM_TYPE"
+         RET=1
+         ;;
     esac
     
     return $RET
-} 
-
+}
 
 vbox_uninstall_app()
 {
@@ -2359,128 +2099,97 @@ vbox_uninstall_app()
     APP=$2
     MODE=$3
 
-    get_info_for_client "$CLIENT"
-
     get_guest_os_for_client "$CLIENT"
 
-    
     case $GUEST_OS in
-	"Ubuntu")
-	    exec_client_command_as_root $CLIENT "dpkg --remove $APP"
-	    RET=$?
-	    
-	    ;;
-	"Fedora")
-	    echo "Fedora uninstall not implemented"
-	    RET=1
-	    ;;
-	"RedHat")
-	    echo "RedHat uninstall not implemented"
-	    RET=1
-	    ;;
-	*)
-	    echo "Don't know how to uninstall packages on $GUEST_OS"
-	    RET=1
-	    ;;
+        "Ubuntu")
+         exec_client_command_as_root $CLIENT "dpkg --remove $APP"
+         RET=$?
+        
+         ;;
+        "Fedora")
+         echo "Fedora uninstall not implemented"
+         RET=1
+         ;;
+        "RedHat")
+         echo "RedHat uninstall not implemented"
+         RET=1
+         ;;
+        *)
+         echo "Don't know how to uninstall packages on $GUEST_OS"
+         RET=1
+         ;;
     esac
 
     return $RET
 }
-
 
 uninstall_app()
 {
     CLIENT="$1"
     APP="$2"
+    RET=1
 
-    get_info_for_client "$1"
-
-    if [ "$CLIENT_FOUND" = "false" ]
-	then
-	echo "No client configuration found for machine: $1"
-	return 111
-    fi
-    RET=0
     case $VM_TYPE in
-	"VirtualBox")
-	    echo "VBOX uninstall app: $APP"
-	    vbox_uninstall_app "$CLIENT" "$APP" 
-	    RET=$?
-	    ;;
-	"qemu")
-	    echo "QEMU uninstall app: $APP"
-	    RET=1
-	    ;;
-	
-	"Android")
-	    echo "Android uninstall app on $CLIENT  $APP"
-	    android_install_app "$CLIENT" "$APP" "uninstall"
-	    RET=$?
-	    ;;
-	
-	*)
-	    echo "Screenshots not implemented for $1"
-	    RET=1
-	    ;;
+        "VirtualBox")
+         echo "VBOX uninstall app: $APP"
+         vbox_uninstall_app "$CLIENT" "$APP"
+         RET=$?
+         ;;
+        "qemu")
+         echo "QEMU uninstall app: $APP"
+         RET=1
+         ;;
+        
+        "Android")
+         echo "Android uninstall app on $CLIENT $APP"
+         android_install_app "$CLIENT" "$APP" "uninstall"
+         RET=$?
+         ;;
+        
+        *)
+         echo "Screenshots not implemented for $1"
+         RET=1
+         ;;
     esac
     
     return $RET
 }
-
 
 install_app()
 {
     CLIENT="$1"
     APP="$2"
+    RET=1
 
-    get_info_for_client "$1"
-
-
-    if [ "$CLIENT_FOUND" = "false" ]
-	then
-	echo "No client configuration found for machine: $1"
-	return 111
-    fi
-    RET=0
     case $VM_TYPE in
-	"VirtualBox")
-	    echo "VBOX install app: $APP"
-	    vbox_install_app "$CLIENT" "$APP" 
-	    RET=1
-	    ;;
-	"qemu")
-	    echo "QEMU install app: $APP"
-	    RET=1
-	    ;;
-	
-	"Android")
-	    echo "Android install app on $CLIENT  $APP"
-	    android_install_app "$CLIENT" "$APP" "install"
-	    RET=$?
-	    ;;
-	
-	*)
-	    echo "Screenshots not implemented for $1"
-	    RET=1
-	    ;;
+        "VirtualBox")
+         echo "VBOX install app: $APP"
+         vbox_install_app "$CLIENT" "$APP"
+         RET=$?
+         ;;
+        "qemu")
+         echo "QEMU install app: $APP"
+         RET=1
+         ;;
+        
+        "Android")
+         echo "Android install app on $CLIENT $APP"
+         android_install_app "$CLIENT" "$APP" "install"
+         RET=$?
+         ;;
+        
+        *)
+         echo "Screenshots not implemented for $1"
+         RET=1
+         ;;
     esac
-    
+
     return $RET
 }
-
 
 print_client_settings()
 {
     CLIENT=$1
-
-    get_info_for_client "$1"
-
-    if [ -f $CLI_CONF ]
-	then
-	cat $CLI_CONF
-    else
-	echo "Can't find configuration file for $CLIENT"
-    fi
-
-    
+    cat $CLI_CONF
 }
