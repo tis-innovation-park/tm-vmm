@@ -797,7 +797,7 @@ stop_helper()
 
     debug "stop_helper: $WANTED_VM"
 
-    is_client_ssh_up
+    is_client_shell_up
     RET=$?
 
     if [ "$RET" = "0" ]
@@ -1108,6 +1108,34 @@ is_client_up()
     return $RET
 }
 
+
+is_client_shell_up()
+{
+    case $VM_TYPE in
+        "VirtualBox")
+            is_client_ssh_up $WANTED_VM
+            RET=$?
+            ;;
+
+        "Android")
+            is_android_up $WANTED_VM
+            RET=$?
+            ;;
+
+        "qemu")
+            is_qemu_up $WANTED_VM
+            RET=$?
+            ;;
+
+        *)
+	    debug "Failed finding vm type for \"$WANTED_VM\"."
+            echo "Failed finding vm type for \"$WANTED_VM\"."
+            exit 123
+            ;;
+    esac
+}
+
+
 is_client_ssh_up()
 {
     debug "Check if Client ssh server is up"
@@ -1211,7 +1239,7 @@ is_client_online()
 # fi
 #}
 
-wait_for_ssh()
+wait_for_shell()
 {
     EXPECTED_STATE="$1"
     TIMEOUT=$2
@@ -1230,7 +1258,7 @@ wait_for_ssh()
 
         debug " Check if client is up: "
 
-        is_client_ssh_up
+        is_client_shell_up
         RET=$?
         if [ "$EXPECTED_STATE" = "up" ]
         then
@@ -1936,6 +1964,35 @@ exec_user_scripts()
     done
 
 
+
+    return 0
+}
+
+open_shell()
+{
+    case $VM_TYPE in
+        "VirtualBox")
+	    open_ssh 
+         ;;
+    
+        "Android")
+	    get_android_specific_info $WANTED_VM
+            AP=$(get_avd_port_for_name $WANTED_VM)
+	    if [ "$ANDROID_SYS" != "physical" ] ;
+	    then
+		ANDROID_DEV=emulator-$AP
+	    else
+		ANDROID_DEV=$WANTED_VM
+	    fi
+
+	    $ADB -s $ANDROID_DEV shell
+         ;;
+
+        *)
+         echo "open_shell does not support $VM_TYPE yet"
+         return 1
+         ;;
+    esac
 
     return 0
 }
