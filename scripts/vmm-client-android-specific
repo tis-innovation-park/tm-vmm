@@ -7,12 +7,14 @@
 get_avd_name_for_port()
 {
     AVD_PORT=$1
-    expect -c "spawn telnet localhost $AVD_PORT; expect \"OK\" ; send \"avd name\n\" ; expect OK" \
+    NAME=$(expect -c "spawn telnet localhost $AVD_PORT; expect \"OK\" ; send \"avd name\n\" ; expect OK" \
         2>/dev/null \
 	| grep -v -e "^OK"  -e Trying  -e Connected \
 	          -e "Android Console" -e "Escape character" \
 	          -e "spawn telnet"    -e "avd name" \
-	| sed 's,[\n\r]*,,g' 
+	| sed 's,[\n\r]*,,g' )
+
+    echo "$NAME"
 }
 
 #
@@ -20,8 +22,10 @@ get_avd_name_for_port()
 #
 get_avd_port_for_name()
 {
+    SAVED_IFS=$IFS
+    export IFS=";"
     AVD_NAME=$1
-    for i in $(get_connected_avds_ports)
+    for i in $(get_connected_avds_ports | awk ' { printf "%s;", $1}')
     do
 	AVD_FOUND=$(get_avd_name_for_port $i)
 #	echo "will test"
@@ -31,9 +35,12 @@ get_avd_port_for_name()
 #	echo -n "   "
 	if [ "$AVD_FOUND" = "$AVD_NAME" ]
 	then
+#	    echo "FOUND IT :......"
 	    echo $i
 	fi
     done
+    IFS=$SAVED_IFS
+
 }
 
 get_connected_avds() 
@@ -113,8 +120,10 @@ check_android_settings()
 
 exec_client_command_android()
 {
+
     if [ "$2" = "" ];
     then
+	echo "Missing parameter(s) to exec_client_command_android(). Got \"$*\""	
 	debug "Missing parameter(s) to exec_client_command_android(). Got \"$*\""
 	return 1
     fi
@@ -140,6 +149,7 @@ exec_client_command_android()
     fi
 
     debug "Will execute on Android ($PORT):  $COMMAND"
+#    echo $ADB  -s $ANDROID_DEV  shell $COMMAND
     $ADB  -s $ANDROID_DEV  shell $COMMAND
     return $?
 }

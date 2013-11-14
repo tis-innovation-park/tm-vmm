@@ -436,7 +436,7 @@ start_vbox()
     rm -f $ERR_FILE
     VBoxManage startvm "$VM_NAME" 2> $ERR_FILE >/dev/null &
     sleep 3
-# Isn't ERR_FILE empty? because >/dev/null, change to 2>/dev/null?
+
     ERROR_FOUND=$(grep -e "error" $ERR_FILE | grep -e "exit code" | wc -l)
     if [ "$ERROR_FOUND" != "0" ]
     then
@@ -491,6 +491,11 @@ start_android()
 {
     debug "start_android."
     export PROC_EXPR=$1
+
+    if [ "$ANDROID_SYS" = "physical" ]
+    then   
+	return
+    fi
 
     if [ ! -x $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS ] ; then
 	debug "Could not find $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS."
@@ -761,6 +766,11 @@ stop_android()
 {
     VB_NAME=$1
     debug "Stopping Android $VM_NAME"
+
+    if [ "$ANDROID_SYS" = "physical" ]
+    then   
+	return
+    fi
 
     if [ "$VB_NAME" != "" ]
     then
@@ -1048,14 +1058,15 @@ is_android_up()
         get_android_specific_info $WANTED_VM
     fi
 
-    debug " is_android_up? adb -s emulator-$ANDROID_PORT shell ls"
-    $ADB -s emulator-$ANDROID_PORT shell ls >/dev/null 2>/dev/null
-    RET=$?
+
+#    debug " is_android_up? adb -s emulator-$ANDROID_PORT shell getprop init.svc.bootanim"
+
+    STOPPED=$($ADB -s emulator-$ANDROID_PORT shell "getprop init.svc.bootanim"  2>/dev/null | grep topped | wc -l)
     
+    debug " is_android_up? adb -s emulator-$ANDROID_PORT shell getprop init.svc.bootanim => $STOPPED"
     debug " is_android_up: $RET"
 
-    # If the VM is NOT running (!=0), return 1
-    if [ $RET -ne 0 ]
+    if [ $STOPPED -eq 0 ]
     then
         debug "Android avd \"$WANTED_VM\" is NOT running."
         return 1
@@ -1351,21 +1362,12 @@ send_to_qemu()
     WANTED_VM=$1
     MSG=$2
     echo "$MSG" | socat - unix-connect:/tmp/qemu-${WANTED_VM}.sock 2>/dev/null | \
-          grep -v "(qemu)" | grep -v "QEMU [0-9\. ]*monitor"
+        grep -v "(qemu)" | grep -v "QEMU [0-9\. ]*monitor"
 }
 
 check_status_helper()
 {
-    WANTED_VM=$1
-    VM_TYPE=$2
-    CLI_CONF=$3
-
     debug "Check status of \"$WANTED_VM\"."
-
-    CLI_CONF=$i
-    debug "Reading client conf $CLI_CONF"
-    . $CLI_CONF
-    
 
     case $VM_TYPE in
         "VirtualBox")
@@ -1486,7 +1488,13 @@ exec_client_command()
         RET=$?
     elif [ "$VM_TYPE" = "Android" ]
     then
-	exec_client_command_android $1 $ANDROID_PORT "$COMMAND"
+#	echo "exec_client_command($1, $2, $3)"
+#	echo "ANRDOID_PORT: $ANDROID_PORT"
+	if [ "$ANDROID_PORT" = "" ] 
+	    then
+	    ANDROID_PORT=" "
+	fi
+	exec_client_command_android "$1" "$ANDROID_PORT" "$COMMAND"
 	RET=$?
     else
         echo "exec_client_command(): support for \"$VM_NAME\" not implemented yet!"
@@ -1533,35 +1541,50 @@ check_machine_android()
 {
     WANTED_VM=$1
 
-    check_android_settings hard
-    RET=$?
-    if [ $RET -ne 0 ] ; then return $RET; fi
-
     debug "Trying to find $WANTED_VM among android avds to check for status"
-    VB_NAMES=$($ANDROID list avd | grep Name | sed -e 's,[ \t]*Name: ,,g' | tr '\n' ' ')
+    VB_NAMES1=$($ANDROID list avd | grep Name | sed -e 's,[ \t]*Name: ,,g' | tr '\n' ' ')
+    VB_NAMES2=$($ADB  devices | grep -v "List of devices attached" | grep -v "^[ ]*$" | grep -v emulator | awk ' {print $1}')
+    VB_NAMES="$VB_NAMES1 $VB_NAMES2 "
 
     SAVED_IFS=$IFS
     export IFS=" "
     for VB_NAME in $VB_NAMES
     do
+
+#	echo "VB_NAME:'$VB_NAME'  '$1'"
+
         FOUND=false
         if [ "$VB_NAME" = "$WANTED_VM" ]
-         then
-         FOUND=true
-         MACHINE_FOUND=true
-         AP=$(get_avd_port_for_name $WANTED_VM)
-         # Hard to get good info out of adb about avd status
-         # check files in root - if not 0 then ok ... ehum
-         LS_LEN=$(exec_client_command_android $AP ls 2>/dev/null | wc -l)
-         if [ $LS_LEN -gt 0 ]
-                then
+        then
+            FOUND=true
+            MACHINE_FOUND=true
+            AP=$(get_avd_port_for_name $WANTED_VM)
+    
+	    if [ "$ANDROID_SYS" = "physical" ]
+	    then
+#		echo physica
+		AP=dummy
+	    else
+		if [ "$AP" = "" ]
+		then
+		    debug "Couldn't find a port to android device $WANTED_VM"
+		    return 1
+		fi
+	    fi
+
+
+            # Hard to get good info out of adb about avd status
+            # check files in root - if not 0 then ok ... ehum	    
+            LS_LEN=$(exec_client_command_android $WANTED_VM $AP ls 2>/dev/null | wc -l)
+            if [ $LS_LEN -gt 0 ]
+            then
                 RET=0
-         else
+            else
                 RET=1
-         fi
+            fi
         fi
     done
-
+    
     IFS=$SAVED_IFS
 
     return $RET
@@ -1774,8 +1797,12 @@ check_android_vm_existence()
     debug "check_android_vm_existence: \"$WANTED_VM\""
     CNT=0
 
-    CNT=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep "$WANTED_VM" | wc -l)
+    CNT1=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep "$WANTED_VM" | wc -l)
+    CNT2=$($ADB devices | grep "$WANTED_VM" | wc -l)
 
+    CNT=$(( $CNT1 + $CNT2))
+
+#    echo "Found $CNT Android machine."
     debug "Found $CNT Android machine."
     if [ $CNT = 1 ] ; then
 	return 0
