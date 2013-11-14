@@ -2,7 +2,7 @@
 
 #
 #                                                                   
-#                   Testing Machine
+#                   vmm
 #                      
 #   Copyright (C) 2012, 2013 TIS Innovation Park
 #                                                                   
@@ -35,9 +35,9 @@ exit_on_error()
     fi
 }
 
-VMM_DIR=/tmp
+VMM_DIR=/opt
 
-VMM=${VMM_DIR}/bin/tm-vmm
+VMM=${VMM_DIR}/bin/vmm-client
 
 
 
@@ -54,16 +54,6 @@ build_project()
     then
 
 
-    $ATS --client-exec    $MACHINE "rm -fr searduino"
-    if [ $? -ne 0 ] ; then return 1 ;  fi
-
-    $ATS --client-exec    $MACHINE "git clone git://git.savannah.nongnu.org/searduino.git"
-    if [ $? -ne 0 ] ; then return 1 ;  fi
-
-    $ATS --client-exec    $MACHINE "cd searduino && make -f Makefile.git"
-    
-    fi
-    
     $VMM --client-exec    $MACHINE "rm -fr searduino"
     if [ $? -ne 0 ] ; then return 1 ;  fi
 
@@ -84,7 +74,6 @@ build_project()
     if [ $? -ne 0 ] ; then return 1 ;  fi
 
     $VMM --client-exec    $MACHINE "$INST_DIR/bin/verify-install.sh"
-
     if [ $? -ne 0 ] ; then return 1 ;  fi
 }
 

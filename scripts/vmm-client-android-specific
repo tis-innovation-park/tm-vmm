@@ -52,6 +52,7 @@ get_connected_avds()
 get_connected_avds_ports()
 {
     get_connected_avds | sed -e "s,[ \t]*emulator\-,,g" 
+#| grep -v "[a-zA-Z]"
 }
 
 
@@ -127,15 +128,28 @@ exec_client_command_android()
 	return 1
     fi
 
-    PORT=$1
-    COMMAND="$2"
+
+#    PORT=$1
+    ANDROID_DEV=$1
+    ANDROID_PORT=$2
+    COMMAND="$3"
 
     check_android_settings hard
     RET=$?
     if [ $RET -ne 0 ] ; then return $RET; fi
 
+
+    #
+    # If AVD, then the name to connect to is emulator-<port>
+    #   so we need to build up the name
+    #
+    if [ "$ANDROID_SYS" != "physical" ]
+    then   
+	ANDROID_DEV=emulator-$ANDROID_PORT
+    fi
+
     debug "Will execute on Android ($PORT):  $COMMAND"
-    $ADB  -s emulator-$PORT shell $COMMAND
+    $ADB  -s $ANDROID_DEV  shell $COMMAND
     return $?
 }
 

@@ -71,42 +71,57 @@ list_vbox_machines()
 }
 
 
+list_android_machines_print_info()
+{
+    AD_NAME_LONG=$1
+    AD_TYPE=$2
+
+    AD_NAME=$(basename $AD_NAME_LONG)
+    FOUND=false
+    if [ "$AD_NAME" != "" ]
+    then
+	echo  "  |--$AD_NAME  ($AD_TYPE machine)"
+	SUB_CLIENTS=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $AD_NAME)
+	
+#	    echo "SUB_CLIENTS: $SUB_CLIENTS"
+	if [ "$SUB_CLIENTS" != "" ]
+	then
+	    for vb in $SUB_CLIENTS
+	    do
+#		echo " ---- $AD_NAME"
+		AD_SHORT_NAME=$(basename $vb)
+		echo "     |--$AD_SHORT_NAME  (client)"  
+		FOUND=true
+	    done
+#	    if [ "$FOUND" = "false" ]
+#	    then
+#		echo "      not in use"
+#	    fi
+	fi
+    else
+	echo "   no android machines found"
+    fi
+}
+
+
 list_android_machines()
 {
     check_android_settings hard
     RET=$?
     if [ $RET -ne 0 ] ; then return $RET; fi
 
-    debug "Listing android machines"
-#    VB_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
-    VB_NAMES=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g')
-    for VB_NAME_LONG in $VB_NAMES
+    debug "Listing android virtual devices"
+#    AD_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
+    AD_NAMES_AVD=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g')
+    AD_NAMES_PHY=$($ADB devices | grep -v "List of devices attached" | egrep -v -e "emulator-[0-9]{3}" | awk ' { print $1}')
+#    AD_NAMES="$AD_NAMES_AVD $AD_NAMES_PHY"
+    for AD_NAME_LONG in $AD_NAMES_AVD
     do
-	VB_NAME=$(basename $VB_NAME_LONG)
-	FOUND=false
-	if [ "$VB_NAME" != "" ]
-	then
-	    echo  "  |--$VB_NAME  "
-	    SUB_CLIENTS=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
-
-#	    echo "SUB_CLIENTS: $SUB_CLIENTS"
-	    if [ "$SUB_CLIENTS" != "" ]
-	    then
-		for vb in $SUB_CLIENTS
-		do
-#		echo " ---- $VB_NAME"
-		    VB_SHORT_NAME=$(basename $vb)
-		    echo "     |--$VB_SHORT_NAME  (client)"  
-		    FOUND=true
-		done
-#	    if [ "$FOUND" = "false" ]
-#	    then
-#		echo "      not in use"
-#	    fi
-	    fi
-	else
-	    echo "   no android machines found"
-	fi
+	list_android_machines_print_info $AD_NAME_LONG "virtual"
+    done
+    for AD_NAME_LONG in $AD_NAMES_PHY
+    do
+	list_android_machines_print_info $AD_NAME_LONG "physical"
     done
 
 }
@@ -215,24 +230,34 @@ list_running_vbox_machines()
 list_running_android()
 {
     echo "  Android"
-    VB_NAME=$(get_connected_avds_ports)
-    export IFS=" "
-    if [ "$VB_NAME" != "" ]
+
+    AD_NAMES=$(get_connected_avds | awk '{ printf "%s;", $1}' )
+
+    export IFS=";"
+    if [ "$AD_NAMES" != "" ]
     then
-	for i in $VB_NAME
+	for AD_NAME in $AD_NAMES
 	do
-	    AVD_NAME=$(get_avd_name_for_port $i)
+	    
+	    if [ "$(echo $AD_NAME | egrep -v -e "emulator-[0-9]{3}" | wc -l)" =  "0" ]
+	    then
+		AD_PORT=$(echo $AD_NAME | sed 's,emulator-,,g')
+		AVD_NAME=$(get_avd_name_for_port $AD_PORT)
+	    else
+		AVD_NAME="$AD_NAME"
+	    fi
+
 	    FOUND=0
-	    for dir in  $ETC_DIRS
+	    for dir in $(echo $ETC_DIRS | sed 's, ,;,'g)
 	    do
 		if [ -d ${dir}/clients ]
 		then
 		    for vb in $(find ${dir}/clients -name *.conf | xargs grep -l $AVD_NAME )
 		    do
 			VB_SHORT_NAME=$(basename $vb | sed 's,\.conf,,g')
-			echo "  |--$VB_SHORT_NAME  [$vb] (machine: $(get_avd_name_for_port $i))"  
+			echo "  |--$VB_SHORT_NAME  [$vb] (machine: $AVD_NAME))"  
 			FOUND=1
-		done
+		    done
 		fi
 	    done
 	done
@@ -244,36 +269,59 @@ list_running_android()
 list_running_android_machines()
 {
     echo "  Android"
-    VB_NAME=$(get_connected_avds_ports)
-    if [ "$VB_NAME" != "" ]
-    then
-        for i in $VB_NAME
-        do
-	    AVD_NAME=$(get_avd_name_for_port $i)
-	    echo " |-- $AVD_NAME (using port $i)"
 
+    AD_NAMES=$(get_connected_avds | awk '{ printf "%s;", $1}' )
+
+    export IFS=";"
+    if [ "$AD_NAMES" != "" ]
+    then
+	for AD_NAME in $AD_NAMES
+	do
+	    
+	    if [ "$(echo $AD_NAME | egrep -v -e "emulator-[0-9]{3}" | wc -l)" =  "0" ]
+	    then
+		AD_PORT=$(echo $AD_NAME | sed 's,emulator-,,g')
+		AVD_NAME=$(get_avd_name_for_port $AD_PORT)
+		PORT_STRING="(using port $AD_PORT)"
+	    else
+		PORT_STRING=" (physical device)"
+		AVD_NAME="$AD_NAME"
+	    fi
+
+	    echo "  |-- $AVD_NAME $PORT_STRING"
+	    
 	    FOUND=0
-	    for dir in $(echo $ETC_DIRS)
+	    for dir in $(echo $ETC_DIRS | sed 's, ,;,'g)
 	    do
-	        if [ -d ${dir}/clients ]
-	        then
-		    for vb in $(find ${dir}/clients -name *.conf | xargs grep -l $AVD_NAME )
+#		echo "------ 1"
+		if [ -d ${dir}/clients ]
+		then
+#		echo "------ 2: ${dir}/clients  BEGIN"
+#		find ${dir}/clients -name "*.conf" | xargs grep -l $AVD_NAME | awk 'BEGIN { printf "%s;", $0}'
+#		echo "------ 2: ${dir}/clients  MID   $AVD_NAME"
+		    for ad in $(find ${dir}/clients -name "*.conf" | xargs grep -l "$AVD_NAME" |  awk ' { printf "%s;", $0}')
 		    do
-		        VB_SHORT_NAME=$(basename $vb)
-		        echo " |--$VB_SHORT_NAME [$vb] (client)"
-		        FOUND=1
+#			echo " ---3 :::  looked for \"$ad\" ..."
+			VB_SHORT_NAME=$(basename $ad | sed 's,\.conf,,g')
+			echo "    |--$VB_SHORT_NAME  [$ad] (machine: $AVD_NAME))"  
+			FOUND=1
 		    done
-	        fi
+#		echo "------ 2: ${dir}/clients  END   $AVD_NAME"
+
+		fi
 	    done
 	    if [ $FOUND -eq 0 ] ;
 	    then
 	        echo " * avd is not registered as Testingmachine machine" ;
 	        echo " * to create a configuration file, try: --create-client-conf $AVD_NAME" ;
 	    fi
-        done
+
+	done
     else
-        echo "   no android emulator currently running"
+	echo "   no android emulators currently running"
     fi
+
+
 }
 
 list_running_clients()
@@ -456,6 +504,12 @@ start_android()
     export PROC_EXPR=$1
     debug "Start android: $VM_NAME"
 
+    if [ "$ANDROID_SYS" = "" ]
+    then   
+    	   echo "Not starting AVD....since we have no ANDROID_SYS"
+	   return
+    fi	
+
     check_android_settings hard
     if [ "$?" != "0" ] ; then
 	echo "Android commands doesn't seem to be set up correctly."
@@ -468,6 +522,7 @@ start_android()
 	return 1
     fi
 
+    
     $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR  -netspeed full -netdelay none &
 }
 
@@ -618,6 +673,12 @@ stop_android()
     VB_NAME=$1
     debug "Stopping Android $VM_NAME"
 
+
+    if [ "$ANDROID_SYS" = "physical" ]
+    then   
+	return
+    fi
+
     check_android_settings hard
     if [ "$?" != "0" ] ; then
 	echo "Android commands doesn't seem to be set up correctly."
@@ -633,9 +694,8 @@ stop_android()
 
 
     if [ "$VB_NAME" != "" ]
-ANDROID_PORT=$(get_avd_port_for_name $VB_NAME)
-
     then
+	ANDROID_PORT=$(get_avd_port_for_name $VB_NAME)
 	debug "Killing Android $VB_NAME"
 	$ADB  -s emulator-$ANDROID_PORT emu kill  >/dev/null 2>/dev/null
 	
@@ -1259,8 +1319,14 @@ is_client_up()
 	    ;;
 
 	"Android")
-	    is_android_up $1
-	    RET=$?
+	    if [ "$ANDROID_SYS" = "" ]
+	    then   
+    		echo "Not chceking if avd is up AVD....since we have no ANDROID_SYS"
+		RET=0
+	    else
+		is_android_up $1
+		RET=$?
+	    fi
 	    ;;
 
 	"qemu")
@@ -1746,7 +1812,7 @@ exec_client_command()
 	RET=$?
     elif [ "$VM_TYPE" = "Android" ]
     then
-	exec_client_command_android $ANDROID_PORT "$COMMAND"
+	exec_client_command_android $1 $ANDROID_PORT "$COMMAND"
 	RET=$?
     else
 	echo "exec_client_command(): support for \"$VM_NAME\" not implemented yet!"
@@ -1935,7 +2001,6 @@ get_vm_specific_info()
 	get_vbox_specific_info
     elif [ "$VM_TYPE" = "Android" ]
     then
-	
 	get_android_specific_info $MY_VM
     else
 	echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
@@ -1967,7 +2032,10 @@ get_info_for_client()
 	    get_vm_specific_info $VM_NAME
 	    RET=$?
 	    
-	    if [ $RET -ne 0 ] ; then debug "Client seems to be down"; CLIENT_FOUND=false; fi
+	    if [ $RET -ne 0 ] ; 
+	    then 
+		debug "Client seems to be down"; CLIENT_FOUND=false; 
+	    fi
 	done
 	if [ "$CLIENT_FOUND" = "true" ]
 	then
@@ -2390,7 +2458,6 @@ android_install_app()
     MODE=$3
 
     get_info_for_client "$CLIENT"
-echo "port=$ANDROID_PORT"
     exec_client_raw_android "$ANDROID_PORT" "$MODE $APP"
 }
 
