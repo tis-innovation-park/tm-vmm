@@ -66,7 +66,10 @@ usage()
     echo "    Lists all available machines"
     echo ""
     echo "  --list-running-clients"
-    echo "    Lists all running machines"
+    echo "    Lists all running clients"
+    echo ""
+    echo "  --list-running-machines"
+    echo "    Lists all running virtual machines "
     echo ""
     echo "  --start-client CLIENT_NAME"
     echo "    Starts client called CLIENT_NAME"
@@ -168,6 +171,14 @@ do
 	    list_running_clients
 	    RET=$?
 	    ;;
+
+	"--list-running-machines")
+	    LIST_RUNNING=true
+	    check_android_settings
+	    list_running_machines
+	    RET=$?
+	    ;;
+
 
 	"--list-machines")
             list_machines
