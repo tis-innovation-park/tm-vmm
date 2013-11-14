@@ -11,6 +11,9 @@ NEWS in coming 0.13
   * --machine-* switches are no longer coupled with client configurations (hesa,
     jonkri)
 
+  * Will interactively assist the user to create a client configuration if the
+    client doesn't have one but the machine exists (jonkri)
+
   * Improved documentation (hesa, jonkri)
 
   New options:

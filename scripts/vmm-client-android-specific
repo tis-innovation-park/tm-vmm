@@ -36,13 +36,16 @@ get_avd_port_for_name()
     done
 }
 
-
 get_connected_avds() 
 {
-    check_android_settings hard
-    RET=$?
-    if [ $RET -ne 0 ] ; then return $RET; fi
-
+    # check_android_settings hard
+    # RET=$?
+    # if [ $RET -ne 0 ]
+    # then
+    # 	debug "check_android_settings hard incompleted. RET=$RET"
+    # 	echo "Android commands doesn't seem to be set up correctly."
+    # 	return $RET
+    # fi
     $ADB devices | grep -v "List of devices attached" | \
 	grep -v "^[ \t]*$"   | \
 	awk ' { print $1 } ' | \
@@ -55,20 +58,19 @@ get_connected_avds_ports()
 #| grep -v "[a-zA-Z]"
 }
 
-
 setup_android()
 {
     # Set up Android path stuff
+    debug "setup_android"
     if [ "$ANDROID_ADT_PATH" != "" ] && [ "$ANDROID" != "" ]
     then
 	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../
-   fi
+    fi
 
     if [ "$ANDROID_AVD_DIR" = "" ]
     then
 	ANDROID_AVD_DIR=${HOME}/.android/avd/
     fi
-
 
     # Set up Android command stuff
     if [ "$ANDROID" = "" ]
@@ -83,42 +85,31 @@ setup_android()
 
 check_android_settings()
 {
-    CHECK_MODE=$1
+    debug "check_android_settings"
 
-    setup_android
     if [ "$ANDROID" = "" ] || [ ! -x $ANDROID ]
     then   	 
-	if [ "$CHECK_MODE" = "hard" ] ; then
-	    echo "no android command found"
-	fi
+	echo "no android command found"
 	debug "no android command found"
-	return 1
+	exit 1
     fi
-
 
     if [ "$ADB" = "" ] || [ ! -x $ADB ]
     then   	 
-	if [ "$CHECK_MODE" = "hard" ] ; then
-	    echo "no adb command found"
-	fi
+	echo "no adb command found"
 	debug "no adb command found"
-	return 1
+	exit 1
     fi
-
 
     if [ "$ANDROID_ADT_PATH" = "" ]
     then   	 
-	if [ "$CHECK_MODE" = "hard" ] ; then
-	    echo "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
-	fi
+	echo "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
 	debug "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
-	return 1
+	exit 1
     fi
 
     return 0
 }
-
-
 
 exec_client_command_android()
 {

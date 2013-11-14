@@ -5,7 +5,7 @@ VirtualBox manual, on how to create a new virtual machine. However we
 provide a guide below to make this easier. You can choose to use our
 settings or change some at your will.
 
-**Note:** *If you’re on a Ubuntu system you might have to add your user to the vboxusers group.*
+**Note:** *If you’re on a Ubuntu system you might have to add your user to the vboxusers group. This can done like this: <code>sudo adduser \`whoami\` vboxusers</code>.*
 
 ### Start Virtualbox
 
