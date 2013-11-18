@@ -1419,13 +1419,11 @@ check_machine_android()
     VB_NAMES1=$($ANDROID list avd | grep Name | sed -e 's,[ \t]*Name: ,,g' | tr '\n' ' ')
     VB_NAMES2=$($ADB  devices | grep -v "List of devices attached" | grep -v "^[ ]*$" | grep -v emulator | awk ' {print $1}')
     VB_NAMES="$VB_NAMES1 $VB_NAMES2 "
-
     SAVED_IFS=$IFS
     export IFS=" "
     for VB_NAME in $VB_NAMES
     do
-
-#	echo "VB_NAME:'$VB_NAME'  '$1'"
+        # echo "VB_NAME:'$VB_NAME'  '$1'"
 
         FOUND=false
         if [ "$VB_NAME" = "$WANTED_VM" ]
@@ -1433,23 +1431,11 @@ check_machine_android()
             FOUND=true
             MACHINE_FOUND=true
             AP=$(get_avd_port_for_name $WANTED_VM)
-    
-	    if [ "$ANDROID_SYS" = "physical" ]
-	    then
-#		echo physica
-		AP=dummy
-	    else
-		if [ "$AP" = "" ]
-		then
-		    debug "Couldn't find a port to android device $WANTED_VM"
-		    return 1
-		fi
-	    fi
-
 
             # Hard to get good info out of adb about avd status
             # check files in root - if not 0 then ok ... ehum	    
-            LS_LEN=$(exec_client_command_android $AP ls 2>/dev/null | wc -l)
+            LS_LEN=$(exec_client_command_android ls 2>/dev/null | wc -l)
+
             if [ $LS_LEN -gt 0 ]
             then
                 RET=0
@@ -1680,6 +1666,9 @@ check_android_vm_existence()
 
     CNT1=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep "$WANTED_VM" | wc -l)
     CNT2=$($ADB devices | grep "$WANTED_VM" | wc -l)
+    if [ $CNT2 -gt 0 ] ; then
+	ANDROID_SYS=physical
+    fi
 
     CNT=$(( $CNT1 + $CNT2))
 
@@ -1706,7 +1695,12 @@ vbox_snapshot()
 android_snapshot()
 {
     # COmmand line fron http://blog.shvetsov.com/2013/02/grab-android-screenshot-to-computer-via.html
-    $ADB -s emulator-$ANDROID_PORT shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > "$1"
+    if [ "$ANDROID_SYS" != "physical" ]
+    then
+        $ADB -s emulator-$ANDROID_PORT shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > "$1"
+    else
+        $ADB -s $VM_NAME shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > "$1"
+    fi
 }
 
 rename_screenshot_name()

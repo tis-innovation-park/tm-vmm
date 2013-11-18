@@ -120,8 +120,7 @@ check_android_settings()
 
 exec_client_command_android()
 {
-    ANDROID_DEV="$1"
-    COMMAND="$2"
+    COMMAND="$1"
 
     #
     # If AVD, then the name to connect to is emulator-<port>
@@ -130,11 +129,13 @@ exec_client_command_android()
     if [ "$ANDROID_SYS" != "physical" ]
     then   
 	ANDROID_DEV=emulator-$ANDROID_PORT
+    else
+	ANDROID_DEV=$VM_NAME
     fi
 
-    debug "Will execute on Android ($ANDROID_PORT):  $COMMAND"
-    # echo $ADB  -s $ANDROID_DEV  shell $COMMAND
-    $ADB  -s $ANDROID_DEV  shell $COMMAND
+    debug "Will execute on Android ($ANDROID_PORT): $COMMAND"
+debug "$ADB -s $ANDROID_DEV shell $COMMAND"
+    $ADB -s $ANDROID_DEV shell $COMMAND
 
     return $?
 }
@@ -144,6 +145,10 @@ exec_client_raw_android()
     COMMAND="$1"
 
     debug "Will execute on Android ($ANDROID_PORT):  $COMMAND"
-    $ADB  -s emulator-$ANDROID_PORT $COMMAND
+    if [ $ANDROID_SYS != physical ] ; then
+	$ADB  -s emulator-$ANDROID_PORT $COMMAND
+    else
+	$ADB  -s $VM_NAME $COMMAND
+    fi
     return $?
 }
