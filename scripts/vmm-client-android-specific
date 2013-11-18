@@ -112,41 +112,18 @@ check_android_settings()
 
 exec_client_command_android()
 {
-    if [ "$2" = "" ];
-    then
-	debug "Missing parameter(s) to exec_client_command_android(). Got \"$*\""
-	return 1
-    fi
+    COMMAND="$1"
 
-    PORT=$1
-    COMMAND="$2"
-
-    check_android_settings hard
-    RET=$?
-    if [ $RET -ne 0 ] ; then return $RET; fi
-
-    debug "Will execute on Android ($PORT):  $COMMAND"
-    $ADB  -s emulator-$PORT shell $COMMAND
+    debug "Will execute on Android ($ANDROID_PORT):  $COMMAND"
+    $ADB  -s emulator-$ANDROID_PORT shell "$COMMAND"
     return $?
 }
 
 exec_client_raw_android()
 {
-    if [ "$2" = "" ];
-    then
-	debug "Missing parameter(s) to exec_client_raw_android(). Got \"$*\""
-	return 1
-    fi
+    COMMAND="$1"
 
-    PORT=$1
-    COMMAND="$2"
-
-    check_android_settings hard
-    RET=$?
-    if [ $RET -ne 0 ] ; then return $RET; fi
-
-    debug "Will execute on Android ($PORT):  $COMMAND"
-    $ADB  -s emulator-$PORT $COMMAND
+    debug "Will execute on Android ($ANDROID_PORT):  $COMMAND"
+    $ADB  -s emulator-$ANDROID_PORT $COMMAND
     return $?
 }
-

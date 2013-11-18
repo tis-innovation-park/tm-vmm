@@ -41,8 +41,9 @@ DEFAULT_ANDROID_SYS="emulator64-arm"
 DEFAULT_VM_STARTUP_TIMEOUT="10"
 DEFAULT_VM_STOP_TIMEOUT="20"
 INIT_DONE=0
-
 DEBUG=true
+# Screenshot dir
+DEFAULT_TM_IMAGE_DIR=$TM_TMP_DIR/vmm/$(whoami)/
 
 
 PERSONAL_ETC_DIR=${HOME}/.testingmachine/
@@ -158,6 +159,10 @@ init_vmm()
     if [ ! -d $TM_TMP_FILE_DIR ]
     then
 	mkdir -p $TM_TMP_FILE_DIR
+    fi
+
+    if [ "$TM_IMAGE_DIR" = "" ] ; then
+	TM_IMAGE_DIR="$DEFAULT_TM_IMAGE_DIR"
     fi
 
     if [ -f $SCRIPT_DIR/loggers/$LOG_FORMAT-logger ]
