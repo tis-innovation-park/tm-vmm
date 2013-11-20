@@ -56,6 +56,8 @@ NEWS in coming 0.13
 
   * `is_client_online' for Android now uses ADB instead of SSH (jonkri)
 
+  * Configuration generation code for Android now supports x86, which is used
+    with the Google TV emalator (jonkri)
 
   Bugfixes:
 
