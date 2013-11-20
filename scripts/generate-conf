@@ -55,6 +55,9 @@ echo_android_client_conf()
 	    then
 		ANDROID_SYS="emulator64-arm"
 	    fi
+	elif [ "$CPU_ARCH" = "x86" ]
+	then
+	    ANDROID_SYS="emulator64-x86"
 	else
 	    echo "Unsupported CPU"
 	fi
