@@ -1,12 +1,24 @@
 NEWS in coming 0.13
 
+  OPTIONS:
+  ======================================
+
   New tm-vmm options:
+  --------------------------------------
     --check-machine-status - checks the status of a machine (hesa) 
+    --shell - replaces --open-ssh
 
   Removed tm-vmm options:
+  --------------------------------------
     --check-machine - replaced by --check-machine-status
+    --open-ssh  replaced by --shell
+
+  New options:
+  --------------------------------------
+     --check-machine-status - checks the status of a machine (hesa) 
 
   New features:
+  ======================================
 
   * We now support physical Android devices (hesa)
 
@@ -28,12 +40,10 @@ NEWS in coming 0.13
   * Now using Netcat instead of SSH to check if a machine is up, allowing for
     less interaction with the user (jonkri)
 
-  New options:
-
-  --check-machine-status - checks the status of a machine (hesa) 
 
 
   Fixes:
+  ======================================
 
   * VBox clients are no longer mistaken for Androids (jonkri)
 
@@ -60,6 +70,7 @@ NEWS in coming 0.13
     with the Google TV emalator (jonkri)
 
   Bugfixes:
+  ======================================
 
   * Fixed a bug in vmm-client-functions not to make VBox clients be mistaken for
     Androids (jonkri)
@@ -83,3 +94,4 @@ NEWS in coming 0.13
     screenshot directory and timeout values (jonkri)
 
   * Fixed a bug where we were waiting for a client that was not up (jonkri)
+
