@@ -107,7 +107,7 @@ usage()
     echo "  --client-x11 CLIENT_NAME"
     echo "    Checks if X11 is up and running on the client called CLIENT_NAME"
     echo ""
-    echo "  --client-screenshot CLIENT_NAME"
+    echo "  --client-screenshot CLIENT_NAME [IMG_NAME]"
     echo "    Takes a screenshot on the client called CLIENT_NAME (not implemented for VirtualBox)"
     echo ""
     echo "  --print-client CLIENT_NAME"
@@ -187,7 +187,7 @@ do
 	"--start-client")
 	    VCLIENT=$2
 	    get_info_for_client $VCLIENT
-	    start_client $VCLIENT
+	    start_client
 	    RET=$?
 	    shift
 	    ;;
@@ -195,7 +195,7 @@ do
 	"--start-client-headless")
 	    VCLIENT=$2
 	    get_info_for_client $VCLIENT
-	    start_client  $VCLIENT headless
+	    start_client headless
 	    RET=$?
 	    shift
 	    ;;
@@ -203,7 +203,7 @@ do
 	"--check-client-ssh")
 	    VCLIENT=$2
 	    get_info_for_client $VCLIENT
-	    check_client_ssh  $VCLIENT
+	    check_client_ssh
 	    RET=$?
 	    shift
 	    ;;
@@ -211,15 +211,15 @@ do
 	"--check-client-online")
 	    VCLIENT=$2
 	    get_info_for_client $VCLIENT
-	    is_client_online  $VCLIENT
+	    is_client_online
 	    RET=$?
 	    shift
 	    ;;
 	
 	"--check-client-status")
 	    VCLIENT="$2"
-	    get_info_for_client  $VCLIENT
-	    check_client_status  "$VCLIENT"
+	    get_info_for_client $VCLIENT
+	    check_client_status
 	    RET=$?
 	    shift
 	    ;;
@@ -227,7 +227,7 @@ do
 	"--stop-client")
 	    VCLIENT=$2
 	    get_info_for_client $VCLIENT
-	    stop_client  $VCLIENT
+	    stop_client
 	    RET=$?
 	    shift
 	    ;;
@@ -236,7 +236,7 @@ do
 	    VCLIENT=$2
 	    COMMAND="$3"
 	    get_info_for_client $VCLIENT
-	    exec_client_command $VCLIENT "$COMMAND"
+	    exec_client_command "$COMMAND"
 	    RET=$?
 	    shift
 	    shift
@@ -246,13 +246,13 @@ do
 	    VCLIENT=$2
 	    COMMAND="$3"
 	    get_info_for_client $VCLIENT
-	    exec_client_command $VCLIENT "$COMMAND"
+	    exec_client_command "$COMMAND"
 	    RET=$?
 
 	    if [ "$RET" != "0" ]
 		then
 		echo "STOPPING CLIENT due to failure"
-		stop_client $VCLIENT
+		stop_client
 		exit $RET
 	    fi
 
@@ -264,7 +264,7 @@ do
 	    VCLIENT=$2
 	    COMMAND="$3"
 	    get_info_for_client $VCLIENT
-	    exec_client_command_as_root $VCLIENT "$COMMAND"
+	    exec_client_command_as_root "$COMMAND"
 	    RET=$?
 	    shift
 	    shift
@@ -273,7 +273,7 @@ do
 	"--client-x11")
 	    VCLIENT=$2
 	    get_info_for_client $VCLIENT
-	    is_client_x11_up $VCLIENT
+	    is_client_x11_up
 	    shift
 	    ;;
 
@@ -282,7 +282,7 @@ do
 	    TIMEOUT=$3
 	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_ssh up "$TIMEOUT" $VCLIENT
+	    wait_for_ssh up "$TIMEOUT"
 	    shift
 	    shift
 	    ;;
@@ -292,7 +292,7 @@ do
 	    TIMEOUT=$3
 	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_state up "$TIMEOUT" $VCLIENT
+	    wait_for_state up "$TIMEOUT"
 	    shift
 	    shift
 	    ;;
@@ -312,28 +312,28 @@ do
 	"--print-client")
 	    VCLIENT=$2
 	    get_info_for_client $VCLIENT
-	    print_client $VCLIENT
+	    print_client
 	    shift
 	    ;;
 	
 	"--client-screenshot")
 	    VCLIENT=$2
+	    IMG_NAME="$3"
 	    get_info_for_client $VCLIENT
-	    client_screenshot $VCLIENT
+	    client_screenshot "$IMG_NAME"
 	    shift
 	    ;;
 
 	"--import-appliance")
-	    VCLIENT=$2
-	    get_info_for_client $VCLIENT
-	    import_appliance $VCLIENT
+	    OVA_FILE="$2"
+	    import_appliance "$OVA_FILE"
 	    shift
 	    ;;
 
 	"--pause-client")
 	    VCLIENT=$2
 	    get_info_for_client $VCLIENT
-	    pause_client $VCLIENT
+	    pause_client
 	    shift
 	    shift
 	    ;;
@@ -341,7 +341,7 @@ do
 	"--resume-client")
 	    VCLIENT=$2
 	    get_info_for_client $VCLIENT
-	    resume_client $VCLIENT
+	    resume_client
 	    shift
 	    shift
 	    ;;
@@ -356,56 +356,58 @@ do
 	"--client-copy-file")
 	    SRC=$2
 	    DST=$3
-	    shift
-	    shift
-	    debug "client_copy_file '$SRC' '$DST'"
 	    client_copy_file "$SRC" "$DST"
+	    shift
+	    shift
 	    ;;
 
 	"--is-client-up")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    shift
-	    
-	    is_client_up $CLIENT
+	    get_info_for_client "$VCLIENT"
+	    is_client_up
+	    echo "Client up? $? ( 0: up | 1: not up )"
 	    ;;
 
 	"--unlock-screen")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    shift
-	    unlock_screen $CLIENT
+	    get_info_for_client "$VCLIENT"
+	    unlock_screen
 	    ;;
 
 	"--install-app")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    APP=$3
 	    shift
 	    shift
-	    install_app $CLIENT $APP
+	    get_info_for_client "$VCLIENT"
+	    install_app "$APP"
 	    ;;
 
 	"--uninstall-app")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    APP=$3
 	    shift
 	    shift
-	    uninstall_app $CLIENT $APP
+	    get_info_for_client "$VCLIENT"
+	    uninstall_app "$APP"
 	    ;;
-
 
 	"--print-client-settings")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    shift
-	    print_client_settings $CLIENT
+	    get_info_for_client "$VCLIENT"
+	    print_client_settings
 	    ;;
-
 
 	"--get-client-os")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    shift
-	    get_guest_os_for_client $CLIENT
+	    get_info_for_client "$VCLIENT"
+	    get_guest_os_for_client
 	    echo $GUEST_OS
 	    ;;
-
 
 	"--help")
 	    usage
@@ -423,8 +425,4 @@ do
     shift
 done
 
-
-
-
 exit $RET
-

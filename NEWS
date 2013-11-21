@@ -1,20 +1,32 @@
 NEWS in coming 0.13
 
   New tm-vmm options:
-    --check-machine-status - checks the statuf of a machine (hesa) 
+    --check-machine-status - checks the status of a machine (hesa) 
 
   Removed tm-vmm options:
     --check-machine - replaced by --check-machine-status
 
   New features:
 
-  * --machine-* switches are no longer coupled with client configurations (hesa,
-    jonkri)
+  * We now support physical Android devices (hesa)
+
+  * Removed some machine options for a cleaner API (jonkri)
+
+  * Remaining --machine-* options are no longer coupled with client
+    configurations (hesa, jonkri)
 
   * Will interactively assist the user to create a client configuration if the
     client doesn't have one but the machine exists (jonkri)
 
+  * More customizable --create-client-screenshot option - does now allow for
+    a specific name and/or directory
+
   * Improved documentation (hesa, jonkri)
+
+  * More debugging information (jonkri)
+
+  * Now using Netcat instead of SSH to check if a machine is up, allowing for
+    less interaction with the user (jonkri)
 
   New options:
 
@@ -32,7 +44,20 @@ NEWS in coming 0.13
   * --check-client-status now has an android implementation (hesa)
 
   * --*-machine options now works for VirtualBox devices (jonkri)
-  
+
+  * Client configurations are now read only once, which also allows us to use
+    less variables in the code, making it more maintainable (jonkri)
+
+  * We now check that there is a machine corresponding to clients that we want
+    to use (jonkri)
+
+  * The directories specified in ETC_DIRS are now considered ordered, and
+    prioritized (jonkri)
+
+  * `is_client_online' for Android now uses ADB instead of SSH (jonkri)
+
+  * Configuration generation code for Android now supports x86, which is used
+    with the Google TV emalator (jonkri)
 
   Bugfixes:
 
@@ -49,3 +74,12 @@ NEWS in coming 0.13
 
   * `--pause-machine' and `--resume-machine' now interpreted by the command-line
     argument parser (jonkri)
+
+  * Android devices are now properly killed (jonkri)
+
+  * Formatting fixes for tm-vmm output (jonkri)
+
+  * Added various defaults that were previously missing, including the
+    screenshot directory and timeout values (jonkri)
+
+  * Fixed a bug where we were waiting for a client that was not up (jonkri)

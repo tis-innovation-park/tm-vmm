@@ -41,21 +41,28 @@ echo_android_client_conf()
     echo VM_NAME=\"$VM_MACHINE\"
     echo VM_TYPE=\"Android\"
     VM_TYPE="Android"
-    ANDROID_SYS=""
+    # ANDROID_SYS=""
 
-    CPU_ARCH=$(grep cpu.arch $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.arch=,,g')
-    CPU_MODEL=$(grep cpu.model $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.model=,,g')
-
-    ANDROID_SYS=""
-    if [ "$CPU_ARCH" = "arm" ]
+    if [ $ANDROID_SYS != physical ]
 	then
-	if [ "$CPU_MODEL" = "cortex-a8" ]
+	CPU_ARCH=$(grep cpu.arch $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.arch=,,g')
+	CPU_MODEL=$(grep cpu.model $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.model=,,g')
+
+	ANDROID_SYS=""
+	if [ "$CPU_ARCH" = "arm" ]
+	then
+	    if [ "$CPU_MODEL" = "cortex-a8" ]
 	    then
-	    ANDROID_SYS="emulator64-arm"
+		ANDROID_SYS="emulator64-arm"
+	    fi
+	elif [ "$CPU_ARCH" = "x86" ]
+	then
+	    ANDROID_SYS="emulator64-x86"
+	else
+	    echo "Unsupported CPU"
 	fi
-    else
-	echo "Unsupported CPU"
     fi
+
     echo "ANDROID_SYS=$ANDROID_SYS"
     echo "#CPU_ARCH=$CPU_ARCH"
     echo "#CPU_MODEL=$CPU_MODEL"
@@ -113,6 +120,7 @@ create_android_client_conf()
     fi
 
     echo_android_client_conf $VM_MACHINE > $CONF_NAME
+
     if [ $? = 0 ] ; then
 	debug "Created conf for android \"VM_MACHINE\"."
 	echo "Created $CONF_NAME"
@@ -140,6 +148,8 @@ create_client_conf()
 	return $?
     elif [ "$VM_TYPE" = "Android" ]
     then
+	# Hack to set ANDROID_SYS (should we re-architect?)
+	check_android_vm_existence "$VM_MACHINE"
 	create_android_client_conf "$VM_MACHINE"
 	return $?
     else
