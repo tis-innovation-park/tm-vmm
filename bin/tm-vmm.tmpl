@@ -116,8 +116,8 @@ usage()
     echo "  --wait-for-ssh CLIENT_NAME"
     echo "    Waits until ssh is up and running on the client called CLIENT_NAME"
     echo ""
-    echo "  --open-ssh CLIENT_NAME"
-    echo "    Opens an interactive shell (using ssh) on the client called CLIENT_NAME"
+    echo "  --shell CLIENT_NAME"
+    echo "    Opens an interactive shell on the client called CLIENT_NAME"
     echo ""
     echo "  --check-client-online CLIENT_NAME"
     echo "    Checks if the client called CLIENT_NAME can ping the outside world"
@@ -297,15 +297,16 @@ do
 	    shift
 	    ;;
 
-	"--open-ssh")
+	"--shell")
 	    VCLIENT=$2
 	    TIMEOUT=$3
 	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_ssh up "$TIMEOUT" $VCLIENT
+	    wait_for_shell up "$TIMEOUT" $VCLIENT
 	    shift
 	    shift
-	    open_ssh
+	    open_shell
+
 	    ;;
 
 	"--print-client")
