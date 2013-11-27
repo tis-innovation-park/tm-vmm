@@ -414,7 +414,7 @@ start_vbox()
     VBoxManage startvm "$VM_NAME" 2> $ERR_FILE >/dev/null &
     sleep 3
 
-    ERROR_FOUND=$(grep -e "error" $ERR_FILE | grep -e "exit code" | wc -l)
+    ERROR_FOUND=$(grep -e "error" $ERR_FILE | wc -l)
     if [ "$ERROR_FOUND" != "0" ]
     then
         debug "Could not start vbox. Error message:"
