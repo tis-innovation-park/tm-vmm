@@ -152,6 +152,9 @@ usage()
     echo "  --get-client-os"
     echo "    Displays the operating system of the client called CLIENT_NAME"
     echo ""
+    echo "  --for-clients-run SCRIPT [CLIENT_NAMES]"
+    echo "    For each client, starts it, run the script, and stop it"
+    echo ""
 
     exit 0
 }
@@ -407,6 +410,14 @@ do
 	    get_info_for_client "$VCLIENT"
 	    get_guest_os_for_client
 	    echo $GUEST_OS
+	    ;;
+
+	"--for-clients-run")
+	    SCRIPT_FILE=$2
+	    VCLIENTS=$3
+	    shift
+	    shift
+	    exec_clients_or_exec_all_clients "$SCRIPT_FILE" "$VCLIENTS"
 	    ;;
 
 	"--help")

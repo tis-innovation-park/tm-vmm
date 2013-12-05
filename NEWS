@@ -1,3 +1,13 @@
+NEWS in coming 0.14
+
+  OPTIONS:
+  ======================================
+
+  New tm-vmm options:
+  --------------------------------------
+    --for-clients-run - runs script for a set of clients (jon)
+
+
 NEWS in coming 0.13
 
   OPTIONS:

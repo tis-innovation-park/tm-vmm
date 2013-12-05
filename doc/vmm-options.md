@@ -100,6 +100,8 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `--get-client-os CLIENT_NAME` - Displays the operating system of the client called CLIENT_NAME
 
+`--for-clients-run SCRIPT [CLIENT_NAMES]` - For each client, starts it, run the script, and stop it. CLIENT_NAMES is a semi-colon-seprated list of client names. If CLIENT_NAMES is left out, all clients will be used. The following variables will be set in the script: CLIENT_NAME, CLIENT_TYPE ("vbox" or "android"), CLIENT_STARTED (0 means yes), CLIENT_UP (0 means yes), and CLIENT_SSH_UP (0 means yes).
+
 
 ## Machine options
 
