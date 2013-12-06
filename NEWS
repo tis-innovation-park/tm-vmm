@@ -5,7 +5,12 @@ NEWS in coming 0.14
 
   New tm-vmm options:
   --------------------------------------
-    --for-clients-run - runs script for a set of clients (jon)
+    --for-clients-run - runs script for a set of clients (jonkri)
+
+  Fixes:
+  ======================================
+
+  * is_client_ssh_up can now return `1' (jonkri)
 
 
 NEWS in coming 0.13
