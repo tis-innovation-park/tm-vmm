@@ -1062,12 +1062,15 @@ is_client_ssh_up()
     # return $RET
 
     # Not working for Android
-    nc -zv localhost $SSH_PORT 2>/dev/null
-    RET=$?
+    VAL=$(nc -zv localhost $SSH_PORT 2>&1 | grep succeeded | wc -l)
 
-    debug "is_client_ssh_up: $RET ( up => 0; not up => not 0 )"
-
-    return $RET
+    if [ $VAL = 0 ]; then
+	debug "is_client_ssh_up: 1 ( up => 0; not up => not 0 )"
+	return 1
+    else
+	debug "is_client_ssh_up: 0 ( up => 0; not up => not 0 )"
+	return 0
+    fi
 }
 
 is_client_x11_up()
@@ -2307,6 +2310,17 @@ exec_clients_or_exec_all_clients()
 	    exec_client $CLIENT_STARTED $CLIENT_UP $CLIENT_SSH_UP
 
 	    stop_client
+
+	    COUNTER=0
+	    while [ $COUNTER -lt 5 ]; do
+		is_client_up
+		if [ $? != 0 ]; then
+		    break
+		else
+		    let COUNTER=COUNTER+1
+		    sleep 5
+		fi
+	    done
 	else
 	    echo "No such client $CLIENT_NAME."
 	    echo "Continue with next client..."
