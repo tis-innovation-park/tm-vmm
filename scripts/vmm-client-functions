@@ -1062,15 +1062,15 @@ is_client_ssh_up()
     # return $RET
 
     # Not working for Android
-    VAL=$(nc -zv localhost $SSH_PORT 2>&1 | grep succeeded | wc -l)
+    # VAL=$(nc -zv localhost $SSH_PORT 2>&1 | grep succeeded | wc -l)
 
-    if [ $VAL = 0 ]; then
-	debug "is_client_ssh_up: 1 ( up => 0; not up => not 0 )"
-	return 1
-    else
-	debug "is_client_ssh_up: 0 ( up => 0; not up => not 0 )"
-	return 0
-    fi
+    # $SSH_PORT (sometimes?) starts with a space, hence the trimming.
+    PORT=$(echo $SSH_PORT | tr -d ' ')
+    debug "is_client_ssh_up(): 2>/dev/null >/dev/tcp/localhost/$PORT"
+    2>/dev/null >/dev/tcp/localhost/$PORT
+    RET=$?
+    debug "is_client_ssh_up: $RET ( up => 0; not up => not 0 )"
+    return $RET
 }
 
 is_client_x11_up()
@@ -2294,7 +2294,7 @@ exec_clients_or_exec_all_clients()
 
 	    if [ $CLIENT_UP = 0 ]; then
 		COUNTER=0
-		while [ $COUNTER -lt 5 ]; do
+		while [ $COUNTER -lt 10 ]; do
 		    is_client_ssh_up
 		    if [ $? = 0 ]; then
 			CLIENT_SSH_UP=0
