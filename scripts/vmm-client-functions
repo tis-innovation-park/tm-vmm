@@ -759,7 +759,7 @@ stop_android()
     # Android client up, RET = 0; Android client down, RET = 1
     RET=$?
 
-    debug "Killing Android \"$VB_NAME\"."
+    debug "Killing Android \"$VM_NAME\"."
     $ADB -s emulator-$ANDROID_PORT emu kill >/dev/null 2>/dev/null
 
     if [ $RET = 1 ] ; then
@@ -973,6 +973,7 @@ is_android_up()
 {
     debug "is_android_up"
 
+    ANDROID_PORT=$(get_avd_port_for_name $VM_NAME)
     # debug " is_android_up? adb -s emulator-$ANDROID_PORT shell getprop init.svc.bootanim"
 
     STOPPED=$($ADB -s emulator-$ANDROID_PORT shell "getprop init.svc.bootanim"  2>/dev/null | grep topped | wc -l)
@@ -1537,7 +1538,11 @@ get_info_for_client()
             if [ $RET -ne 0 ] ; then
 		debug "Client \"$WANTED_CLIENT\" seems to be down"
 		debug "exit tm-vmm."
-		exit 1
+		if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+		    exit 1
+		else
+		    return 1
+		fi
 	    else
 		debug "Got vm specific info."
 		break
@@ -1554,7 +1559,11 @@ get_info_for_client()
 		else
 		    debug "Can't find vbox machine \"$VM_NAME\"."
 		    echo "Can't find vbox machine \"$VM_NAME\"."
-		    exit 1
+		    if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+			exit 1
+		    else
+			return 1
+		    fi
 		fi
 		;;
 
@@ -1565,7 +1574,11 @@ get_info_for_client()
 		else
 		    debug "Can't find android machine \"$VM_NAME\"."
 		    echo "Can't find android machine \"$VM_NAME\"."
-		    exit 1
+		    if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+			exit 1
+		    else
+			return 1
+		    fi
 		fi
 		;;
 
@@ -1574,7 +1587,11 @@ get_info_for_client()
 	    *)
 		debug "Not implemented for this type of vm yet."
 		echo "Not implemented for this type of vm yet."
-		exit 1
+		if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+		    exit 1
+		else
+		    return 1
+		fi
 	esac
     else
 	debug "Can't find .conf file for \"$WANTED_CLIENT\"."
@@ -1600,13 +1617,17 @@ get_info_for_client()
 	    talk_to_user Android
 	    RET=$?
 	else
-	    debug "Can't find any info for \"$WANTED_CLIENT\". Exit."
-	    echo "Can't find any info for \"$WANTED_CLIENT\". Exit."
+	    debug "Can't find any info for \"$WANTED_CLIENT\"."
+	    echo "Can't find any info for \"$WANTED_CLIENT\"."
 	    RET=1
 	fi
 
 	if [ $RET != 0 ] ; then
-	    exit $RET
+	    if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+		exit $RET
+	    else
+		return 1
+	    fi
 	fi
 
 	return $RET
@@ -2274,14 +2295,18 @@ exec_clients_or_exec_all_clients()
     do
 	CLIENT_UP=1
 	CLIENT_SSH_UP=1
+	EXIT_ON_CLIENT_INFO_FAILURE=1
 	IFS=$SAVED_IFS
 	get_info_for_client "$CLIENT_NAME"
+	RET=$?
+	debug "Got client info for running script? RET: $RET"
 	IFS=";"
-	if [ $? = 0 ]; then
+	if [ $RET = 0 ]; then
+	    debug "start_client $VM_NAME for running the script $SCRIPT_FILE."
 	    start_client
 	    CLIENT_STARTED=$?
 	    COUNTER=0
-	    while [ $COUNTER -lt 5 ]; do
+	    while [ $COUNTER -lt 60 ]; do
 		is_client_up
 		if [ $? = 0 ]; then
 		    CLIENT_UP=0
@@ -2292,9 +2317,10 @@ exec_clients_or_exec_all_clients()
 		fi
 	    done
 
-	    if [ $CLIENT_UP = 0 ]; then
+	    if [ "$CLIENT_UP" = "0" ] && [ "$CLIENT_TYPE" = "VirtualBox" ]
+	    then
 		COUNTER=0
-		while [ $COUNTER -lt 10 ]; do
+		while [ $COUNTER -lt 60 ]; do
 		    is_client_ssh_up
 		    if [ $? = 0 ]; then
 			CLIENT_SSH_UP=0
@@ -2307,12 +2333,11 @@ exec_clients_or_exec_all_clients()
 	    fi
 
 	    debug "is_client_up: $?" # is_client_up?
-	    exec_client $CLIENT_STARTED $CLIENT_UP $CLIENT_SSH_UP
-
+	    exec_client
 	    stop_client
 
 	    COUNTER=0
-	    while [ $COUNTER -lt 5 ]; do
+	    while [ $COUNTER -lt 60 ]; do
 		is_client_up
 		if [ $? != 0 ]; then
 		    break
@@ -2322,8 +2347,8 @@ exec_clients_or_exec_all_clients()
 		fi
 	    done
 	else
-	    echo "No such client $CLIENT_NAME."
-	    echo "Continue with next client..."
+	    debug "Continue next client for script..."
+	    echo "Continue next client for script..."
 	fi
     done
     IFS=$SAVED_IFS
@@ -2331,9 +2356,6 @@ exec_clients_or_exec_all_clients()
 
 exec_client()
 {
-    CLIENT_STARTED=$1
-    CLIENT_UP=$2
-    CLIENT_SSH_UP=$3
+    CLIENT_NAME=$VM_NAME CLIENT_TYPE=$VM_TYPE CLIENT_STARTED=$CLIENT_STARTED CLIENT_UP=$CLIENT_UP CLIENT_SSH_UP=$CLIENT_SSH_UP bash $SCRIPT_FILE
 
-    CLIENT_NAME=$CLIENT_NAME CLIENT_STARTED=$CLIENT_STARTED CLIENT_UP=$CLIENT_UP CLIENT_SSH_UP=$CLIENT_SSH_UP CLIENT_TYPE=$VM_TYPE sh $SCRIPT_FILE
 }
