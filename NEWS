@@ -10,7 +10,7 @@ NEWS in coming 0.14
   Fixes:
   ======================================
 
-  * is_client_ssh_up can now return `1' (jonkri)
+  * is_client_ssh_up now works with VBox NATs, and can return `1' (jonkri)
 
 
 NEWS in coming 0.13
