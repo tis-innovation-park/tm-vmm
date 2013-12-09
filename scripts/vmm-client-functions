@@ -2331,6 +2331,11 @@ exec_clients_or_exec_all_clients()
 		    fi
 		done
 	    fi
+            
+            if [ "$CLIENT_UP" = 0 ] && [ "$CLIENT_TYPE" = "Android" ]
+            then
+                ANDROID_DEVICE="emulator-$ANDROID_PORT"
+            fi
 
 	    debug "is_client_up: $?" # is_client_up?
 	    exec_client
@@ -2351,11 +2356,11 @@ exec_clients_or_exec_all_clients()
 	    echo "Continue next client for script..."
 	fi
     done
+
     IFS=$SAVED_IFS
 }
 
 exec_client()
 {
-    CLIENT_NAME=$VM_NAME CLIENT_TYPE=$VM_TYPE CLIENT_STARTED=$CLIENT_STARTED CLIENT_UP=$CLIENT_UP CLIENT_SSH_UP=$CLIENT_SSH_UP bash $SCRIPT_FILE
-
+    CLIENT_NAME=$VM_NAME CLIENT_TYPE=$VM_TYPE CLIENT_STARTED=$CLIENT_STARTED CLIENT_UP=$CLIENT_UP CLIENT_SSH_UP=$CLIENT_SSH_UP ANDROID_DEVICE=$ANDROID_DEVICE bash $SCRIPT_FILE
 }
