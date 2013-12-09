@@ -1074,7 +1074,7 @@ is_client_ssh_up()
 
     VAL=$(nc -i 1 localhost $SSH_PORT < /dev/null 2> /dev/null | grep '^SSH' | wc -l)
 
-    if [ $VAL=1 ]; then
+    if [ $VAL = 1 ]; then
         debug "is_client_ssh_up: 0 ( up => 0; not up => not 0 )"
         return 0
     else
@@ -2326,7 +2326,7 @@ exec_clients_or_exec_all_clients()
 		fi
 	    done
 
-	    if [ "$CLIENT_UP" = "0" ] && [ "$CLIENT_TYPE" = "VirtualBox" ]
+	    if [ "$CLIENT_UP" = "0" ] && [ "$VM_TYPE" = "VirtualBox" ]
 	    then
 		COUNTER=0
 		while [ $COUNTER -lt 60 ]; do
@@ -2341,7 +2341,7 @@ exec_clients_or_exec_all_clients()
 		done
 	    fi
             
-            if [ "$CLIENT_UP" = 0 ] && [ "$CLIENT_TYPE" = "Android" ]
+            if [ "$CLIENT_UP" = 0 ] && [ "$VM_TYPE" = "Android" ]
             then
                 ANDROID_DEVICE="emulator-$ANDROID_PORT"
             fi
