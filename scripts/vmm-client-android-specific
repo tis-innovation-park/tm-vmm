@@ -69,7 +69,7 @@ setup_android()
 {
     # Set up Android path stuff
     debug "setup_android"
-    if [ "$ANDROID_ADT_PATH" != "" ] && [ "$ANDROID" != "" ]
+    if [ "$ANDROID_ADT_PATH" == "" ] && [ "$ANDROID" != "" ]
     then
 	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../
     fi
