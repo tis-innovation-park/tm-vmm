@@ -1050,9 +1050,7 @@ start_machine()
 	return 111
     else
 	start_helper "$WANTED_VM" $VM_TYPE $CLI_CONF
-=======
         export VM_TYPE="Android"
->>>>>>> b0abbe99b3951d003e66d4980e1d3200ab92ee5f
     fi
 }
 
