@@ -291,14 +291,15 @@ start_vbox_headless()
     fi
     debug "start_vbox_headless()"
     debug "start_vbox_headless: vboxheadless -s  \"$VM_NAME\""
-    ERR_FILE=$$.vbm-err
+    ERR_FILE=.$$.vbm-err
     rm -f $ERR_FILE
-    vboxheadless -s  "$VM_NAME"  2> $ERR_FILE  >/dev/null  &
+    vboxheadless -s  "$VM_NAME"  > $ERR_FILE  2>&1  &
 
     sleep 5
     ERROR_FOUND=$(grep -i -e "error" $ERR_FILE  | wc -l)
+    ALREADY_STARTED=$(grep -i -e "already locked for" $ERR_FILE  | wc -l)
 
-    if [ "$ERROR_FOUND" != "0" ]
+    if [ "$ALREADY_STARTED" == "0" ] && [ "$ERROR_FOUND" != "0" ] 
     then   
 	debug "Could not start vbox (headless). Error message:"
 	debug "$(cat $ERR_FILE)"
@@ -408,11 +409,13 @@ start_vbox()
     fi
     ERR_FILE=$$.vbm-out
     rm -f $ERR_FILE
-    VBoxManage startvm "$VM_NAME"  2> $ERR_FILE  >/dev/null &
+    VBoxManage startvm "$VM_NAME"  > $ERR_FILE 2>&1   &
 
     sleep 3
-    ERROR_FOUND=$(grep -e "error" $ERR_FILE  | grep -e "exit code" | wc -l)
-    if [ "$ERROR_FOUND" != "0" ]
+    ERROR_FOUND=$(grep -e "error" $ERR_FILE  | wc -l)
+    ALREADY_STARTED=$(grep -i -e "already locked " $ERR_FILE  | wc -l)
+
+    if [ "$ALREADY_STARTED" == "0" ] && [ "$ERROR_FOUND" != "0" ] 
     then   
 	debug "Could not start vbox. Error message:"
 	debug "$(cat $ERR_FILE)"
@@ -937,8 +940,7 @@ start_helper()
 		echo "Failed to start: $VM_NAME"
 		return 1
 	    fi
-
-
+	    
 	    check_vbox_proc $VM_NAME
 	    RET=$?
 	    
