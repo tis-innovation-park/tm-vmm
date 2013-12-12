@@ -1,4 +1,4 @@
-# Testing Machine VMM configuration
+# Testing Machine vmm configuration
 
 ## Configuration file syntax
 
@@ -8,11 +8,11 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 ### Variables 
 
-`LOG_FILE_DIR=/tmp/vmm/log` - sets the log file base directory to /tmp/vmm/log. This means that all logs can be found here.
+`LOG_FILE_DIR=/tmp/tm-vmm/log` - sets the log file base directory to /tmp/vmm/log. This means that all logs can be found here.
 
 `VM_STARTUP_TIMEOUT=10` - the time to wait for a virtual machine to start up before considering it to be 'dead'.
 
-`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately VVM will take down a machine with a `kill`.
+`VM_STOP_TIMEOUT=20` - the time to wait for a virtual machine to start up before taking more drastic actions to take down the machine. Ultimately vmm will take down a machine with a `kill`.
 
 `SSH=ssh` - the SSH program to use
 
@@ -30,7 +30,13 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 `SSH_PORT=22` - the port where the SSH server is running on the client
 
-`SSH_SHUTDOWN_COMMAND="shutdown -h now"` - VVM will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
+`SSH_SHUTDOWN_COMMAND="shutdown -h now"` - vmm will do its very best to shut down a machine as gracefully as possible. One way to do this is to try to shut it down using SSH. The command in this variable will be used to do that.
+
+`ANDROID_ADT_PATH=/opt/adt-bundle-linux-x86_64-20130219` - Path to Android SDK installation. vmm will use this to find the commands adb and android. 
+
+`ANDROID=~/example/bin/android` - Specify the android command. This overrides the android command as found using the environment variable ANDROID_ADT_PATH.
+
+`ADB=~/example/bin/adb` - Specify the adb command. This overrides the android command as found using the environment variable ANDROID_ADT_PATH.
 
 
 # tm-vmm Command line options
@@ -38,54 +44,86 @@ The syntax for setting a variable is the same as in bash scrips (no coincidence!
 
 ## Client options
 
-`--list-clients` - lists all configured clients
+`--list-clients` - Lists all configured clients
 
-`--start-clients client` - starts client 
+`--start-client CLIENT_NAME` - Starts the client called CLIENT_NAME
 
-`--start-client-headless CLIENT_NAME` - Start client called CLIENT_NAME as headless (no screen)
+`--start-client-headless CLIENT_NAME` - Starts the client called CLIENT_NAME as headless (no screen)
 
-`--stop-clients client` - stops client
+`--stop-clients CLIENT_NAME` - Stops the client called CLIENT_NAME
 
 `--list-running-clients` - Lists all clients currently running
 
-`--check-client-ssh` - Checks if ssh is up on client
+`--check-client-ssh CLIENT_NAME` - Checks if ssh is up on the client called CLIENT_NAME
 
-`--check-client-status` - Checks if clients is up and running
+`--check-client-status CLIENT_NAME` - Checks if the client called CLIENT_NAME is up and running
 
-`--client-exec CLIENT cmd` - Execeute cmd on client
+`--client-exec CLIENT_NAME COMMAND` - Execeutes the COMMAND on the client called CLIENT_NAME
 
-`--client-exec-as-root` - Execeute cmd on client as root
+`--client-exec-as-root CLIENT_NAME COMMAND` - Execeutes the COMMAND on the client called CLIENT_NAME as root
 
-`--client-x11 CLIENT` - Checks if X11 is up and running on CLIENT
+`--client-x11 CLIENT_NAME` - Checks if X11 is up and running on the client called CLIENT_NAME
 
-`--client-screenshot CLIENT` - Take a screenshot on CLIENT (not 100% ready)
+`--client-screenshot CLIENT_NAME` - Takes a screenshot on the client called CLIENT_NAME (not 100% ready)
 
-`--print-client CLIENT` - Print the configuration for CLIENT
+`--print-client CLIENT_NAME` - Prints the configuration for the client called CLIENT_NAME
 
-`--wait-for-ssh CLIENT` - Wait until ssh is up and running on CLIENT
+`--wait-for-ssh CLIENT_NAME TIMEOUT<optional>` - Waits until ssh is up and running on the client called CLIENT_NAME (Default TIMEOUT value is 120 if it is not set by the user)
 
-`--open-ssh CLIENT` - Open an interactive shell (using ssh) on CLIENT
+`--wait-for-client CLIENT_NAME TIMEOUT<optional>` - (Needs updating) (Default TIMEOUT value is 120 if it is not set by the user)
 
-`--check-client-online CLIENT` - Check if CLIENT can ping the outside world
+`--open-ssh CLIENT_NAME TIMEOUT<optional>` - Opens an interactive shell (using ssh) on the client called CLIENT_NAME (Default TIMEOUT value is 120 if it is not set by the user)
+
+`--check-client-online CLIENT_NAME` - Checks if the client called CLIENT_NAME can ping the outside world
+
+`--pause-client CLIENT_NAME` - Pauses the running client
+
+`--resume-client CLIENT_NAME` - Resumes the paused client
+
+`--client-exec-fail CLIENT_NAME COMMAND` - Executes the COMMAND on the client called CLIENT_NAME and turns it off upon failure
+
+`--create-client-conf CLIENT_NAME` - Creates the configuration for the client called CLIENT_NAME automatically
+
+`--snapshot-client CLIENT_NAME` - Takes a screen shot on the client called CLIENT_NAME (not implemented for VirtualBox)
+
+`--client-copy-file SRC DST` - Copies a file from a client to a host or from a host to a client; a host resource could be "~/myhostfile", and a client resource could be "[CLIENT_NAME]:~/myclientfile"
+
+`--is-client-up CLIENT_NAME` - Checks whether the client called CLIENT_NAME is running
+
+`--unlock-screen CLIENT_NAME` - Unlocks the screen of the virtual machine (Android only for now)
+
+`--install-app CLIENT_NAME PACKAGE` - Installs application PACKAGE on the client called CLIENT_NAME (APK, DEB or RPM); APK files are not yet transferred to the client
+
+`--uninstall-app CLIENT_NAME APP_NAME` - Uninstalls application APP_NAME on the client called CLIENT_NAME (APK, DEB or RPM)
+
+`--print-client-settings CLIENT_NAME` - Prints the path to the client's configuration
+
+`--get-client-os CLIENT_NAME` - Displays the operating system of the client called CLIENT_NAME
+
+`--for-clients-run SCRIPT [CLIENT_NAMES]` - For each client, starts it, run the script, and stop it. CLIENT_NAMES is a semi-colon-seprated list of client names. If CLIENT_NAMES is left out, all clients will be used. The following variables will be set in the script: CLIENT_NAME, CLIENT_TYPE ("vbox" or "android"), CLIENT_STARTED (0 means yes), CLIENT_UP (0 means yes), and CLIENT_SSH_UP (0 means yes).
 
 
 ## Machine options
 
-`  --list-machines` - lists all machines known to VVM
+`  --list-machines` - Lists all machines known to vmm
 
-`  --start-machine client` - starts machine 
+`  --start-machine MACHINE_NAME` - Starts machine named MACHINE
+
+` --start-machine-headless MACHINE_NAME` - Starts machine called VM_NAME as headless (no screen)
+
+` --stop-machine MACHINE_NAME`  - Stops machine named MACHINE
+
+` --check-machine-status MACHINE_NAME` - Checks status on the machine called MACHINE_NAME
+
+`--list-running-machines` - Lists all machines currently running
+
+`--pause-machine MACHINE_NAME` - Pauses the running virtual machine
+
+`--resume-machine MACHINE_NAME` - Resumes the paused virtual machine
 
 
-` --start-machine-headless VM_NAME` - Start machine called VM_NAME as headless (no screen)
+## Other
 
-`  --stop-machine client`  - stops machine
+`--version` - Checks the current version of the tm-vmm
 
-`--check-machine`
-
-
-` --stop-client CLIENT_NAME` - Stop client called CLIENT_NAME
-
-
-` --stop-machine VM_NAME` - Stop machine called VM_NAME
-
-
+`--import-appliance APPLIANCE` - Imports an OVA file into VirtualBox (OVF, Open Virtualization Format, is a cross-platform standard for packaging ready-made virtual machines that can be imported to virtualizers, while OVA is the name of a tar archive file with the OVF directory inside)

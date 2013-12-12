@@ -57,7 +57,6 @@ usage()
     echo ""
     echo "OPTIONS"
     echo "  --help"
-    echo ""
     echo "    Prints usage text"
     echo ""
     echo "  --list-clients"
@@ -67,48 +66,94 @@ usage()
     echo "    Lists all available machines"
     echo ""
     echo "  --list-running-clients"
+    echo "    Lists all running clients"
+    echo ""
     echo "  --list-running-machines"
+    echo "    Lists all running virtual machines "
     echo ""
     echo "  --start-client CLIENT_NAME"
-    echo "    Start client called CLIENT_NAME"
+    echo "    Starts client called CLIENT_NAME"
     echo ""
     echo "  --start-client-headless CLIENT_NAME"
-    echo "    Start client called CLIENT_NAME as headless (no screen)"
-    echo ""
-    echo "  --start-machine-headless VM_NAME"
-    echo "    Start machine called VM_NAME as headless (no screen)"
+    echo "    Starts client called CLIENT_NAME as headless (no screen)"
     echo ""
     echo "  --stop-client CLIENT_NAME"
-    echo "    Stop client called CLIENT_NAME"
+    echo "    Stops client called CLIENT_NAME"
     echo ""
-    echo "  --stop-machine VM_NAME"
-    echo "    Stop machine called VM_NAME"
+    echo "  --import-appliance APPLIANCE OVA_FILE"
+    echo "    Imports the appliance"
     echo ""
-    echo "  --import-appliance APPLIANCE"
-    echo "    imports the appliance "
+    echo "  --pause-client CLIENT_NAME"
+    echo "    Pauses the running client called CLIENT_NAME"
     echo ""
-    echo "--pause-machine VM_NAME"
-    echo "--resume-machine VM_NAME"
-    echo "--pause-client CLIENT_NAME"
-    echo "--resume-client CLIENT_NAME"
-    echo "--check-client-ssh"
-    echo "--check-client-status"
-    echo "--check-machine"
-    echo "--client-exec"
-    echo "--client-exec-fail"
-    echo "--client-exec-as-root"
-    echo "--client-x11"
-    echo "--client-screenshot"
-    echo "--print-client"
-    echo "--wait-for-ssh"
-    echo "--open-ssh"
-    echo "--check-client-online"
-    echo "--create-client-conf"
-    echo "--snapshot-client"
-    echo "--client-copy-file"
-    echo "--is-client-up"
-    echo "--version"
-    echo "--wait-for-client"
+    echo "  --resume-client CLIENT_NAME"
+    echo "    Resumes the paused client called CLIENT_NAME"
+    echo ""
+    echo "  --check-client-ssh CLIENT_NAME"
+    echo "    Checks if ssh is up on the client called CLIENT_NAME"
+    echo ""
+    echo "  --check-client-status CLIENT_NAME"
+    echo "    Checks if the client called CLIENT_NAME is up and running"
+    echo ""
+    echo "  --client-exec CLIENT_NAME COMMAND"
+    echo "    Execeutes the COMMAND on the client called CLIENT_NAME"
+    echo ""
+    echo "  --client-exec-fail CLIENT_NAME COMMAND"
+    echo "    Executes the COMMAND on the client called CLIENT_NAME and turns it off upon failure"
+    echo ""
+    echo "  --client-exec-as-root CLIENT_NAME COMMAND"
+    echo "    Execeutes the COMMAND on the client called CLIENT_NAME as root"
+    echo ""
+    echo "  --client-x11 CLIENT_NAME"
+    echo "    Checks if X11 is up and running on the client called CLIENT_NAME"
+    echo ""
+    echo "  --client-screenshot CLIENT_NAME [IMG_NAME]"
+    echo "    Takes a screenshot on the client called CLIENT_NAME (not implemented for VirtualBox)"
+    echo ""
+    echo "  --print-client CLIENT_NAME"
+    echo "    Prints the configuration for the client called CLIENT_NAME"
+    echo ""
+    echo "  --wait-for-ssh CLIENT_NAME"
+    echo "    Waits until ssh is up and running on the client called CLIENT_NAME"
+    echo ""
+    echo "  --shell CLIENT_NAME"
+    echo "    Opens an interactive shell on the client called CLIENT_NAME"
+    echo ""
+    echo "  --check-client-online CLIENT_NAME"
+    echo "    Checks if the client called CLIENT_NAME can ping the outside world"
+    echo ""
+    echo "  --create-client-conf CLIENT_NAME"
+    echo "    Creates the configuration for the client called CLIENT_NAME automatically"
+    echo ""
+    echo "  --client-copy-file SRC DST"
+    echo "    Copies a file from a client to a host or from a host to a client; a host resource could be '~/myhostfile', and a client resource could be '[CLIENT_NAME]:~/myclientfile'"
+    echo ""
+    echo "  --is-client-up CLIENT_NAME"
+    echo "    Checks whether the client called CLIENT_NAME is running"
+    echo ""
+    echo "  --version"
+    echo "    Checks the current version of the tm-vmm"
+    echo ""
+    echo "  --wait-for-client CLIENT_NAME TIMEOUT<optional>"
+    echo "    (Needs updating) (Default TIMEOUT value is 120 if it is not set by the user)"
+    echo ""
+    echo "  --unlock-screen CLIENT_NAME"
+    echo "    Unlocks the screen of the virtual machine (Android only for now)"
+    echo ""
+    echo "  --install-app CLIENT_NAME PACKAGE"
+    echo "    Installs application on the client called CLIENT_NAME (APK, DEB or RPM); APK files are not yet transferred to the client"
+    echo ""
+    echo "  --uninstall-app"
+    echo "    Uninstalls application APP_NAME on the client called CLIENT_NAME (APK, DEB or RPM)"
+    echo ""
+    echo "  --print-client-settings"
+    echo "    Prints the path to the client's configuration"
+    echo ""
+    echo "  --get-client-os"
+    echo "    Displays the operating system of the client called CLIENT_NAME"
+    echo ""
+    echo "  --for-clients-run SCRIPT [CLIENT_NAMES]"
+    echo "    For each client, starts it, run the script, and stop it"
     echo ""
 
     exit 0
@@ -125,86 +170,67 @@ do
 	
 	"--list-running-clients")
 	    LIST_RUNNING=true
+	    check_android_settings
 	    list_running_clients
 	    RET=$?
 	    ;;
-	
+
 	"--list-running-machines")
 	    LIST_RUNNING=true
+	    check_android_settings
 	    list_running_machines
 	    RET=$?
 	    ;;
-	
+
+
 	"--list-machines")
-	    list_machines
-	    ;;
+            list_machines
+            ;;
 	
 	"--start-client")
 	    VCLIENT=$2
-	    start_client $VCLIENT
+	    get_info_for_client $VCLIENT
+	    start_client
 	    RET=$?
 	    shift
 	    ;;
 	
 	"--start-client-headless")
 	    VCLIENT=$2
-	    start_client  $VCLIENT headless
-	    RET=$?
-	    shift
-	    ;;
-	
-	"--start-machine")
-	    VCLIENT=$2
-	    start_machine $VCLIENT
-	    RET=$?
-	    shift
-	    ;;
-	
-	"--start-client-headless")
-	    VCLIENT=$2
-	    start_machine  $VCLIENT headless
+	    get_info_for_client $VCLIENT
+	    start_client headless
 	    RET=$?
 	    shift
 	    ;;
 	
 	"--check-client-ssh")
 	    VCLIENT=$2
-	    check_client_ssh  $VCLIENT
+	    get_info_for_client $VCLIENT
+	    check_client_ssh
 	    RET=$?
 	    shift
 	    ;;
 
 	"--check-client-online")
 	    VCLIENT=$2
-	    is_client_online  $VCLIENT
+	    get_info_for_client $VCLIENT
+	    is_client_online
 	    RET=$?
 	    shift
 	    ;;
 	
 	"--check-client-status")
 	    VCLIENT="$2"
-	    check_client_status  "$VCLIENT"
-	    RET=$?
-	    shift
-	    ;;
-	
-	"--check-machine")
-	    VCLIENT=$2
-	    check_machine  $VCLIENT
+	    get_info_for_client $VCLIENT
+	    check_client_status
 	    RET=$?
 	    shift
 	    ;;
 	
 	"--stop-client")
 	    VCLIENT=$2
-	    stop_client  $VCLIENT
-	    RET=$?
-	    shift
-	    ;;
-	
-	"--stop-machine")
-	    VCLIENT=$2
-	    stop_machine  $VCLIENT
+	    get_info_for_client $VCLIENT
+	    stop_client
 	    RET=$?
 	    shift
 	    ;;
@@ -212,16 +238,8 @@ do
 	"--client-exec")
 	    VCLIENT=$2
 	    COMMAND="$3"
-	    exec_client_command $VCLIENT "$COMMAND"
-	    RET=$?
-	    shift
-	    shift
-	    ;;
-
-	"--client-exec")
-	    VCLIENT=$2
-	    COMMAND="$3"
-	    exec_client_command $VCLIENT "$COMMAND" 
+	    get_info_for_client $VCLIENT
+	    exec_client_command "$COMMAND"
 	    RET=$?
 	    shift
 	    shift
@@ -230,14 +248,14 @@ do
 	"--client-exec-fail")
 	    VCLIENT=$2
 	    COMMAND="$3"
-
-	    exec_client_command $VCLIENT "$COMMAND"
+	    get_info_for_client $VCLIENT
+	    exec_client_command "$COMMAND"
 	    RET=$?
 
 	    if [ "$RET" != "0" ]
 		then
 		echo "STOPPING CLIENT due to failure"
-		stop_client $VCLIENT
+		stop_client
 		exit $RET
 	    fi
 
@@ -248,98 +266,158 @@ do
 	"--client-exec-as-root"	)
 	    VCLIENT=$2
 	    COMMAND="$3"
-	    
-	    exec_client_command_as_root $VCLIENT "$COMMAND"
+	    get_info_for_client $VCLIENT
+	    exec_client_command_as_root "$COMMAND"
 	    RET=$?
 	    shift
 	    shift
 	    ;;
 
 	"--client-x11")
-	    is_client_x11_up $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    is_client_x11_up
 	    shift
 	    ;;
 
 	"--wait-for-ssh")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    TIMEOUT=$3
+	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_ssh up "$TIMEOUT" $CLIENT 
+	    wait_for_ssh up "$TIMEOUT"
 	    shift
 	    shift
 	    ;;
 
 	"--wait-for-client")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    TIMEOUT=$3
+	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_state up "$TIMEOUT" $CLIENT 
+	    wait_for_state up "$TIMEOUT"
 	    shift
 	    shift
 	    ;;
 
-	"--open-ssh")
-	    CLIENT=$2
+	"--shell")
+	    VCLIENT=$2
 	    TIMEOUT=$3
+	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_ssh up "$TIMEOUT" $CLIENT 
+	    wait_for_shell up "$TIMEOUT" $VCLIENT
 	    shift
 	    shift
-	    open_ssh
+	    open_shell
+
 	    ;;
 
 	"--print-client")
-	    print_client $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    print_client
 	    shift
 	    ;;
 	
 	"--client-screenshot")
-	    client_screenshot $2
+	    VCLIENT=$2
+	    IMG_NAME="$3"
+	    get_info_for_client $VCLIENT
+	    client_screenshot "$IMG_NAME"
 	    shift
 	    ;;
 
 	"--import-appliance")
-	    import_appliance $2
+	    OVA_FILE="$2"
+	    import_appliance "$OVA_FILE"
 	    shift
 	    ;;
 
 	"--pause-client")
-	    pause_client $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    pause_client
 	    shift
 	    shift
 	    ;;
 
 	"--resume-client")
-	    resume_client $2
+	    VCLIENT=$2
+	    get_info_for_client $VCLIENT
+	    resume_client
 	    shift
 	    shift
 	    ;;
 
 	"--create-client-conf")
-	    create_client_conf $2
+	    VCLIENT=$2
+	    create_client_conf "$VCLIENT"
 	    shift
-	    shift
-	    ;;
-
-	"--snapshot-client")
-	    client_screenshot $2
 	    shift
 	    ;;
 
 	"--client-copy-file")
 	    SRC=$2
 	    DST=$3
-	    shift
-	    shift
-	    debug "client_copy_file '$SRC' '$DST'"
 	    client_copy_file "$SRC" "$DST"
+	    shift
+	    shift
 	    ;;
 
 	"--is-client-up")
-	    CLIENT=$2
+	    VCLIENT=$2
 	    shift
-	    
-	    is_client_up $CLIENT
+	    get_info_for_client "$VCLIENT"
+	    is_client_up
+	    echo "Client up? $? ( 0: up | 1: not up )"
+	    ;;
+
+	"--unlock-screen")
+	    VCLIENT=$2
+	    shift
+	    get_info_for_client "$VCLIENT"
+	    unlock_screen
+	    ;;
+
+	"--install-app")
+	    VCLIENT=$2
+	    APP=$3
+	    shift
+	    shift
+	    get_info_for_client "$VCLIENT"
+	    install_app "$APP"
+	    ;;
+
+	"--uninstall-app")
+	    VCLIENT=$2
+	    APP=$3
+	    shift
+	    shift
+	    get_info_for_client "$VCLIENT"
+	    uninstall_app "$APP"
+	    ;;
+
+	"--print-client-settings")
+	    VCLIENT=$2
+	    shift
+	    get_info_for_client "$VCLIENT"
+	    print_client_settings
+	    ;;
+
+	"--get-client-os")
+	    VCLIENT=$2
+	    shift
+	    get_info_for_client "$VCLIENT"
+	    get_guest_os_for_client
+	    echo $GUEST_OS
+	    ;;
+
+	"--for-clients-run")
+	    SCRIPT_FILE=$2
+	    VCLIENTS=$3
+	    shift
+	    shift
+	    exec_clients_or_exec_all_clients "$SCRIPT_FILE" "$VCLIENTS"
 	    ;;
 
 	"--help")
@@ -358,8 +436,4 @@ do
     shift
 done
 
-
-
-
 exit $RET
-

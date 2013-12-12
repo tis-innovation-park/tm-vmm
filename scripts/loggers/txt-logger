@@ -27,7 +27,7 @@ init_log_file()
 
     if [ "$LOG_FILE_DIR" = "" ]
     then   	 		 
-#	echo "You must set the LOG_DEBUG_DIR variable"
+#	echo "You must set the LOG_FILE_DIR variable"
 #	echo " can't log at the moment so bailing out"
 #	return 1
 	return 0
@@ -108,7 +108,6 @@ log_helper()
     shift
     COMMAND=$1
     shift
-
     if [ "$RET" = "0" ]
     then
 	RET_STR="OK"

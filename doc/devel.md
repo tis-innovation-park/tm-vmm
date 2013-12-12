@@ -37,7 +37,7 @@ The implementation is probably better added to the library files above. This mak
 
 A scripts that makes it possible to write pretty advanced one-liners.
 
-# Developing VMM
+# Developing vmm
 
-VMM is written in bash. 
+vmm is written in bash. 
 

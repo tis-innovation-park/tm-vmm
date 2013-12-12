@@ -7,11 +7,14 @@
 get_avd_name_for_port()
 {
     AVD_PORT=$1
-    expect -c "spawn telnet localhost $AVD_PORT; expect \"OK\" ; send \"avd name\n\" ; expect OK" \
+    NAME=$(expect -c "spawn telnet localhost $AVD_PORT; expect \"OK\" ; send \"avd name\n\" ; expect OK" \
+        2>/dev/null \
 	| grep -v -e "^OK"  -e Trying  -e Connected \
 	          -e "Android Console" -e "Escape character" \
 	          -e "spawn telnet"    -e "avd name" \
-	| sed 's,[\n\r]*,,g'
+	| sed 's,[\n\r]*,,g' )
+
+    echo "$NAME"
 }
 
 #
@@ -19,8 +22,10 @@ get_avd_name_for_port()
 #
 get_avd_port_for_name()
 {
+    SAVED_IFS=$IFS
+    export IFS=";"
     AVD_NAME=$1
-    for i in $(get_connected_avds_ports)
+    for i in $(get_connected_avds_ports | awk ' { printf "%s;", $1}')
     do
 	AVD_FOUND=$(get_avd_name_for_port $i)
 #	echo "will test"
@@ -30,16 +35,25 @@ get_avd_port_for_name()
 #	echo -n "   "
 	if [ "$AVD_FOUND" = "$AVD_NAME" ]
 	then
-#	    echo " ==========> $i"
+#	    echo "FOUND IT :......"
 	    echo $i
 	fi
     done
-}
+    IFS=$SAVED_IFS
 
+}
 
 get_connected_avds() 
 {
-    adb devices | grep -v "List of devices attached" | \
+    # check_android_settings hard
+    # RET=$?
+    # if [ $RET -ne 0 ]
+    # then
+    # 	debug "check_android_settings hard incompleted. RET=$RET"
+    # 	echo "Android commands doesn't seem to be set up correctly."
+    # 	return $RET
+    # fi
+    $ADB devices | grep -v "List of devices attached" | \
 	grep -v "^[ \t]*$"   | \
 	awk ' { print $1 } ' | \
 	sed  -e "s,[\n\r]*,,g"
@@ -48,22 +62,93 @@ get_connected_avds()
 get_connected_avds_ports()
 {
     get_connected_avds | sed -e "s,[ \t]*emulator\-,,g" 
+#| grep -v "[a-zA-Z]"
+}
+
+setup_android()
+{
+    # Set up Android path stuff
+    debug "setup_android"
+    if [ "$ANDROID_ADT_PATH" == "" ] && [ "$ANDROID" != "" ]
+    then
+	ANDROID_ADT_PATH=$(dirname $ANDROID)/../../
+    fi
+
+    if [ "$ANDROID_AVD_DIR" = "" ]
+    then
+	ANDROID_AVD_DIR=${HOME}/.android/avd/
+    fi
+
+    # Set up Android command stuff
+    if [ "$ANDROID" = "" ]
+    then   	 
+	ANDROID=$ANDROID_ADT_PATH/sdk/tools/android
+    fi
+    if [ "$ADB" = "" ]
+    then   	 
+	ADB=$ANDROID_ADT_PATH/sdk/platform-tools/adb
+    fi
 }
 
 check_android_settings()
 {
-    if [ "$ANDROID" = "" ]
+    debug "check_android_settings"
+
+    if [ "$ANDROID" = "" ] || [ ! -x $ANDROID ]
     then   	 
 	echo "no android command found"
-	return 1
+	debug "no android command found"
+	exit 1
     fi
 
+    if [ "$ADB" = "" ] || [ ! -x $ADB ]
+    then   	 
+	echo "no adb command found"
+	debug "no adb command found"
+	exit 1
+    fi
 
     if [ "$ANDROID_ADT_PATH" = "" ]
     then   	 
 	echo "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
-	return 1
+	debug "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
+	exit 1
     fi
 
     return 0
+}
+
+exec_client_command_android()
+{
+    COMMAND="$1"
+
+    #
+    # If AVD, then the name to connect to is emulator-<port>
+    #   so we need to build up the name
+    #
+    if [ "$ANDROID_SYS" != "physical" ]
+    then   
+	ANDROID_DEV=emulator-$ANDROID_PORT
+    else
+	ANDROID_DEV=$VM_NAME
+    fi
+
+    debug "Will execute on Android ($ANDROID_PORT): $COMMAND"
+debug "$ADB -s $ANDROID_DEV shell $COMMAND"
+    $ADB -s $ANDROID_DEV shell $COMMAND
+
+    return $?
+}
+
+exec_client_raw_android()
+{
+    COMMAND="$1"
+
+    debug "Will execute on Android ($ANDROID_PORT):  $COMMAND"
+    if [ $ANDROID_SYS != physical ] ; then
+	$ADB  -s emulator-$ANDROID_PORT $COMMAND
+    else
+	$ADB  -s $VM_NAME $COMMAND
+    fi
+    return $?
 }

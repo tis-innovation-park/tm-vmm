@@ -52,7 +52,7 @@ The Testing Machine is currently made up by Virtual Machine Manager
 (tm-vmm) and documentation on how to wite, execute and automate tests
 of eGov sites in particular but also other softwares.
 
-### Virtual Machine Manager (VMM)
+### Virtual Machine Manager (vmm)
 
 tm-vmm is made up by bash scripts that let the user manage various
 virtual machine software in a general way. See the tm-vmm manual for

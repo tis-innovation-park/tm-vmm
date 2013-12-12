@@ -23,7 +23,7 @@
 
 echo_vbox_client_conf()
 {
-    VM_MACHINE=$1
+    VM_MACHINE="$1"
 
     echo VM_NAME=\"$VM_MACHINE\"
     echo VM_TYPE=\"VirtualBox\"
@@ -32,7 +32,6 @@ echo_vbox_client_conf()
     echo VM_SUPERUSER=root
     echo SSH_PORT=auto
     echo SSH_SHUTDOWN_COMMAND=\"shutdown -h now\"
-
 }
 
 echo_android_client_conf()
@@ -42,94 +41,119 @@ echo_android_client_conf()
     echo VM_NAME=\"$VM_MACHINE\"
     echo VM_TYPE=\"Android\"
     VM_TYPE="Android"
-    ANDROID_SYS=""
+    # ANDROID_SYS=""
 
-    CPU_ARCH=$(grep cpu.arch $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.arch=,,g')
-    CPU_MODEL=$(grep cpu.model $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.model=,,g')
-
-    ANDROID_SYS=""
-    if [ "$CPU_ARCH" = "arm" ]
+    if [ $ANDROID_SYS != physical ]
 	then
-	if [ "$CPU_MODEL" = "cortex-a8" ]
-	    then
-	    ANDROID_SYS="emulator64-arm"
-	fi
-    else
-	echo "Unsupported CPU"
-    fi
-    echo "ANDROID_SYS=$ANDROID_SYS"
+	CPU_ARCH=$(grep cpu.arch $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.arch=,,g')
+	CPU_MODEL=$(grep cpu.model $ANDROID_AVD_DIR/$1.avd/config.ini | sed 's,hw\.cpu\.model=,,g')
 
-    echo "TODO: handle  CPU: $CPU_ARCH $CPU_MODEL   in a proper way :)"
+	ANDROID_SYS=""
+	if [ "$CPU_ARCH" = "arm" ]
+	then
+	    if [ "$CPU_MODEL" = "cortex-a8" ]
+	    then
+		ANDROID_SYS="emulator64-arm"
+	    fi
+	elif [ "$CPU_ARCH" = "x86" ]
+	then
+	    ANDROID_SYS="emulator64-x86"
+	else
+	    echo "Unsupported CPU"
+	fi
+    fi
+
+    echo "ANDROID_SYS=$ANDROID_SYS"
+    echo "#CPU_ARCH=$CPU_ARCH"
+    echo "#CPU_MODEL=$CPU_MODEL"
 }
 
 create_vbox_client_conf()
 {
-    VM_MACHINE=$1
+    VM_MACHINE="$1"
+    VM_MACHINE_NOBLANKS="${1/ /_}"
 
-    CONF_NAME=${PERSONAL_ETC_DIR}/clients/$VM_MACHINE.conf
+    CONF_NAME=${PERSONAL_ETC_DIR}/clients/$VM_MACHINE_NOBLANKS.conf
 
     if [ -f $CONF_NAME ]
 	then
-	echo "Configuration file for $VM_MACHINE already exists"
+	debug "Configuration file for \"$VM_MACHINE\" already exists."
+	debug "   $CONF_NAME"
+	echo "Configuration file for \"$VM_MACHINE\" already exists."
 	echo "   $CONF_NAME"
 	return 1
     fi
 
-    if [ ! -d ${PERSONAL_ETC_DIR} ]
+    if [ ! -d ${PERSONAL_ETC_DIR}/clients ]
     then
-	mkdir -p ${PERSONAL_ETC_DIR}
+	mkdir -p ${PERSONAL_ETC_DIR}/clients
     fi
 
-    echo "Creating $CONF_NAME"
-
-    echo_vbox_client_conf $VM_MACHINE > $CONF_NAME
-
+    echo_vbox_client_conf "$VM_MACHINE" > $CONF_NAME
+    if [ $? = 0 ] ; then
+	debug "Created conf for vbox \"VM_MACHINE\"."
+	echo "Created $CONF_NAME"
+    else
+	debug "Failed to create conf for vbox \"VM_MACHINE\"."
+	echo "Failed to create conf for vbox \"VM_MACHINE\"."
+    fi
+    return $?
 }
 
 create_android_client_conf()
 {
-    VM_MACHINE=$1
+    VM_MACHINE="$1"
+    VM_MACHINE_NOBLANKS="${1/ /_}"
 
-    CONF_NAME=${PERSONAL_ETC_DIR}/clients/$VM_MACHINE.conf
+    CONF_NAME=${PERSONAL_ETC_DIR}/clients/$VM_MACHINE_NOBLANKS.conf
 
     if [ -f $CONF_NAME ]
 	then
-	echo "Configuration file for $VM_MACHINE already exists"
+	echo "Configuration file for \"$VM_MACHINE\" already exist.s"
 	echo "   $CONF_NAME"
 	return 1
     fi
 
-    if [ ! -d ${PERSONAL_ETC_DIR} ]
+    if [ ! -d ${PERSONAL_ETC_DIR}/clients ]
     then
-	mkdir -p ${PERSONAL_ETC_DIR}
+	mkdir -p ${PERSONAL_ETC_DIR}/clients
     fi
 
-    echo "Creating $CONF_NAME"
+    echo_android_client_conf $VM_MACHINE > $CONF_NAME
 
-    echo_android_client_conf $VM_MACHINE 
-#> $CONF_NAME
-
+    if [ $? = 0 ] ; then
+	debug "Created conf for android \"VM_MACHINE\"."
+	echo "Created $CONF_NAME"
+    else
+	debug "Failed to create conf for android \"VM_MACHINE\"."
+	echo "Failed to create conf for android \"VM_MACHINE\"."
+    fi
+    return $?
 }
 
 
 create_client_conf()
 {
-    VM_MACHINE=$1
+    VM_MACHINE="$1"
 
-    find_vm_type $VM_MACHINE
+    find_vm_type "$VM_MACHINE"
 
     if [ "$VM_TYPE" = "" ]
     then
-	echo "Couldn't find type for machine \"$VM_MACHINE\""
+	echo "Couldn't find type for machine \"$VM_MACHINE\"."
+	return 1
     elif [ "$VM_TYPE" = "VirtualBox" ]
     then
-	create_vbox_client_conf $VM_MACHINE
+	create_vbox_client_conf "$VM_MACHINE"
+	return $?
     elif [ "$VM_TYPE" = "Android" ]
     then
-	create_android_client_conf $VM_MACHINE
-	
+	# Hack to set ANDROID_SYS (should we re-architect?)
+	check_android_vm_existence "$VM_MACHINE"
+	create_android_client_conf "$VM_MACHINE"
+	return $?
     else
-	echo "Can't create conf for $VM_MACHINE ($VM_TYPE)"
+	echo "Can't create conf for \"$VM_MACHINE\" ($VM_TYPE)."
+	return 1
     fi
-
 }

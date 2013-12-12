@@ -1,4 +1,4 @@
-## Setup 
+# Setup 
 
 * Create the directory $HOME/.testingmachine
 
@@ -16,30 +16,42 @@ For a list of variables, see section Configuration syntax below.
 
 ## Creating a machine
 
-To create a machine vvm relies on the virtualization software. So if
+To create a machine vmm relies on the virtualization software. So if
 you want to manage a Virtualbox machine you (at least for now) create
 it with Virtualbox. For information about how to do this, read the
-chapter "Creating a Virtualbox machine".
+chapter "Creating a Virtualbox machine" or "Creating an Android
+Virtual Device".
 
 
-## Creating a client
+## Preparing for creating a client
 
-First of all you need to decide what machine you want to use with your client. In the example below we will assume it is called Debian6.0
-
+First of all you need to decide what machine you want to use with your
+client. 
 
 * Create a directory for all clients:
 
   `mkdir ~/.testingmachine/clients`
 
-## Create a client configuration
+## Create a VirtualBox client
+
+In the example below we will assume it is called Debian-6.0
+
+### Create a client configuration file
 
 You can create client configuration in two different ways:
 
-* Manually create a configuration file for the client (using a virtual machine):
+* Manually
+* Automatically
 
-      [CLIENT NAME].conf
+#### Create a configuration file manually
+
+* Manually create a configuration file for the client (bound to a virtual machine):
+
+      [CLIENT_NAME].conf
 
     * Set the variables as you find suitable for your project.
+
+#### Create a configuration file automatically
 
 * Use the command line option:
 
@@ -49,22 +61,76 @@ Example usage of the option.
 
     `tm-vmm --create-client-conf  Debian-6.0`
 
-## Example of a client configuration:
+It is assumed that Debian-6.0 is a VirtualBox image.
 
+__Note:__ `--create-client-conf` will set the default value for the guest username to \`whoami\`. If your virtual machine uses some other username, you should modify the client configuration after running this command.
+
+### Example of a client configuration:
 
 `   VM_NAME=Debian6.0`
+
 `   VM_TYPE="VirtualBox"`
+
 `   VM_IP_ADDRESS=192.168.1.2`
+
 `   VM_USER=$USER`
+
 `   VM_SUPERUSER=root`
+
 `   SSH_PORT=22`
+
 `   SSH_SHUTDOWN_COMMAND="shutdown -h now"`
 
 For more variables see section Configuration syntax below
 
-* Copy the public ssh key to the machine, e.g
+* Copy your public ssh key to the machine's root account, e.g
 
-  `ssh-copy-id 192.168.1.2`
+  `ssh-copy-id -p 2256 `
+
+## Create an Android client
 
 
+
+
+In the example below we will assume it is called Nexus-10
+
+### Create a client configuration file
+
+You can create client configuration in two different ways:
+
+* Manually
+* Automatically
+
+#### Create a configuration file manually
+
+* Manually create a configuration file for the client (bound to a virtual machine):
+
+      [CLIENT_NAME].conf
+
+    * Set the variables as you find suitable for your project.
+
+#### Create a configuration file automatically
+
+* Use the command line option:
+
+    `--create-client-conf`
+
+Example usage of the option.
+
+    `tm-vmm --create-client-conf  Nexus-10`
+
+It is assumed that Debian-6.0 and Nexus-10 is the name either a VirtualBox or Android image.
+
+__Note:__ `--create-client-conf` will set the default value for the guest username to \`whoami\`. If your virtual machine uses some other username, you should modify the client configuration after running this command.
+
+### Example of a client configuration:
+
+
+`VM_NAME="eGov-android-machine"`
+
+`VM_TYPE="Android"`
+
+`ANDROID_SYS=emulator64-arm`
+
+For more variables see section Configuration syntax below
 
