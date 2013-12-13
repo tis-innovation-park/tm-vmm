@@ -1098,7 +1098,7 @@ is_qemu_up()
 
 is_vbox_up()
 {
-    CNT=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""} { print $2 } ' | sed 's,\",,g' | grep "$VM_NAME" | wc -l)
+    CNT=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""} { print $2 } ' | sed 's,\",,g' | grep "^${VM_NAME}$" | wc -l)
 
     # If the VM is running (>1), return 0
     if [ $CNT -eq 1 ]
