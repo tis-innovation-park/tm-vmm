@@ -1855,6 +1855,13 @@ check_android_vm_existence()
     debug "check_android_vm_existence: \"$WANTED_VM\""
     CNT=0
 
+    if [ "$ANDROID" = "" ] || [ "$ADB" = "" ] 
+    then 
+	echo " # Android not set up, can't find AVD for $WANTED_VM "
+	return 1
+    fi
+    
+
     CNT1=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep "$WANTED_VM" | wc -l)
     CNT2=$($ADB devices | grep "$WANTED_VM" | wc -l)
     if [ $CNT2 -gt 0 ] ; then
@@ -2146,10 +2153,9 @@ client_copy_file()
         copy_to_client "$SRC_LOC" "$MY_DST_HOST" "$DST_LOC"
         RET=$?
     else
-        echo "uh oh"
+        echo "Missing SRC or DST host"
+	RET=1
     fi
-
-    echo "RETURN $RET"
 
     return $RET
 }
