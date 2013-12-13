@@ -211,6 +211,10 @@ Open up a user management tool by pressing the dasher (logo missing) and type us
 
   `ssh -p 2256 vmm@localhost -t "sudo mkdir /root/.ssh && sudo cp /home/vmm/.ssh/authorized_keys /root/.ssh/"`
 
+* Disable password (for user vmm) when using sudo 
+
+  `ssh -p 2257 root@localhost "echo \"vmm ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers"`
+
 * Test your root acoount
 
  `ssh -p 2256 root@localhost whoami`
