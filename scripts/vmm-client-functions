@@ -52,9 +52,9 @@ list_vbox_machines()
 		if [ "$CONF_CLIENT" != "" ]
 		then
                     VB_SHORT_NAME=$(basename $CONF_CLIENT)
-                    echo " |--$VB_SHORT_NAME (client)"
+                    echo "   |--$VB_SHORT_NAME (client)"
 		else
-                    echo " |--no conf file yet"
+                    echo "   |--no conf file yet"
 		fi
             fi
         done
