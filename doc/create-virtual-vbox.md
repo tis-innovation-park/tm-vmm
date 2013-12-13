@@ -139,7 +139,7 @@ Follow the installation instructions to install Ubuntu in your new virtual machi
 
 To upgrade your system you need to:
 
-* Click on the Software updater icon to your left
+* Click on the Software updater icon to your left (it may take up to a few minutes before the icon appears)
 * Click install now
 * Enter password
 
