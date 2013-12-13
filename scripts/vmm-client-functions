@@ -99,8 +99,18 @@ list_android_machines_print_info()
 
 list_android_machines()
 {
+    
+
+     if [ "$ANDROID" = "" ] || [ "$ADB" = "" ] 
+     then 
+	 echo " # Android not set up, can't list devices"
+	 return 0
+     fi
+
     debug "Listing android virtual devices"
 #    AD_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
+
+
     AD_NAMES_AVD=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g')
     AD_NAMES_PHY=$($ADB devices | grep -v "List of devices attached" | egrep -v -e "emulator-[0-9]{3}" | awk ' { print $1}')
 #    AD_NAMES="$AD_NAMES_AVD $AD_NAMES_PHY"
