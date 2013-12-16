@@ -973,8 +973,6 @@ is_android_up()
 {
     debug "is_android_up"
 
-    # debug " is_android_up? adb -s emulator-$ANDROID_PORT shell getprop init.svc.bootanim"
-
     STOPPED=$($ADB -s emulator-$ANDROID_PORT shell "getprop init.svc.bootanim"  2>/dev/null | grep topped | wc -l)
     
     debug " is_android_up? adb -s emulator-$ANDROID_PORT shell getprop init.svc.bootanim => $STOPPED"
@@ -1387,6 +1385,11 @@ exec_client_command()
     then
         exec_client_command_android "$COMMAND"
         RET=$?
+    elif [ "$VM_TYPE" = "ssh" ]
+    then
+        $SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS \
+            "$COMMAND"
+        RET=$?
     else
         echo "exec_client_command(): support for \"$VM_NAME\" not implemented yet!"
         RET=1
@@ -1466,6 +1469,24 @@ check_machine_android()
     return $RET
 }
 
+get_ssh_specific_info() 
+{
+    debug "vm_name: $VM_NAME"
+    if [ "$SSH_PORT" = "auto" ] ; then
+	SSH_PORT=22
+	return 0
+    fi
+
+    if [ "$SSH_PORT" = "" ] ; then
+        debug "SSH_PORT is not set."
+        return 1
+    else
+	debug "SSH_PORT is set as $SSH_PORT."
+	return 0
+    fi
+}
+
+
 get_vbox_specific_info()
 {
     debug "vm_name: $VM_NAME"
@@ -1479,8 +1500,13 @@ get_vbox_specific_info()
         return 1
     else
 	debug "SSH_PORT is set as $SSH_PORT."
-	return 1
+	return 0
     fi
+
+    
+#    CLIENT_VBOX_IP
+
+
 }
 
 get_android_specific_info()
@@ -1504,6 +1530,10 @@ get_vm_specific_info()
     elif [ "$VM_TYPE" = "Android" ]
     then
         get_android_specific_info
+        RET=$?
+    elif [ "$VM_TYPE" = "ssh" ]
+    then
+        get_ssh_specific_info
         RET=$?
     else
         echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
@@ -1564,6 +1594,10 @@ get_info_for_client()
 		    echo "Can't find android machine \"$VM_NAME\"."
 		    exit 1
 		fi
+		;;
+
+	    ssh)
+		return 0
 		;;
 
 	    # qemu in the future?
