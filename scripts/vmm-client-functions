@@ -52,9 +52,9 @@ list_vbox_machines()
 		if [ "$CONF_CLIENT" != "" ]
 		then
                     VB_SHORT_NAME=$(basename $CONF_CLIENT)
-                    echo " |--$VB_SHORT_NAME (client)"
+                    echo "   |--$VB_SHORT_NAME (client)"
 		else
-                    echo " |--no conf file yet"
+                    echo "   |--no conf file yet"
 		fi
             fi
         done
@@ -99,8 +99,18 @@ list_android_machines_print_info()
 
 list_android_machines()
 {
+    
+
+     if [ "$ANDROID" = "" ] || [ "$ADB" = "" ] 
+     then 
+	 echo " # Android not set up, can't list devices"
+	 return 0
+     fi
+
     debug "Listing android virtual devices"
 #    AD_NAMES=$(find  ${ANDROID_AVD_DIR}/* -prune -name "*.ini" | sed 's,\.ini,,g')
+
+
     AD_NAMES_AVD=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g')
     AD_NAMES_PHY=$($ADB devices | grep -v "List of devices attached" | egrep -v -e "emulator-[0-9]{3}" | awk ' { print $1}')
 #    AD_NAMES="$AD_NAMES_AVD $AD_NAMES_PHY"
@@ -453,30 +463,24 @@ start_vbox_headless()
         return 1
     fi
 
-    ERR_FILE=$TM_TMP_FILE_DIR/$$.vbm-err
+    debug "start_vbox_headless: vboxheadless -s  \"$VM_NAME\""
+    ERR_FILE=.$$.vbm-err
     rm -f $ERR_FILE
-
-    vboxheadless -s "$VM_NAME" 2> $ERR_FILE >/dev/null &
-
-    if [ "$ANDROID_SYS" = "" ]
-    then   
-    	   echo "Not starting AVD....since we have no ANDROID_SYS"
-	   return
-    fi	
+    vboxheadless -s  "$VM_NAME"  > $ERR_FILE  2>&1  &
 
     sleep 5
-    ERROR_FOUND=$(grep -i -e "error" $ERR_FILE | wc -l)
+    ERROR_FOUND=$(grep -i -e "error" $ERR_FILE  | wc -l)
+    ALREADY_STARTED=$(grep -i -e "already locked for" $ERR_FILE  | wc -l)
 
-    if [ "$ERROR_FOUND" != "0" ]
-    then
-        debug "Could not start vbox (headless). Error message:"
-        debug "$(cat $ERR_FILE)"
-        rm -f $ERR_FILE
-        return 1
-    fi
+    if [ "$ALREADY_STARTED" == "0" ] && [ "$ERROR_FOUND" != "0" ] 
+    then   
+	debug "Could not start vbox (headless). Error message:"
+	debug "$(cat $ERR_FILE)"
+	rm -f $ERR_FILE
+	return 1
+    fi	
 
-    
-    $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd $PROC_EXPR  -netspeed full -netdelay none &
+    vboxheadless -s "$VM_NAME" 2> $ERR_FILE >/dev/null &
     rm -f $ERR_FILE
 
     return 0
@@ -498,6 +502,12 @@ start_android()
         echo "Could not find $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS."
         return 1
     fi
+
+    if [ "$ANDROID_SYS" = "" ]
+    then   
+    	   echo "Not starting AVD....since we have no ANDROID_SYS"
+	   return
+    fi	
 
     $ANDROID_ADT_PATH/sdk/tools/$ANDROID_SYS -avd "$VM_NAME" -netspeed full -netdelay none &
 }
@@ -638,6 +648,27 @@ kill_vb_proc()
 {
     KILL_ARG=$1
 
+    if [ $(vboxmanage list vms | grep -c "$PROC_EXPR" | wc -l) -eq 0 ]
+	then
+	debug "Could not find vbox image: $PROC_EXPR"
+	return 1
+    fi
+    ERR_FILE=$$.vbm-out
+    rm -f $ERR_FILE
+    VBoxManage startvm "$VM_NAME"  > $ERR_FILE 2>&1   &
+
+    sleep 3
+    ERROR_FOUND=$(grep -e "error" $ERR_FILE  | wc -l)
+    ALREADY_STARTED=$(grep -i -e "already locked " $ERR_FILE  | wc -l)
+
+    if [ "$ALREADY_STARTED" == "0" ] && [ "$ERROR_FOUND" != "0" ] 
+    then   
+	debug "Could not start vbox. Error message:"
+	debug "$(cat $ERR_FILE)"
+	rm -f $ERR_FILE
+	return 1
+    fi
+
     debug "Kill vb proc \"$VM_NAME\" ($KILL_ARG)"
 
     sleep 5
@@ -759,7 +790,7 @@ stop_android()
     # Android client up, RET = 0; Android client down, RET = 1
     RET=$?
 
-    debug "Killing Android \"$VB_NAME\"."
+    debug "Killing Android \"$VM_NAME\"."
     $ADB -s emulator-$ANDROID_PORT emu kill >/dev/null 2>/dev/null
 
     if [ $RET = 1 ] ; then
@@ -919,6 +950,116 @@ find_vm_type()
         export VM_TYPE="VirtualBox"
     elif [ $ANDROID_FOUND -ne 0 ]
     then
+	export VM_TYPE="Android"
+    fi
+}
+
+
+start_helper()
+{
+    debug "start_helper: $*"
+
+    WANTED_NAME=$1
+    VM_TYPE=$2
+    CLI_CONF=$3
+    START_ARGS=$4
+
+    debug "Reading client conf $CLI_CONF"
+    .  $CLI_CONF
+
+    case $VM_TYPE in
+	"VirtualBox")
+	    debug "Starting vbox $1 ($START_ARGS)"
+	    if [ "$START_ARGS" = "headless"  ]
+	    then
+		start_vbox_headless $VM_NAME
+		RET=$?
+	    else
+		start_vbox $VM_NAME
+		RET=$?
+	    fi
+
+	    if [ $RET -ne 0 ]
+		then
+		debug "Failed to start: $VM_NAME"
+		echo "Failed to start: $VM_NAME"
+		return 1
+	    fi
+	    
+	    check_vbox_proc $VM_NAME
+	    RET=$?
+	    
+	    if [ $RET -ne 0 ]
+		then
+		OK=0
+	    else
+		OK=1
+	    fi
+
+	    OK=$?
+	    log "$OK" "Start VirtualBox" "$VM_NAME"
+	    ;;
+	"Android")
+	    debug "Starting android $1 ($START_ARGS)"
+	    if [ "$START_ARGS" = "headless"  ]
+	    then
+		start_android_headless $VM_NAME
+	    else
+		start_android $VM_NAME
+	    fi
+
+		
+	    ;;
+	"qemu")
+	    debug "Starting qemu $1"
+	    start_qemu "$WANTED_NAME" "&"
+
+	    check_qemu_proc $VM_NAME
+	    RET=$?
+	    
+	    if [ $RET -ne 0 ]
+		then
+		OK=0
+	    else
+		OK=1
+	    fi
+
+	    OK=$?
+	    log "$OK" "Start qemu" "$VM_NAME"
+	    ;;
+	*)
+	    echo "Failed finding vm type for $1"
+	    log "1" "Unknown vm type" "$VM_NAME"
+	    exit
+	    ;;
+    esac
+    
+
+
+    if [ "$2" = "--no-wait" ]
+    then
+	return 0
+    fi
+    
+    wait_until_up $VM_NAME
+
+
+}
+
+
+start_machine()
+{
+    CLIENT_FOUND=false
+    WANTED_VM=$1
+
+    get_info_for_machine $1
+
+    if [ "$CLIENT_FOUND" = "false" ]
+	then
+	echo "No client configuration found for machine: $1"
+	return 111
+    else
+	start_helper "$WANTED_VM" $VM_TYPE $CLI_CONF
         export VM_TYPE="Android"
     fi
 }
@@ -957,7 +1098,7 @@ is_qemu_up()
 
 is_vbox_up()
 {
-    CNT=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""} { print $2 } ' | sed 's,\",,g' | grep "$VM_NAME" | wc -l)
+    CNT=$(vboxmanage list runningvms | awk 'BEGIN { FS="\""} { print $2 } ' | sed 's,\",,g' | grep "^${VM_NAME}$" | wc -l)
 
     # If the VM is running (>1), return 0
     if [ $CNT -eq 1 ]
@@ -972,6 +1113,9 @@ is_vbox_up()
 is_android_up()
 {
     debug "is_android_up"
+
+    ANDROID_PORT=$(get_avd_port_for_name $VM_NAME)
+    # debug " is_android_up? adb -s emulator-$ANDROID_PORT shell getprop init.svc.bootanim"
 
     STOPPED=$($ADB -s emulator-$ANDROID_PORT shell "getprop init.svc.bootanim"  2>/dev/null | grep topped | wc -l)
     
@@ -1059,13 +1203,25 @@ is_client_ssh_up()
     # debug " Returning: $RET"
     # return $RET
 
-    # Not working for Android
-    nc -zv localhost $SSH_PORT 2>/dev/null
-    RET=$?
+    # Not working for Fedora (uses another ncat).
+    # VAL=$(nc -zv localhost $SSH_PORT 2>&1 | grep succeeded | wc -l)
 
-    debug "is_client_ssh_up: $RET ( up => 0; not up => not 0 )"
+    # Not working when VirtualBox NAT port forwarding.
+    # # $SSH_PORT (sometimes?) starts with a space, hence the trimming.
+    # PORT=$(echo $SSH_PORT | tr -d ' ')
+    # debug "is_client_ssh_up(): 2>/dev/null >/dev/tcp/localhost/$PORT"
+    # 2>/dev/null >/dev/tcp/localhost/$PORT
+    # RET=$?
 
-    return $RET
+    VAL=$(nc -i 1 localhost $SSH_PORT < /dev/null 2> /dev/null | grep '^SSH' | wc -l)
+
+    if [ $VAL = 1 ]; then
+        debug "is_client_ssh_up: 0 ( up => 0; not up => not 0 )"
+        return 0
+    else
+        debug "is_client_ssh_up: 1 ( up => 0; not up => not 0 )"
+        return 1
+    fi
 }
 
 is_client_x11_up()
@@ -1564,7 +1720,11 @@ get_info_for_client()
             if [ $RET -ne 0 ] ; then
 		debug "Client \"$WANTED_CLIENT\" seems to be down"
 		debug "exit tm-vmm."
-		exit 1
+		if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+		    exit 1
+		else
+		    return 1
+		fi
 	    else
 		debug "Got vm specific info."
 		break
@@ -1581,7 +1741,11 @@ get_info_for_client()
 		else
 		    debug "Can't find vbox machine \"$VM_NAME\"."
 		    echo "Can't find vbox machine \"$VM_NAME\"."
-		    exit 1
+		    if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+			exit 1
+		    else
+			return 1
+		    fi
 		fi
 		;;
 
@@ -1592,7 +1756,11 @@ get_info_for_client()
 		else
 		    debug "Can't find android machine \"$VM_NAME\"."
 		    echo "Can't find android machine \"$VM_NAME\"."
-		    exit 1
+		    if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+			exit 1
+		    else
+			return 1
+		    fi
 		fi
 		;;
 
@@ -1605,7 +1773,11 @@ get_info_for_client()
 	    *)
 		debug "Not implemented for this type of vm yet."
 		echo "Not implemented for this type of vm yet."
-		exit 1
+		if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+		    exit 1
+		else
+		    return 1
+		fi
 	esac
     else
 	debug "Can't find .conf file for \"$WANTED_CLIENT\"."
@@ -1631,13 +1803,17 @@ get_info_for_client()
 	    talk_to_user Android
 	    RET=$?
 	else
-	    debug "Can't find any info for \"$WANTED_CLIENT\". Exit."
-	    echo "Can't find any info for \"$WANTED_CLIENT\". Exit."
+	    debug "Can't find any info for \"$WANTED_CLIENT\"."
+	    echo "Can't find any info for \"$WANTED_CLIENT\"."
 	    RET=1
 	fi
 
 	if [ $RET != 0 ] ; then
-	    exit $RET
+	    if [ $EXIT_ON_CLIENT_INFO_FAILURE = 0 ]; then
+		exit $RET
+	    else
+		return 1
+	    fi
 	fi
 
 	return $RET
@@ -1714,6 +1890,13 @@ check_android_vm_existence()
     WANTED_VM=$1
     debug "check_android_vm_existence: \"$WANTED_VM\""
     CNT=0
+
+    if [ "$ANDROID" = "" ] || [ "$ADB" = "" ] 
+    then 
+	echo " # Android not set up, can't find AVD for $WANTED_VM "
+	return 1
+    fi
+    
 
     CNT1=$($ANDROID list avd | grep Name | sed 's,[ \t]*Name: ,,g' | grep "$WANTED_VM" | wc -l)
     CNT2=$($ADB devices | grep "$WANTED_VM" | wc -l)
@@ -2006,10 +2189,9 @@ client_copy_file()
         copy_to_client "$SRC_LOC" "$MY_DST_HOST" "$DST_LOC"
         RET=$?
     else
-        echo "uh oh"
+        echo "Missing SRC or DST host"
+	RET=1
     fi
-
-    echo "RETURN $RET"
 
     return $RET
 }
@@ -2305,14 +2487,18 @@ exec_clients_or_exec_all_clients()
     do
 	CLIENT_UP=1
 	CLIENT_SSH_UP=1
+	EXIT_ON_CLIENT_INFO_FAILURE=1
 	IFS=$SAVED_IFS
 	get_info_for_client "$CLIENT_NAME"
+	RET=$?
+	debug "Got client info for running script? RET: $RET"
 	IFS=";"
-	if [ $? = 0 ]; then
+	if [ $RET = 0 ]; then
+	    debug "start_client $VM_NAME for running the script $SCRIPT_FILE."
 	    start_client
 	    CLIENT_STARTED=$?
 	    COUNTER=0
-	    while [ $COUNTER -lt 5 ]; do
+	    while [ $COUNTER -lt 60 ]; do
 		is_client_up
 		if [ $? = 0 ]; then
 		    CLIENT_UP=0
@@ -2323,9 +2509,10 @@ exec_clients_or_exec_all_clients()
 		fi
 	    done
 
-	    if [ $CLIENT_UP = 0 ]; then
+	    if [ "$CLIENT_UP" = "0" ] && [ "$VM_TYPE" = "VirtualBox" ]
+	    then
 		COUNTER=0
-		while [ $COUNTER -lt 5 ]; do
+		while [ $COUNTER -lt 60 ]; do
 		    is_client_ssh_up
 		    if [ $? = 0 ]; then
 			CLIENT_SSH_UP=0
@@ -2336,24 +2523,36 @@ exec_clients_or_exec_all_clients()
 		    fi
 		done
 	    fi
+            
+            if [ "$CLIENT_UP" = 0 ] && [ "$VM_TYPE" = "Android" ]
+            then
+                ANDROID_DEVICE="emulator-$ANDROID_PORT"
+            fi
 
 	    debug "is_client_up: $?" # is_client_up?
-	    exec_client $CLIENT_STARTED $CLIENT_UP $CLIENT_SSH_UP
-
+	    exec_client
 	    stop_client
+
+	    COUNTER=0
+	    while [ $COUNTER -lt 60 ]; do
+		is_client_up
+		if [ $? != 0 ]; then
+		    break
+		else
+		    let COUNTER=COUNTER+1
+		    sleep 5
+		fi
+	    done
 	else
-	    echo "No such client $CLIENT_NAME."
-	    echo "Continue with next client..."
+	    debug "Continue next client for script..."
+	    echo "Continue next client for script..."
 	fi
     done
+
     IFS=$SAVED_IFS
 }
 
 exec_client()
 {
-    CLIENT_STARTED=$1
-    CLIENT_UP=$2
-    CLIENT_SSH_UP=$3
-
-    CLIENT_NAME=$CLIENT_NAME CLIENT_STARTED=$CLIENT_STARTED CLIENT_UP=$CLIENT_UP CLIENT_SSH_UP=$CLIENT_SSH_UP CLIENT_TYPE=$VM_TYPE sh $SCRIPT_FILE
+    CLIENT_NAME=$VM_NAME CLIENT_TYPE=$VM_TYPE CLIENT_STARTED=$CLIENT_STARTED CLIENT_UP=$CLIENT_UP CLIENT_SSH_UP=$CLIENT_SSH_UP ANDROID_DEVICE=$ANDROID_DEVICE bash $SCRIPT_FILE
 }
