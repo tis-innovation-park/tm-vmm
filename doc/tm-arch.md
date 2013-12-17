@@ -27,6 +27,8 @@ documentation. The manuals are written in Markdown format.
 
 * *.md - Source version of the manuals 
 * generated-files - all files generated from the .md files are placed here
+* pics - pictures used in the manuals
+* faq-pics - pictures related to the FAQ
 
 ### examples
 
