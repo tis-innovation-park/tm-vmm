@@ -10,6 +10,8 @@ Directory containing all programs visible to the user.
   script is basically a parser for the functions as stored in the
   scripts in the scripts directory.
 
+* tm-vmm-auto - outdated script previously used to automate stuff
+
 ### devel-stuff
 
 A directory containing scripts and other files that can be used while
@@ -43,6 +45,7 @@ This is where the functionality of Testing Machine is stored.
 * functions
 * generate-conf
 * vmm-client-android-specific
+* vmm-client-qemu-specific
 * vmm-client-functions
 
 * loggers - directory containing various scripts that implements
@@ -51,3 +54,4 @@ This is where the functionality of Testing Machine is stored.
      * debug-logger
      * txt 
      * txt-logger
+
