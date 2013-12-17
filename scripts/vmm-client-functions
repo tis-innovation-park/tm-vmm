@@ -33,6 +33,15 @@ else
     exit 1
 fi
 
+QEMU_SPEC_FILE=$(dirname $0)/../share/testingmachine/scripts/vmm-client-qemu-specific
+if [ -f $QEMU_SPEC_FILE ]
+then
+    source $QEMU_SPEC_FILE
+else
+    echo "Can't find $QEMU_SPEC_FILE"
+    exit 1
+fi
+
 list_vbox_machines()
 {
     debug "Listing vbox machines"
