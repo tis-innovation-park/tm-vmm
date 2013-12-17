@@ -1,0 +1,127 @@
+start_qemu()
+{
+    VM_NAME="$1"
+
+    set_qemu_program $QEMU_CPU
+
+    debug "Starting qemu $1"
+    debug " $VM_START_ARGS"
+    MONITOR_ARGS="-monitor unix:/tmp/qemu-$VM_NAME.sock,server,nowait "
+    REDIR_ARGS="-redir tcp:$SSH_PORT::22 "
+    EXTRA_ARGS="-no-reboot -nographic -display none "
+    
+    START_VM="$QEMU_BINARY -M versatilepb -m 256"
+    START_VM="$START_VM -kernel $QEMU_KERNEL -hda $QEMU_HDA"
+    START_VM="$START_VM -append \"root=/dev/sda1\" "
+    START_VM="$START_VM -initrd $QEMU_INITRD"
+    START_VM="$START_VM $MONITOR_ARGS $REDIR_ARGS $EXTRA_ARGS"
+
+    if [ ! -f $QEMU_KERNEL ] || [ ! -f $QEMU_INITRD ] || [ ! -f $QEMU_HDA ]
+        then
+        debug "Can't find either of:"
+        debug " kernel: $QEMU_KERNEL"
+        debug " initrd: $QEMU_INITRD"
+        debug " hda: $QEMU_HDA"
+        return 1
+    fi
+
+    if [ "$VNC_PORT" != "" ]
+    then
+        START_VM="$START_VM -vnc :$VNC_PORT"
+    fi
+    debug " $START_VM"        
+    echo "$START_VM" | bash &
+    
+    return 0
+# /dev/null
+}
+
+set_qemu_program()
+{
+    WANTED_CPU=$1
+    export QEMU_BINARY
+    case $WANTED_CPU in
+        "arm")
+         QEMU_BINARY=qemu-system-arm
+         ;;
+        *)
+         echo "Unsupported cmou $WANTED_CPU"
+         ;;
+    esac
+}
+
+check_qemu_proc()
+{
+    PROC_EXPR=$1
+    RET=$(ps auxww | grep qemu | grep -c $PROC_EXPR )
+
+    debug "Number of qemu processes: $RET"
+    
+    return $RET
+}
+stop_qemu()
+{
+    VB_NAME=$1
+    debug "Stopping qemu $VM_NAME"
+
+    if [ "$VB_NAME" != "" ]
+    then
+        debug "Send to QEMU $VB_NAME: ctrl-alt-delete"
+        send_to_qemu $VB_NAME "sendkey ctrl-alt-delete"
+        wait_for_state down 20 $VB_NAME
+
+        is_qemu_up $VB_NAME
+        RET=$?
+        if [ "$RET" != "0" ]
+        then
+         debug " client is up, returning"
+         return
+        fi
+
+        debug "Send to QEMU $VB_NAME: system_powerdown"
+        send_to_qemu $VB_NAME "system_powerdown"
+        wait_for_state down 20 $VB_NAME
+
+        is_qemu_up $VB_NAME
+        RET=$?
+        if [ "$RET" != "0" ]
+        then
+         debug " client is up, returning"
+         return
+        fi
+
+        debug "Send to QEMU $VB_NAME: quit"
+        send_to_qemu $VB_NAME "quit"
+        wait_for_state down 20 $VB_NAME
+
+        break
+    fi
+}
+
+is_qemu_up()
+{
+    export WANTED_VM=$1
+
+    CNT=$(send_to_qemu $WANTED_VM "info status" | grep "VM status: running" | wc -l)
+
+    debug " is_qemu_up: $CNT"
+
+    # If the VM is running (>1), return 0
+    if [ $CNT -ne 0 ]
+    then
+        debug "qemu vm \"$WANTED_VM\" is running."
+        return 0
+    fi
+
+    debug "qemu vm \"$WANTED_VM\" is NOT running."
+    return 1
+}
+
+send_to_qemu()
+{
+    WANTED_VM=$1
+    MSG=$2
+    echo "$MSG" | socat - unix-connect:/tmp/qemu-${WANTED_VM}.sock 2>/dev/null | \
+        grep -v "(qemu)" | grep -v "QEMU [0-9\. ]*monitor"
+}
+
