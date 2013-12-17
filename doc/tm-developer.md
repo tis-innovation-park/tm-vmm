@@ -34,6 +34,22 @@ simply say something nice, send an email to the mailing list
 Do you wish for another media (IRC, forum...) propose it on the
 mailing list.
 
+# Adding bash code or fixing bugs
+
+## Add a new command line option
+
+If you want to a new command line option to tm-vmm you should update
+the bin/tm-vmm.tmpl file. Make sure to add code to parse the command
+line and also as an entry in the help printout.
+
+Update the documentation accordingly.
+
+## Add bash functions
+
+If you want to fix bugs or add new features add this in the scripts directory. 
+
+If you add a bash file, make sure to update the Makefile.tmpl accordingly.	
+
 # Writing documentation
 
 All documentation is written in Markdown format. We use pandoc to
@@ -44,6 +60,9 @@ easily re-usable. Since there's no *include* functionality in Markdown
 we had used the Makefile to cp/cat together the various
 manuals. Perhaps not the most optimal way of doing things - but it
 works. If you have improvement suggestion you're more than welcome.
+
+If you add a markdown file, make sure to update the doc/Makefile.tmpl
+accordingly.
 
 # Generating Manuals
 
@@ -62,7 +81,6 @@ distributions:
 
 `sudo apt-get install`
 `sudo apt-get pandoc texlive-latex-base`
-
 
 # Releasing
 
@@ -132,9 +150,4 @@ The scripts accepts some options:
 * `--push` - Push the code (and tags) up to github
 
 * `--force-tag` - If the tag already exists, overwrite it
-
-
-
-
-
 
