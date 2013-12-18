@@ -61,9 +61,9 @@ distributions:
 `sudo apt-get install`
 `sudo apt-get pandoc texlive-latex-base`
 
-# Releasing
+# Releasing the software
 
-## Manual release
+## Manual release 
 
 To release we go through the following procedure:
 
@@ -129,4 +129,12 @@ The scripts accepts some options:
 * `--push` - Push the code (and tags) up to github
 
 * `--force-tag` - If the tag already exists, overwrite it
+
+# Releasing the manuals
+
+## Scripted release 
+
+`cd doc`
+
+`make clean all release-doc`
 
