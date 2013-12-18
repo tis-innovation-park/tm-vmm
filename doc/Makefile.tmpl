@@ -145,11 +145,15 @@ release-doc:
 	@cp generated-files/tm-developer.*          $(TM_MANUALS_DIR)/Developer-Guide/
 	@cp -r pics screenshots                     $(TM_MANUALS_DIR)/Developer-Guide/
 
-	@echo "  ** Copying Developer manual"
+	@echo "  ** Copying Quick guide"
 	@test -d                                    $(TM_MANUALS_DIR)/Quick-Guide/
 	@cp generated-files/tm-quick-guide.*        $(TM_MANUALS_DIR)/Quick-Guide/
 	@cp -r pics screenshots                     $(TM_MANUALS_DIR)/Quick-Guide/
 
-	@echo "* Managaing git"
-	cd $(TM_MANUALS_DIR)/ && git add *
+	@echo "* Managing git"
+	cd $(TM_MANUALS_DIR)/ && \
+                git add User-Guide/* && \
+		git add Developer-Guide/* && \
+		git add Quick-Guide/*
+	cd $(TM_MANUALS_DIR)/ && git commit
 	cd $(TM_MANUALS_DIR)/ && git push
