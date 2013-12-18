@@ -95,6 +95,7 @@ To release we go through the following procedure:
      `git tag -a <version number> -m '<version number'`
 
 * Push the code and the tag
+     `git push`
      `git push --tags`
 
 * Build 
