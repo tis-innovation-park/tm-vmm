@@ -30,8 +30,7 @@ start_qemu()
         START_VM="$START_VM -vnc :$VNC_PORT"
     fi
     debug " $START_VM"        
-    echo "$START_VM" 
-#| bash &
+    echo "$START_VM" | bash &
    exit
    
     return 0
@@ -126,7 +125,11 @@ send_to_qemu()
 {
     WANTED_VM=$1
     MSG=$2
-    echo "$MSG" | socat - unix-connect:/tmp/qemu-${WANTED_VM}.sock 2>/dev/null | \
+
+#    echo "MSG: $MSG"
+    SOCKET=/tmp/qemu-${WANTED_VM}.sock
+
+    echo "$MSG" | socat - unix-connect:${SOCKET} 2>/dev/null | \
         grep -v "(qemu)" | grep -v "QEMU [0-9\. ]*monitor"
 }
 
