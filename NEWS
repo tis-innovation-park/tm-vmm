@@ -11,7 +11,18 @@ NEWS in coming 0.14
   ======================================
 
   * is_client_ssh_up now works with VBox NATs, and can return `1' (jonkri)
+  * Implement alternative SSH check that works with VBox forwarding (jonkri)
+  * start-client (not using headless) no longer starts in headless mode (jonkri)
+  * Fix bug in `is_client_ssh_up' (jonkri)
+  * Don't list AVDs if Android is not set up (hesa)
 
+  For the brave, we're also introducing SSH client type support (experimental
+  and unsupported).
+
+  Several manual enhancements, including an updated developer's guide, and
+  software requirements.
+
+  Separated QEMU code by putting it in its own file.
 
 NEWS in coming 0.13
 
