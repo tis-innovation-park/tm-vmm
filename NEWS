@@ -1,3 +1,10 @@
+NEWS in coming 0.14.1
+
+  Fixes:
+  ======================================
+
+  * --stop-client does not start a client if none is running (hesa)
+
 NEWS in coming 0.14
 
   OPTIONS:
