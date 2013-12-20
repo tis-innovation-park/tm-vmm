@@ -437,7 +437,7 @@ start_client()
 
 start_vbox()
 {
-    debug "start_vbox."
+    debug "start_vbox"
 
     if [ $(vboxmanage list vms | grep -c "$VM_NAME" | wc -l) -eq 0 ]
     then
@@ -595,27 +595,6 @@ maximise_vbox()
 kill_vb_proc()
 {
     KILL_ARG=$1
-
-    if [ $(vboxmanage list vms | grep -c "$PROC_EXPR" | wc -l) -eq 0 ]
-	then
-	debug "Could not find vbox image: $PROC_EXPR"
-	return 1
-    fi
-    ERR_FILE=$$.vbm-out
-    rm -f $ERR_FILE
-    VBoxManage startvm "$VM_NAME"  > $ERR_FILE 2>&1   &
-
-    sleep 3
-    ERROR_FOUND=$(grep -e "error" $ERR_FILE  | wc -l)
-    ALREADY_STARTED=$(grep -i -e "already locked " $ERR_FILE  | wc -l)
-
-    if [ "$ALREADY_STARTED" == "0" ] && [ "$ERROR_FOUND" != "0" ] 
-    then   
-	debug "Could not start vbox. Error message:"
-	debug "$(cat $ERR_FILE)"
-	rm -f $ERR_FILE
-	return 1
-    fi
 
     debug "Kill vb proc \"$VM_NAME\" ($KILL_ARG)"
 
