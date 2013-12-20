@@ -1407,8 +1407,13 @@ exec_client_command()
         $SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS \
             "$COMMAND"
         RET=$?
+    elif [ "$VM_TYPE" = "qemu" ]
+    then
+        $SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS \
+            "$COMMAND"
+        RET=$?
     else
-        echo "exec_client_command(): support for \"$VM_NAME\" not implemented yet!"
+        echo "exec_client_command(): support for \"$VM_TYPE\" not implemented yet!"
         RET=1
     fi
 

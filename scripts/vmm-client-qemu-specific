@@ -30,8 +30,10 @@ start_qemu()
         START_VM="$START_VM -vnc :$VNC_PORT"
     fi
     debug " $START_VM"        
-    echo "$START_VM" | bash &
-    
+    echo "$START_VM" 
+#| bash &
+   exit
+   
     return 0
 # /dev/null
 }
