@@ -44,8 +44,11 @@ set_qemu_program()
         "arm")
          QEMU_BINARY=qemu-system-arm
          ;;
+        "armel")
+         QEMU_BINARY=qemu-system-arm
+         ;;
         *)
-         echo "Unsupported cmou $WANTED_CPU"
+         echo "Unsupported cpu $WANTED_CPU"
          ;;
     esac
 }

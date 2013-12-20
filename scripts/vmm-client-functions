@@ -391,30 +391,30 @@ start_client()
              OK=1
          fi
          ;;
-
+	
         "Android")
-
-         if [ "$START_ARGS" = "headless" ] ; then
+	    
+            if [ "$START_ARGS" = "headless" ] ; then
                 start_android_headless
                 sleep 2
-         else
+            else
                 start_android
                 sleep 2
-         fi
-         ;;
-
+            fi
+            ;;
+	
         "qemu")
-         debug "Starting qemu \"$WANTED_CLIENT\"."
-         start_qemu "$WANTED_NAME" "&"
-
-         check_qemu_proc $VM_NAME
-         RET=$?
-         
-         if [ $RET -ne 0 ] ; then
-             OK=0
-         else
-             OK=1
-         fi
+            debug "Starting qemu \"$WANTED_CLIENT\"."
+            start_qemu "$WANTED_CLIENT" "&"
+	    
+            check_qemu_proc $VM_NAME
+            RET=$?
+            
+            if [ $RET -ne 0 ] ; then
+		OK=0
+            else
+		OK=1
+            fi
 # Shouldn't be removed???
 #        OK=$?
          log "$OK" "Start qemu" "$VM_NAME"
@@ -1552,6 +1552,9 @@ get_vm_specific_info()
     then
         get_ssh_specific_info
         RET=$?
+    elif [ "$VM_TYPE" = "qemu" ]
+    then
+        RET=0
     else
         echo "get_vm_specific_info(): support for \"$VM_NAME\" not implemented yet!"
     fi
@@ -1623,6 +1626,11 @@ get_info_for_client()
 			return 1
 		    fi
 		fi
+		;;
+
+	    qemu)
+		echo "WARNING, ONLY BASIC QEMU IMPL"
+		return 0
 		;;
 
 	    ssh)
