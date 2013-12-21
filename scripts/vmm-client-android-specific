@@ -50,7 +50,7 @@ get_connected_avds()
     if [ $RET -ne 0 ]
     then
     	debug "check_android_settings hard incompleted. RET=$RET"
-    # 	echo "Android commands doesn't seem to be set up correctly."
+#     	echo "Android commands doesn't seem to be set up correctly."
      	return $RET
     fi
     $ADB devices | grep -v "List of devices attached" | \
@@ -106,21 +106,21 @@ check_android_settings()
     then   	 
 	echo "no android command found"
 	debug "no android command found"
-	if [ "$MODE" = "hard" ] ; then 	exit 1 ; fi
+	if [ "$MODE" = "hard" ] ; then 	exit 1 ; else return 1 ; fi
     fi
 
     if [ "$ADB" = "" ] || [ ! -x $ADB ]
     then   	 
 	echo "no adb command found"
 	debug "no adb command found"
-	if [ "$MODE" = "hard" ] ; then 	exit 1 ; fi
+	if [ "$MODE" = "hard" ] ; then 	exit 1 ; else return 1 ; fi
     fi
 
     if [ "$ANDROID_ADT_PATH" = "" ]
     then   	 
 	echo "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
 	debug "Can't find Android adt ... you must set ANDROID_ADT_PATH in your vmm.conf"
-	if [ "$MODE" = "hard" ] ; then 	exit 1 ; fi
+	if [ "$MODE" = "hard" ] ; then 	exit 1 ; else return 1 ; fi
     fi
 
     return 0
@@ -167,6 +167,15 @@ list_running_android()
 {
     echo "  Android"
 
+    check_android_settings >/dev/null 2 >/dev/null
+    RET=$?
+    if [ $RET -ne 0 ]
+    then
+    	debug "check_android_settings hard incompleted. RET=$RET"
+     	echo "    * No devices found. Android commands doesn't seem to be set up correctly."
+     	return $RET
+    fi
+    
     AD_NAMES=$(get_connected_avds | awk '{ printf "%s;", $1}' )
 
     export IFS=";"
