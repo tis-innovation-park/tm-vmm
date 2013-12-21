@@ -57,12 +57,14 @@ set_qemu_program()
 check_qemu_proc()
 {
     PROC_EXPR=$1
+
     RET=$(ps auxww | grep qemu | grep -c $PROC_EXPR )
 
     debug "Number of qemu processes: $RET"
     
     return $RET
 }
+
 stop_qemu()
 {
     VB_NAME=$1
@@ -70,6 +72,15 @@ stop_qemu()
 
     if [ "$VB_NAME" != "" ]
     then
+
+	check_qemu_proc $VB_NAME
+	RET=$?
+	
+	if [ $RET -eq 0 ];
+	then
+	    return
+	fi
+
         debug "Send to QEMU $VB_NAME: ctrl-alt-delete"
         send_to_qemu $VB_NAME "sendkey ctrl-alt-delete"
         wait_for_state down 20 $VB_NAME
@@ -81,6 +92,11 @@ stop_qemu()
          debug " client is up, returning"
          return
         fi
+	check_qemu_proc $VB_NAME
+	if [ $? -eq 0 ];
+	then
+	    return
+	fi
 
         debug "Send to QEMU $VB_NAME: system_powerdown"
         send_to_qemu $VB_NAME "system_powerdown"
@@ -93,6 +109,11 @@ stop_qemu()
          debug " client is up, returning"
          return
         fi
+	check_qemu_proc $VB_NAME
+	if [ $? -eq 0 ];
+	then
+	    return
+	fi
 
         debug "Send to QEMU $VB_NAME: quit"
         send_to_qemu $VB_NAME "quit"
@@ -133,3 +154,42 @@ send_to_qemu()
         grep -v "(qemu)" | grep -v "QEMU [0-9\. ]*monitor"
 }
 
+android-specific()
+{
+    echo "Listing running qemu devices not possible at the moment"
+}
+
+
+list_running_qemu() 
+{
+    echo "  Qemu"
+    for token in $(ps x -U autobuilder -u autobuilder  | grep qemu | grep -v grep | grep sock | sed 's, ,\n,g' | grep sock ) 
+    do
+	token=${token#unix:/tmp/qemu-}
+	QEMU_NAME=${token%%.sock,server,nowait}
+	IFS=" "
+	echo "   |--$QEMU_NAME"  
+
+	SUB_CLIENTS=$(find $ETC_DIRS -name "*.conf" 2>/dev/null | grep "clients/" | xargs grep -l $QEMU_NAME)
+
+#	echo "SUB_CLIENTS: $SUB_CLIENTS"
+	if [ "$SUB_CLIENTS" != "" ]
+	then
+	    for qe in $SUB_CLIENTS
+	    do
+#		echo " ---- $AD_NAME"
+		QE_SHORT_NAME=$(basename $qe)
+		echo "     |--$QE_SHORT_NAME  (client)"  
+		FOUND=true
+	    done
+#	    if [ "$FOUND" = "false" ]
+#	    then
+#		echo "      not in use"
+#	    fi
+	else
+	    echo "     |--$QEMU_NAME  (no clients using it)"  
+	fi
+	
+
+    done
+}
