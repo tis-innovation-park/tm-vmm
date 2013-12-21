@@ -144,12 +144,12 @@ list_running_vbox()
                 if [ "$CONF_CLIENT" != "" ]
                 then
                     VB_SHORT_NAME=$(basename $CONF_CLIENT | sed 's,\.conf,,g')
-                    echo " |--$VB_SHORT_NAME [$CONF_CLIENT] (machine: $VB_NAME )"
+                    echo "    |--$VB_SHORT_NAME [$CONF_CLIENT] (machine: $VB_NAME )"
                 fi
          fi
         done
     else
-        echo " No virtualbox machines is currently running."
+        echo "   No virtualbox machines is currently running."
     fi
     IFS=$SAVED_IFS
 }
