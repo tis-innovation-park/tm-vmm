@@ -1641,6 +1641,10 @@ copy_from_client()
             $SCP -r -P $SSH_PORT $VM_USER@$VM_IP_ADDRESS:"$MY_SRC_LOC" "$MY_DST_LOC"
             ;;
 	
+        "qemu")
+            $SCP -r -P $SSH_PORT $VM_USER@$VM_IP_ADDRESS:"$MY_SRC_LOC" "$MY_DST_LOC"
+            ;;
+	
         "Android")
             $ADB -s emulator-$ANDROID_PORT pull "$MY_SRC_LOC" "$MY_DST_LOC"
             ;;
@@ -1662,6 +1666,10 @@ copy_to_client()
     debug "copy_to_client ($VM_TYPE): $MY_SRC_LOC $MY_DST_HOST $MY_DST_LOC"
     case $VM_TYPE in
         "VirtualBox")
+            $SCP -r -P $SSH_PORT "$MY_SRC_LOC" $VM_USER@$VM_IP_ADDRESS:"$MY_DST_LOC"
+            ;;
+	
+        "qemu")
             $SCP -r -P $SSH_PORT "$MY_SRC_LOC" $VM_USER@$VM_IP_ADDRESS:"$MY_DST_LOC"
             ;;
 	
