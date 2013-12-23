@@ -215,7 +215,13 @@ start_client()
     if [ $RET -eq 0 ]
     then
 	echo "Client \"$VCLIENT\" seems up"
-	echo " .... future release will not continue to start client"
+	if [ "$VM_TYPE" = "qemu" 9
+	then
+	    echo " Will not start a bew qemu instance."
+	    return
+	else
+	    echo " .... future release will not continue to start client"
+	fi
     fi
 
     case $VM_TYPE in
