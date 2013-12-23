@@ -1585,6 +1585,10 @@ open_shell()
 	    open_ssh 
          ;;
     
+        "qemu")
+	    open_ssh 
+         ;;
+    
         "Android")
 	    get_android_specific_info $WANTED_VM
             AP=$(get_avd_port_for_name $WANTED_VM)
