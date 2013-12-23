@@ -170,7 +170,6 @@ do
 	
 	"--list-running-clients")
 	    LIST_RUNNING=true
-	    check_android_settings
 	    list_running_clients
 	    RET=$?
 	    ;;
@@ -369,7 +368,9 @@ do
 	    shift
 	    get_info_for_client "$VCLIENT"
 	    is_client_up
-	    echo "Client up? $? ( 0: up | 1: not up )"
+	    RET=$?
+#	    echo "Client up? $? ( 0: up | 1: not up )"
+	    exit $RET
 	    ;;
 
 	"--unlock-screen")

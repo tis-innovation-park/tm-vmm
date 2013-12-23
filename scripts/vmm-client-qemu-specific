@@ -10,11 +10,22 @@ start_qemu()
     REDIR_ARGS="-redir tcp:$SSH_PORT::22 "
     EXTRA_ARGS="-no-reboot -nographic -display none "
     
-    START_VM="$QEMU_BINARY -M versatilepb -m 256"
-    START_VM="$START_VM -kernel $QEMU_KERNEL -hda $QEMU_HDA"
-    START_VM="$START_VM -append \"root=/dev/sda1\" "
-    START_VM="$START_VM -initrd $QEMU_INITRD"
-    START_VM="$START_VM $MONITOR_ARGS $REDIR_ARGS $EXTRA_ARGS"
+    START_VM="$QEMU_BINARY -kernel $QEMU_KERNEL $QEMU_CPU -m 256 -M versatilepb "
+    START_VM="$START_VM -no-reboot "
+    if [ "$QEMU_ROOT" != "" ]
+    then
+	START_VM="$START_VM -append \"root=${QEMU_ROOT} panic=1 rootfstype=ext4 rw \" "
+    else
+	START_VM="$START_VM -append \"root=/dev/sda1\" "
+    fi
+
+    START_VM="$START_VM -nographic -hda $QEMU_HDA"	
+
+    if [ "$QEMU_INITRD" != "" ]
+    then
+	START_VM="$START_VM -initrd $QEMU_INITRD"
+    fi
+    START_VM="$START_VM  $MONITOR_ARGS $REDIR_ARGS $EXTRA_ARGS"
 
     if [ ! -f $QEMU_KERNEL ] || [ ! -f $QEMU_INITRD ] || [ ! -f $QEMU_HDA ]
         then
@@ -31,7 +42,7 @@ start_qemu()
     fi
     debug " $START_VM"        
     echo "$START_VM" | bash &
-    
+   
     return 0
 # /dev/null
 }
@@ -43,9 +54,17 @@ set_qemu_program()
     case $WANTED_CPU in
         "arm")
          QEMU_BINARY=qemu-system-arm
+	 QEMU_CPU=""
+         ;;
+        "arm1176")
+         QEMU_BINARY=qemu-system-arm
+	 QEMU_CPU=" -cpu arm1176 "
+         ;;
+        "armel")
+         QEMU_BINARY=qemu-system-arm
          ;;
         *)
-         echo "Unsupported cmou $WANTED_CPU"
+         echo "Unsupported cpu $WANTED_CPU"
          ;;
     esac
 }
@@ -53,12 +72,14 @@ set_qemu_program()
 check_qemu_proc()
 {
     PROC_EXPR=$1
+
     RET=$(ps auxww | grep qemu | grep -c $PROC_EXPR )
 
     debug "Number of qemu processes: $RET"
     
     return $RET
 }
+
 stop_qemu()
 {
     VB_NAME=$1
@@ -66,6 +87,15 @@ stop_qemu()
 
     if [ "$VB_NAME" != "" ]
     then
+
+	check_qemu_proc $VB_NAME
+	RET=$?
+	
+	if [ $RET -eq 0 ];
+	then
+	    return
+	fi
+
         debug "Send to QEMU $VB_NAME: ctrl-alt-delete"
         send_to_qemu $VB_NAME "sendkey ctrl-alt-delete"
         wait_for_state down 20 $VB_NAME
@@ -77,6 +107,11 @@ stop_qemu()
          debug " client is up, returning"
          return
         fi
+	check_qemu_proc $VB_NAME
+	if [ $? -eq 0 ];
+	then
+	    return
+	fi
 
         debug "Send to QEMU $VB_NAME: system_powerdown"
         send_to_qemu $VB_NAME "system_powerdown"
@@ -89,6 +124,11 @@ stop_qemu()
          debug " client is up, returning"
          return
         fi
+	check_qemu_proc $VB_NAME
+	if [ $? -eq 0 ];
+	then
+	    return
+	fi
 
         debug "Send to QEMU $VB_NAME: quit"
         send_to_qemu $VB_NAME "quit"
@@ -121,7 +161,56 @@ send_to_qemu()
 {
     WANTED_VM=$1
     MSG=$2
-    echo "$MSG" | socat - unix-connect:/tmp/qemu-${WANTED_VM}.sock 2>/dev/null | \
+
+#    echo "MSG: $MSG"
+    SOCKET=/tmp/qemu-${WANTED_VM}.sock
+
+    echo "$MSG" | socat - unix-connect:${SOCKET} 2>/dev/null | \
         grep -v "(qemu)" | grep -v "QEMU [0-9\. ]*monitor"
 }
 
+android-specific()
+{
+    echo "Listing running qemu devices not possible at the moment"
+}
+
+
+list_running_qemu() 
+{
+    echo "  Qemu"
+
+    QEMUS=$(ps x -U autobuilder -u autobuilder  | grep qemu | grep -v grep | grep sock | sed 's, ,\n,g' | grep sock )
+    if [ "$QEMUS" != ""  ] 
+    then
+	for token in  $QEMUS
+	do
+	    token=${token#unix:/tmp/qemu-}
+	    QEMU_NAME=${token%%.sock,server,nowait}
+	    IFS=" "
+	    echo "   |--$QEMU_NAME"  
+	    
+	    SUB_CLIENTS=$(find $ETC_DIRS -name "*.conf" 2>/dev/null | grep "clients/" | xargs grep -l $QEMU_NAME)
+	    
+#	echo "SUB_CLIENTS: $SUB_CLIENTS"
+	    if [ "$SUB_CLIENTS" != "" ]
+	    then
+		for qe in $SUB_CLIENTS
+		do
+#		echo " ---- $AD_NAME"
+		    QE_SHORT_NAME=$(basename $qe)
+		    echo "     |--$QE_SHORT_NAME  (client)"  
+		    FOUND=true
+		done
+#	    if [ "$FOUND" = "false" ]
+#	    then
+#		echo "      not in use"
+#	    fi
+	    else
+		echo "     |--$QEMU_NAME  (no clients using it)"  
+	    fi
+	done
+    else
+	echo "    * No Qemu clients currently running"
+    fi
+    
+}
