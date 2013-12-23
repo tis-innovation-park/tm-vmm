@@ -212,10 +212,11 @@ start_client()
 
     is_client_up $VCLIENT
     RET=$?
+#    echo "is $VCLIENT up?  $RET"
     if [ $RET -eq 0 ]
     then
 	echo "Client \"$VCLIENT\" seems up"
-	if [ "$VM_TYPE" = "qemu" 9
+	if [ "$VM_TYPE" = "qemu" ]
 	then
 	    echo " Will not start a bew qemu instance."
 	    return
