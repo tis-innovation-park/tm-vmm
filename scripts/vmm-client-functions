@@ -140,7 +140,7 @@ list_running_vbox()
          if [ "$VB_NAME" != "" ]
          then
                 IFS=$SAVED_IFS
-                CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $VB_NAME)
+                CONF_CLIENT=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l "\"$VB_NAME\"")
                 if [ "$CONF_CLIENT" != "" ]
                 then
                     VB_SHORT_NAME=$(basename $CONF_CLIENT | sed 's,\.conf,,g')
