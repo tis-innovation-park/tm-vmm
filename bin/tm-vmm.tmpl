@@ -284,7 +284,7 @@ do
 	    TIMEOUT=$3
 	    get_info_for_client $VCLIENT
 	    if [ "$TIMEOUT" = "" ] ; then TIMEOUT=120 ; fi
-	    wait_for_ssh up "$TIMEOUT"
+	    wait_for_ssh $VCLIENT "$TIMEOUT"
 	    shift
 	    shift
 	    ;;

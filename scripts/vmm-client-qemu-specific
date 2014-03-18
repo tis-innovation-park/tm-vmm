@@ -9,8 +9,15 @@ start_qemu()
     MONITOR_ARGS="-monitor unix:/tmp/qemu-$VM_NAME.sock,server,nowait "
     REDIR_ARGS="-redir tcp:$SSH_PORT::22 "
     EXTRA_ARGS="-no-reboot -nographic -display none "
-    
-    START_VM="$QEMU_BINARY -kernel $QEMU_KERNEL $QEMU_CPU -m 256 -M versatilepb "
+
+    START_VM="$QEMU_BINARY -kernel $QEMU_KERNEL"
+
+    if [ "$QEMU_CPU" != "" ]
+    then 
+	START_VM="$START_VM -cpu $QEMU_CPU  "
+    fi  	 
+
+    START_VM="$START_VM -m 256 -M versatilepb "
     START_VM="$START_VM -no-reboot "
     if [ "$QEMU_ROOT" != "" ]
     then
@@ -30,9 +37,9 @@ start_qemu()
     if [ ! -f $QEMU_KERNEL ] || [ ! -f $QEMU_INITRD ] || [ ! -f $QEMU_HDA ]
         then
         debug "Can't find either of:"
-        debug " kernel: $QEMU_KERNEL"
-        debug " initrd: $QEMU_INITRD"
-        debug " hda: $QEMU_HDA"
+        debug "  kernel: $QEMU_KERNEL"
+        debug "  initrd: $QEMU_INITRD"
+        debug "  hda: $QEMU_HDA"
         return 1
     fi
 
@@ -54,11 +61,9 @@ set_qemu_program()
     case $WANTED_CPU in
         "arm")
          QEMU_BINARY=qemu-system-arm
-	 QEMU_CPU=""
          ;;
         "arm1176")
          QEMU_BINARY=qemu-system-arm
-	 QEMU_CPU=" -cpu arm1176 "
          ;;
         "armel")
          QEMU_BINARY=qemu-system-arm
@@ -73,11 +78,37 @@ check_qemu_proc()
 {
     PROC_EXPR=$1
 
-    RET=$(ps auxww | grep qemu | grep -c $PROC_EXPR )
+    RET=$(ps ax -U autobuilder -u autobuilder  | grep qemu | grep -v grep | grep -w $PROC_EXPR | wc -l)
 
     debug "Number of qemu processes: $RET"
     
     return $RET
+}
+
+kill_qemu_sub() 
+{
+    QEMU_NAME=$1
+    SIG=$2
+
+    QEMU_VM_PROC=$(ps x -U autobuilder -u autobuilder  | grep qemu | grep -v grep | grep -w $VB_NAME | awk '{print $1}')
+    if [ "$QEMU_VM_PROC" != "" ]
+    then
+	kill $SIG $QEMU_VM_PROC
+	sleep 3
+    else
+	return
+    fi
+
+}
+
+
+kill_qemu() 
+{
+    QEMU_NAME=$1
+
+    kill_qemu_sub $QEMU_NAME 
+    kill_qemu_sub $QEMU_NAME SIGINT
+    kill_qemu_sub $QEMU_NAME SIGKILL
 }
 
 stop_qemu()
@@ -85,57 +116,90 @@ stop_qemu()
     VB_NAME=$1
     debug "Stopping qemu $VM_NAME"
 
+    echo "stop_qemu $1"
     if [ "$VB_NAME" != "" ]
     then
 
+	DELAY=1
+
+    echo "1 checking _qemu $1"
+
 	check_qemu_proc $VB_NAME
 	RET=$?
+    echo "1 checking _qemu $1 => $RET"
 	
 	if [ $RET -eq 0 ];
 	then
 	    return
 	fi
 
+	echo "2 stop  $VB_NAME $RET"
+
         debug "Send to QEMU $VB_NAME: ctrl-alt-delete"
         send_to_qemu $VB_NAME "sendkey ctrl-alt-delete"
-        wait_for_state down 20 $VB_NAME
+        wait_for_state down $DELAY $VB_NAME
+
 
         is_qemu_up $VB_NAME
         RET=$?
+	echo "3 qemu up?  $VB_NAME $RET"
         if [ "$RET" != "0" ]
         then
-         debug " client is up, returning"
-         return
+            echo " client is down, returning"
+            debug " client is down, returning"
+            return
         fi
+
 	check_qemu_proc $VB_NAME
 	if [ $? -eq 0 ];
 	then
+	    echo " no proc found"
 	    return
 	fi
 
         debug "Send to QEMU $VB_NAME: system_powerdown"
         send_to_qemu $VB_NAME "system_powerdown"
-        wait_for_state down 20 $VB_NAME
+        wait_for_state down $DELAY $VB_NAME
+
 
         is_qemu_up $VB_NAME
         RET=$?
+	echo "4 is up?  $VB_NAME $RET"
+
         if [ "$RET" != "0" ]
         then
-         debug " client is up, returning"
-         return
+            debug " client is down, returning"
+            return
         fi
+
+	echo "check 5.."
 	check_qemu_proc $VB_NAME
 	if [ $? -eq 0 ];
 	then
 	    return
 	fi
 
+	echo " send quit.."
         debug "Send to QEMU $VB_NAME: quit"
         send_to_qemu $VB_NAME "quit"
-        wait_for_state down 20 $VB_NAME
+        wait_for_state down $DELAY $VB_NAME
 
-        break
+	echo " check again ().."
+
+	check_qemu_proc $VB_NAME
+	if [ $? -eq 0 ];
+	then
+	    echo "no qemu procs...."
+	    return
+	fi
+
+	echo "5 killing"
+	kill_qemu
+
     fi
+
+
+
 }
 
 is_qemu_up()
@@ -145,6 +209,7 @@ is_qemu_up()
     CNT=$(send_to_qemu $WANTED_VM "info status" | grep "VM status: running" | wc -l)
 
     debug " is_qemu_up: $CNT"
+#    echo " is_qemu_up: $CNT"
 
     # If the VM is running (>1), return 0
     if [ $CNT -ne 0 ]
