@@ -2179,7 +2179,7 @@ take_snapshot()
         *)
          echo "Can not take snapshots on $VM_TYPE"
          log "1" "Snapshot on vm type $VM_NAME not supported" 
-         exit
+         exit 1
          ;;
     esac
     
@@ -2197,7 +2197,7 @@ restore_snapshot()
         *)
          echo "Can not restore snapshots on $VM_TYPE"
          log "1" "Snapshots on vm type $VM_NAME not supported" 
-         exit
+         exit 1
          ;;
     esac
     
@@ -2216,7 +2216,7 @@ delete_snapshot()
         *)
          echo "Can not delete snapshots on $VM_TYPE"
          log "1" "Snapshots on vm type $VM_NAME not supported" 
-         exit
+         exit 1
          ;;
     esac
     
