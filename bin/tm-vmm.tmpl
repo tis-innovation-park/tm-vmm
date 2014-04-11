@@ -155,6 +155,15 @@ usage()
     echo "  --for-clients-run SCRIPT [CLIENT_NAMES]"
     echo "    For each client, starts it, run the script, and stop it"
     echo ""
+    echo "  --take-snapshot CLIENT_NAME SNAPSHAOT_NAME"
+    echo "    Take a snapshot of a vm"
+    echo ""
+    echo "  --restore-snapshot CLIENT_NAME SNAPSHAOT_NAME"
+    echo "    Restore a vm to a snapshot"
+    echo ""
+    echo "  --delete-snapshot CLIENT_NAME SNAPSHAOT_NAME"
+    echo "    Delete snapshot"
+    echo ""
 
     exit 0
 }
@@ -419,6 +428,36 @@ do
 	    shift
 	    shift
 	    exec_clients_or_exec_all_clients "$SCRIPT_FILE" "$VCLIENTS"
+	    ;;
+
+	"--take-snapshot")
+	    VCLIENT=$2
+	    SNAPSHOT_NAME="$3"
+	    get_info_for_client $VCLIENT
+	    take_snapshot "$SNAPSHOT_NAME"
+	    RET=$?
+	    shift
+	    shift
+	    ;;
+
+	"--restore-snapshot")
+	    VCLIENT=$2
+	    SNAPSHOT_NAME="$3"
+	    get_info_for_client $VCLIENT
+	    restore_snapshot "$SNAPSHOT_NAME"
+	    RET=$?
+	    shift
+	    shift
+	    ;;
+
+	"--delete-snapshot")
+	    VCLIENT=$2
+	    SNAPSHOT_NAME="$3"
+	    get_info_for_client $VCLIENT
+	    delete_snapshot "$SNAPSHOT_NAME"
+	    RET=$?
+	    shift
+	    shift
 	    ;;
 
 	"--help")

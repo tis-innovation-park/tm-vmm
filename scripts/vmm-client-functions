@@ -2,7 +2,7 @@
 #
 # Testing Machine
 #
-# Copyright (C) 2012, 2013 TIS Innovation Park
+# Copyright (C) 2012, 2013, 2014 TIS Innovation Park
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -2085,3 +2085,145 @@ exec_client()
 {
     CLIENT_NAME=$VM_NAME CLIENT_TYPE=$VM_TYPE CLIENT_STARTED=$CLIENT_STARTED CLIENT_UP=$CLIENT_UP CLIENT_SSH_UP=$CLIENT_SSH_UP ANDROID_DEVICE=$ANDROID_DEVICE bash $SCRIPT_FILE
 }
+
+
+take_snapshot_vbox()
+{
+    SNAPSHOT_NAME=$1
+    RET=0
+
+    check_vbox_vm_existence $VCLIENT
+    RET_VBOX=$?
+    if [ $RET_VBOX != 0 ] ; then
+	debug "Can't find any info for \"$WANTED_CLIENT\"."
+	echo "Can't find any info for \"$WANTED_CLIENT\"."
+	RET=1
+	return $RET
+    fi
+
+    
+    if [ "$SNAPSHOT_NAME" = "" ] ; then
+	SNAPSHOT_NAME="BASE"
+    fi
+
+    echo "SNAPSHOT VBOX: $1"
+    vboxmanage snapshot "$VCLIENT" take "$SNAPSHOT_NAME"
+    RET=$?
+    return $RET
+}
+
+
+delete_snapshot_vbox()
+{
+    SNAPSHOT_NAME=$1
+    RET=0
+
+    check_vbox_vm_existence $VCLIENT
+    RET_VBOX=$?
+    if [ $RET_VBOX != 0 ] ; then
+	debug "Can't find any info for \"$WANTED_CLIENT\"."
+	echo "Can't find any info for \"$WANTED_CLIENT\"."
+	RET=1
+	return $RET
+    fi
+
+    
+    if [ "$SNAPSHOT_NAME" = "" ] ; then
+	SNAPSHOT_NAME="BASE"
+    fi
+
+    echo "SNAPSHOT VBOX: $1"
+    vboxmanage snapshot "$VCLIENT" delete "$SNAPSHOT_NAME"
+    RET=$?
+    return $RET
+}
+
+
+restore_snapshot_vbox()
+{
+    SNAPSHOT_NAME=$1
+    RET=0
+
+    check_vbox_vm_existence $VCLIENT
+    RET_VBOX=$?
+    if [ $RET_VBOX != 0 ] ; then
+	debug "Can't find any info for \"$WANTED_CLIENT\"."
+	echo "Can't find any info for \"$WANTED_CLIENT\"."
+	RET=1
+	return $RET
+    fi
+
+    
+    if [ $SNAPSHOT_NAME = "" ] ; then
+	SNAPSHOT_NAME="BASE"
+    fi
+
+   
+    echo "SNAPSHOT VBOX: $1"
+    vboxmanage snapshot "$VCLIENT" restore "$SNAPSHOT_NAME"
+
+    RET=$?
+    return $RET
+}
+
+
+take_snapshot() 
+{
+    SNAPSHOT_NAME=$1
+
+    case $VM_TYPE in
+        "VirtualBox")
+	    take_snapshot_vbox $SNAPSHOT_NAME
+         ;;
+
+        *)
+         echo "Can not take snapshots on $VM_TYPE"
+         log "1" "Snapshot on vm type $VM_NAME not supported" 
+         exit
+         ;;
+    esac
+    
+}
+
+restore_snapshot() 
+{
+    SNAPSHOT_NAME=$1
+
+    case $VM_TYPE in
+        "VirtualBox")
+	    restore_snapshot_vbox $SNAPSHOT_NAME
+         ;;
+
+        *)
+         echo "Can not restore snapshots on $VM_TYPE"
+         log "1" "Snapshots on vm type $VM_NAME not supported" 
+         exit
+         ;;
+    esac
+    
+    
+}
+
+delete_snapshot()
+{
+    SNAPSHOT_NAME=$1
+
+    case $VM_TYPE in
+        "VirtualBox")
+	    delete_snapshot_vbox $SNAPSHOT_NAME
+         ;;
+
+        *)
+         echo "Can not delete snapshots on $VM_TYPE"
+         log "1" "Snapshots on vm type $VM_NAME not supported" 
+         exit
+         ;;
+    esac
+    
+    
+}
+
+
+
+
+
