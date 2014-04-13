@@ -1163,7 +1163,7 @@ exec_client_command()
     if [ "$VM_TYPE" = "VirtualBox" ]
     then
         debug "$SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS $COMMAND"
-        $SSH -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS \
+        $SSH -t -p $SSH_PORT $VM_USER@$VM_IP_ADDRESS \
             "$COMMAND"
         RET=$?
     elif [ "$VM_TYPE" = "Android" ]
