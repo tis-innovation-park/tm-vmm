@@ -2102,11 +2102,20 @@ take_snapshot_vbox()
     fi
 
     
+    
     if [ "$SNAPSHOT_NAME" = "" ] ; then
 	SNAPSHOT_NAME="BASE"
     fi
 
-    echo "SNAPSHOT VBOX: $1"
+    ALREADY_THERE=$(vboxmanage snapshot Ubuntu-12-04-32 list | sed -e 's,[ \t]*Name:[ \t]*,,g'  -e 's,[ \t]*(UUID: [a-z0-9\-]*)[ \t]*\*,,g' | grep "$SNAPSHOT_NAME" | wc -l)
+
+
+    if [ "$ALREADY_THERE" != "0" ]
+    then   
+	echo "Snapshot name ($SNAPSHOT_NAME) already used. Bailing out"
+	exit 1
+    fi     	
+
     vboxmanage snapshot "$VCLIENT" take "$SNAPSHOT_NAME"
     RET=$?
     return $RET
