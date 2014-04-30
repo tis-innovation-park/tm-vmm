@@ -528,7 +528,7 @@ list_android_machines_print_info()
     FOUND=false
     if [ "$AD_NAME" != "" ]
     then
-	echo  "  |--$AD_NAME  ($AD_TYPE machine)"
+	echo  " |--$AD_NAME  ($AD_TYPE machine)"
 	SUB_CLIENTS=$(find $ETC_DIRS -name *.conf 2>/dev/null | grep "clients/" | xargs grep -l $AD_NAME)
 	
 #	    echo "SUB_CLIENTS: $SUB_CLIENTS"
