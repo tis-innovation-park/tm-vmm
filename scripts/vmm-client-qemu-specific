@@ -4,6 +4,13 @@ start_qemu()
 
     set_qemu_program $QEMU_CPU
 
+    if [ "$SSH_PORT" = "auto" ]
+    then
+	echo "Automatic SSH_PORT not supported in qemu"
+	echo "  - specify a port, e g SSH_PORT=2222"
+	return 1
+    fi
+
     debug "Starting qemu $1"
     debug " $VM_START_ARGS"
     MONITOR_ARGS="-monitor unix:/tmp/qemu-$VM_NAME.sock,server,nowait "
@@ -26,7 +33,22 @@ start_qemu()
 	START_VM="$START_VM -append \"root=/dev/sda1\" "
     fi
 
-    START_VM="$START_VM -nographic -hda $QEMU_HDA"	
+    SNAPSHOTS=$(ls -1t ${QEMU_HDA}-snapshot-* | wc -l)
+    if [ $SNAPSHOTS  -eq 0 ]
+    then
+	HDA=$QEMU_HDA
+	
+    elif [ $SNAPSHOTS  -eq 1 ]
+    then
+	HDA=$(ls -1t ${QEMU_HDA}-snapshot-*| head -1)
+	
+    elif [ $SNAPSHOTS  -gt 1 ]
+    then
+	echo "Too many snapshots, can't decide which to use"
+	return 1
+    fi
+
+    START_VM="$START_VM -nographic -hda $HDA"	
 
     if [ "$QEMU_INITRD" != "" ]
     then
@@ -43,13 +65,15 @@ start_qemu()
         return 1
     fi
 
+
     if [ "$VNC_PORT" != "" ]
     then
         START_VM="$START_VM -vnc :$VNC_PORT"
     fi
     debug " $START_VM"        
+
     echo "$START_VM" | bash &
-   
+
     return 0
 # /dev/null
 }
@@ -78,8 +102,7 @@ check_qemu_proc()
 {
     PROC_EXPR=$1
 
-    RET=$(ps ax -U autobuilder -u autobuilder  | grep qemu | grep -v grep | grep -w $PROC_EXPR | wc -l)
-
+    RET=$(ps ax  | grep qemu | grep -v grep | grep -w $PROC_EXPR | wc -l)
     debug "Number of qemu processes: $RET"
     
     return $RET
@@ -90,7 +113,7 @@ kill_qemu_sub()
     QEMU_NAME=$1
     SIG=$2
 
-    QEMU_VM_PROC=$(ps x -U autobuilder -u autobuilder  | grep qemu | grep -v grep | grep -w $VB_NAME | awk '{print $1}')
+    QEMU_VM_PROC=$(ps x  | grep qemu | grep -v grep | grep -w $VB_NAME | awk '{print $1}')
     if [ "$QEMU_VM_PROC" != "" ]
     then
 	kill $SIG $QEMU_VM_PROC
@@ -116,24 +139,20 @@ stop_qemu()
     VB_NAME=$1
     debug "Stopping qemu $VM_NAME"
 
-    echo "stop_qemu $1"
     if [ "$VB_NAME" != "" ]
     then
 
 	DELAY=1
 
-    echo "1 checking _qemu $1"
 
 	check_qemu_proc $VB_NAME
 	RET=$?
-    echo "1 checking _qemu $1 => $RET"
 	
 	if [ $RET -eq 0 ];
 	then
 	    return
 	fi
 
-	echo "2 stop  $VB_NAME $RET"
 
         debug "Send to QEMU $VB_NAME: ctrl-alt-delete"
         send_to_qemu $VB_NAME "sendkey ctrl-alt-delete"
@@ -142,10 +161,9 @@ stop_qemu()
 
         is_qemu_up $VB_NAME
         RET=$?
-	echo "3 qemu up?  $VB_NAME $RET"
+
         if [ "$RET" != "0" ]
         then
-            echo " client is down, returning"
             debug " client is down, returning"
             return
         fi
@@ -153,7 +171,7 @@ stop_qemu()
 	check_qemu_proc $VB_NAME
 	if [ $? -eq 0 ];
 	then
-	    echo " no proc found"
+	    debug " no proc found"
 	    return
 	fi
 
@@ -164,7 +182,6 @@ stop_qemu()
 
         is_qemu_up $VB_NAME
         RET=$?
-	echo "4 is up?  $VB_NAME $RET"
 
         if [ "$RET" != "0" ]
         then
@@ -172,28 +189,23 @@ stop_qemu()
             return
         fi
 
-	echo "check 5.."
 	check_qemu_proc $VB_NAME
 	if [ $? -eq 0 ];
 	then
 	    return
 	fi
 
-	echo " send quit.."
         debug "Send to QEMU $VB_NAME: quit"
         send_to_qemu $VB_NAME "quit"
         wait_for_state down $DELAY $VB_NAME
 
-	echo " check again ().."
-
 	check_qemu_proc $VB_NAME
 	if [ $? -eq 0 ];
 	then
-	    echo "no qemu procs...."
+	    debug "no qemu procs...."
 	    return
 	fi
 
-	echo "5 killing"
 	kill_qemu
 
     fi
@@ -205,11 +217,9 @@ stop_qemu()
 is_qemu_up()
 {
     export WANTED_VM=$1
-
     CNT=$(send_to_qemu $WANTED_VM "info status" | grep "VM status: running" | wc -l)
 
     debug " is_qemu_up: $CNT"
-#    echo " is_qemu_up: $CNT"
 
     # If the VM is running (>1), return 0
     if [ $CNT -ne 0 ]
@@ -224,11 +234,12 @@ is_qemu_up()
 
 send_to_qemu()
 {
+#    echo "SEND"
     WANTED_VM=$1
     MSG=$2
 
-#    echo "MSG: $MSG"
     SOCKET=/tmp/qemu-${WANTED_VM}.sock
+ #   echo "MSG: $MSG  => unix-connect:${SOCKET}"
 
     echo "$MSG" | socat - unix-connect:${SOCKET} 2>/dev/null | \
         grep -v "(qemu)" | grep -v "QEMU [0-9\. ]*monitor"
@@ -244,7 +255,7 @@ list_running_qemu()
 {
     echo "  Qemu"
 
-    QEMUS=$(ps x -U autobuilder -u autobuilder  | grep qemu | grep -v grep | grep sock | sed 's, ,\n,g' | grep sock )
+    QEMUS=$(ps x   | grep qemu | grep -v grep | grep sock | sed 's, ,\n,g' | grep sock )
     if [ "$QEMUS" != ""  ] 
     then
 	for token in  $QEMUS
@@ -278,4 +289,56 @@ list_running_qemu()
 	echo "    * No Qemu clients currently running"
     fi
     
+}
+
+take_snapshot_qemu()
+{
+    SNAPSHOT_NAME=$1
+    RET=0
+ 
+    if [ "$SNAPSHOT_NAME" = "" ] ; then
+	SNAPSHOT_NAME="SEARD_BASE"
+    fi
+
+    SNAPSHOT_IMG=${QEMU_HDA}-snapshot-$SNAPSHOT_NAME
+
+    if [ -f $SNAPSHOT_IMG ]
+    then   
+	echo "Snapshot name ($SNAPSHOT_NAME) already used. Bailing out"
+	exit 1
+    fi     	
+
+    qemu-img create -f qcow2 -b ${QEMU_HDA} $SNAPSHOT_IMG
+
+    RET=$?
+    return $RET
+}
+
+
+restore_snapshot_qemu()
+{
+    echo
+}
+
+delete_snapshot_qemu()
+{
+    SNAPSHOT_NAME=$1
+    RET=0
+ 
+    if [ "$SNAPSHOT_NAME" = "" ] ; then
+	SNAPSHOT_NAME="SEARD_BASE"
+    fi
+
+    SNAPSHOT_IMG=${QEMU_HDA}-snapshot-$SNAPSHOT_NAME
+
+    if [ ! -f $SNAPSHOT_IMG ]
+    then   
+	echo "Snapshot ($SNAPSHOT_NAME) does not exist. Bailing out"
+	exit 1
+    fi     	
+
+    rm  $SNAPSHOT_IMG
+
+    RET=$?
+    return $RET
 }
