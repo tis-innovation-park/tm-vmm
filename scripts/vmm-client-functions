@@ -218,7 +218,7 @@ start_client()
 	echo "Client \"$VCLIENT\" seems up"
 	if [ "$VM_TYPE" = "qemu" ]
 	then
-	    echo " Will not start a bew qemu instance."
+	    echo " Will not start a new qemu instance."
 	    return
 	else
 	    echo " .... future release will not continue to start client"
@@ -487,7 +487,13 @@ stop_client()
                 debug " Command: $SSH $SSH_TEST_OPTIONS -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND"
             else
 		wait_until_down
-		return 0
+
+		is_client_shell_up
+		RET=$?
+		if [ "$RET" != "0" ]
+		then
+		    return 0
+		fi
             fi
         else
             debug "Missing credentials to stop via ssh and super user"
@@ -510,7 +516,6 @@ stop_client()
             ;;
 
         "qemu")
-	    echo "Stoping qemu....$VM_NAME"
             stop_qemu "$VM_NAME"
 	    
             check_qemu_proc "$VM_NAME"
@@ -1106,7 +1111,7 @@ check_client_status()
          ;;
         "qemu")
          debug " check status with qemu"
-         send_to_qemu "$WANTED_VM" "info status" > /dev/null
+         send_to_qemu "$WANTED_VM" "info status" #> /dev/null
          RET=$?
 
          ;;
@@ -2104,7 +2109,7 @@ take_snapshot_vbox()
     
     
     if [ "$SNAPSHOT_NAME" = "" ] ; then
-	SNAPSHOT_NAME="BASE"
+	SNAPSHOT_NAME="SEARD_BASE"
     fi
 
     ALREADY_THERE=$(vboxmanage snapshot Ubuntu-12-04-32 list | sed -e 's,[ \t]*Name:[ \t]*,,g'  -e 's,[ \t]*(UUID: [a-z0-9\-]*)[ \t]*\*,,g' | grep "$SNAPSHOT_NAME" | wc -l)
@@ -2138,7 +2143,7 @@ delete_snapshot_vbox()
 
     
     if [ "$SNAPSHOT_NAME" = "" ] ; then
-	SNAPSHOT_NAME="BASE"
+	SNAPSHOT_NAME="SEARD_BASE"
     fi
 
     echo "SNAPSHOT VBOX: $1"
@@ -2185,6 +2190,10 @@ take_snapshot()
 	    take_snapshot_vbox $SNAPSHOT_NAME
          ;;
 
+        "qemu")
+	    take_snapshot_qemu $SNAPSHOT_NAME
+         ;;
+
         *)
          echo "Can not take snapshots on $VM_TYPE"
          log "1" "Snapshot on vm type $VM_NAME not supported" 
@@ -2201,6 +2210,10 @@ restore_snapshot()
     case $VM_TYPE in
         "VirtualBox")
 	    restore_snapshot_vbox $SNAPSHOT_NAME
+         ;;
+
+        "qemu")
+	    restore_snapshot_qemu $SNAPSHOT_NAME
          ;;
 
         *)
@@ -2220,6 +2233,10 @@ delete_snapshot()
     case $VM_TYPE in
         "VirtualBox")
 	    delete_snapshot_vbox $SNAPSHOT_NAME
+         ;;
+
+        "qemu")
+	    delete_snapshot_qemu $SNAPSHOT_NAME
          ;;
 
         *)
