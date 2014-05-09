@@ -275,10 +275,15 @@ start_client()
             else
 		OK=1
             fi
-# Shouldn't be removed???
-#        OK=$?
-         log "$OK" "Start qemu" "$VM_NAME"
-         ;;
+	    # Shouldn't be removed???
+	    #        OK=$?
+	    log "$OK" "Start qemu" "$VM_NAME"
+            ;;	
+	
+	"ssh")
+            debug "No need to start \"$WANTED_CLIENT\" since it is an ssh client"
+	    RET=0
+	    ;;
 
         *)
          echo "Failed finding vm type for \"$WANTED_CLIENT\"."
@@ -468,6 +473,7 @@ stop_vbox()
 
 stop_client()
 {
+    
     debug "stop_client: $VM_NAME"
 
     is_client_shell_up
@@ -533,6 +539,12 @@ stop_client()
             return $RET
             ;;
 
+	"ssh")
+            debug "Will not stop \"$WANTED_CLIENT\" since it is an ssh client"
+	    RET=0
+	    ;;
+
+
         *)
             echo "Failed finding vm type for $1"
             exit 123
@@ -547,7 +559,6 @@ pause_client()
     case $VM_TYPE in
         "VirtualBox")
             VBoxManage controlvm "$VM_NAME" pause
-#sleep 10 ; VBoxManage controlvm Ubuntu-12.04 pause ; sleep 600 ; VBoxManage controlvm Ubuntu-12.04 resume ; ssh -p 9022 root@localhost ntpdate-debian         kill_vbox $1
             ;;
 
         "Android")
@@ -575,7 +586,6 @@ resume_client()
         "VirtualBox")
             VBoxManage controlvm "$VM_NAME" resume
             printf "\n\n\t*****RESET TIME LATER!!!!\n\n\n"
-#sleep 10 ; VBoxManage controlvm Ubuntu-12.04 pause ; sleep 600 ; VBoxManage controlvm Ubuntu-12.04 resume ; ssh -p 9022 root@localhost ntpdate-debian         kill_vbox $1
             ;;
 
         "qemu")
@@ -819,6 +829,13 @@ is_client_shell_up()
             RET=$?
             ;;
 
+	"ssh")
+            is_client_ssh_up $WANTED_VM
+	    RET=$?
+	    ;;
+
+
+
         *)
 	    debug "Failed finding vm type for \"$WANTED_VM\"."
             echo "Failed finding vm type for \"$WANTED_VM\"."
@@ -855,7 +872,7 @@ is_client_ssh_up()
 
     
 #    VAL=$(nc -i 1 localhost $SSH_PORT < /dev/null 2> /dev/null | grep '^SSH' | wc -l)
-    VAL=$(nc -i 1 -w 10 localhost $SSH_PORT < /dev/null 2> /dev/null | grep '^SSH' | wc -l)
+    VAL=$(nc -i 1 -w 10 $VM_IP_ADDRESS $SSH_PORT < /dev/null 2> /dev/null | grep '^SSH' | wc -l)
 
     if [ $VAL = 1 ]; then
         debug "is_client_ssh_up: 0 ( up => 0; not up => not 0 )"
@@ -1622,6 +1639,11 @@ open_shell()
 	    $ADB -s $ANDROID_DEV shell
          ;;
 
+        "ssh")
+	    open_ssh 
+         ;;
+    
+
         *)
          echo "open_shell does not support $VM_TYPE yet"
          return 1
@@ -1672,6 +1694,11 @@ copy_from_client()
         "Android")
             $ADB -s emulator-$ANDROID_PORT pull "$MY_SRC_LOC" "$MY_DST_LOC"
             ;;
+
+        "ssh")
+            $SCP -r -P $SSH_PORT $VM_USER@$VM_IP_ADDRESS:"$MY_SRC_LOC" "$MY_DST_LOC"
+            ;;
+	
         *)
             echo "copy not supported"
             return 1
@@ -1700,6 +1727,10 @@ copy_to_client()
         "Android")
             $ADB -s emulator-$ANDROID_PORT push "$MY_SRC_LOC" "$MY_DST_LOC"
             ;;
+        "ssh")
+            $SCP -r -P $SSH_PORT "$MY_SRC_LOC" $VM_USER@$VM_IP_ADDRESS:"$MY_DST_LOC"
+            ;;
+	
         *)
             echo "copy not supported"
             return 1
@@ -2112,7 +2143,7 @@ take_snapshot_vbox()
 	SNAPSHOT_NAME="SEARD_BASE"
     fi
 
-    ALREADY_THERE=$(vboxmanage snapshot Ubuntu-12-04-32 list | sed -e 's,[ \t]*Name:[ \t]*,,g'  -e 's,[ \t]*(UUID: [a-z0-9\-]*)[ \t]*\*,,g' | grep "$SNAPSHOT_NAME" | wc -l)
+    ALREADY_THERE=$(vboxmanage snapshot $WANTED_CLIENT list | sed -e 's,[ \t]*Name:[ \t]*,,g'  -e 's,[ \t]*(UUID: [a-z0-9\-]*)[ \t]*\*,,g' | grep "$SNAPSHOT_NAME" | wc -l)
 
 
     if [ "$ALREADY_THERE" != "0" ]
