@@ -1216,8 +1216,7 @@ exec_client_command_as_root()
 
     debug "exec_client_command_as_root $1"
     debug "$SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $COMMAND"
-    $SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS \
-        "$COMMAND"
+    $SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS     "$COMMAND"
     return $?
 }
 
