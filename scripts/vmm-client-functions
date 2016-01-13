@@ -485,12 +485,12 @@ stop_client()
         then
             debug "Super user account available"
             debug " trying to stop via ssh"
-            $SSH $SSH_TEST_OPTIONS -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND 2>/dev/null
+            $SSH $SSH_TEST_OPTIONS -p $SSH_PORT -l $VM_SUPERUSER $VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND 2>/dev/null
             RET=$?
             if [ "$RET" != "0" ]
             then
                 debug "Failed stopping client with ssh"
-                debug " Command: $SSH $SSH_TEST_OPTIONS -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND"
+                debug " Command: $SSH $SSH_TEST_OPTIONS -p $SSH_PORT -l $VM_SUPERUSER@$VM_IP_ADDRESS $SSH_SHUTDOWN_COMMAND"
             else
 		wait_until_down
 
@@ -1215,8 +1215,8 @@ exec_client_command_as_root()
     COMMAND="$1"
 
     debug "exec_client_command_as_root $1"
-    debug "$SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS $COMMAND"
-    $SSH -p $SSH_PORT $VM_SUPERUSER@$VM_IP_ADDRESS     "$COMMAND"
+    debug "$SSH -p $SSH_PORT -l $VM_SUPERUSER $VM_IP_ADDRESS $COMMAND"
+    $SSH -p $SSH_PORT -l $VM_SUPERUSER $VM_IP_ADDRESS     "$COMMAND"
     return $?
 }
 
