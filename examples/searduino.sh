@@ -37,7 +37,7 @@ exit_on_error()
 
 VMM_DIR=/opt
 
-VMM=${VMM_DIR}/bin/vmm-client
+VMM=${VMM_DIR}/bin/tm-vmm
 
 
 
@@ -50,8 +50,8 @@ build_project()
     export CONF_TWEAK="export CFLAGS=-I/usr/lib/jvm/java-6-openjdk-i386/include; export CXXFLAGS=-I/usr/lib/jvm/java-6-openjdk-i386/include; "
 
 
-    if [ "1" = "2" ]
-    then
+#    if [ "1" = "2" ]
+ #   then
 
 
     $VMM --client-exec    $MACHINE "rm -fr searduino"
@@ -60,9 +60,11 @@ build_project()
     $VMM --client-exec    $MACHINE "git clone git://git.savannah.nongnu.org/searduino.git"
     if [ $? -ne 0 ] ; then return 1 ;  fi
 
+    $VMM --client-exec-as-root $MACHINE "cd searduino && bin/setup-debian.sh"
+    
     $VMM --client-exec    $MACHINE "cd searduino && make -f Makefile.git"
     
-    fi
+  #  fi
     
     $VMM --client-exec    $MACHINE "cd searduino && $CONF_TWEAK ./configure --prefix=$INST_DIR --disable-unittest "
     if [ $? -ne 0 ] ; then return 1 ;  fi
@@ -100,7 +102,7 @@ build_on_host()
 }
 
 #build_on_host searduino-32-devel
-build_on_host armel-debian-6.0
+build_on_host rpi
 
 
 
